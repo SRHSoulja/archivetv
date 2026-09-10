@@ -22,6 +22,7 @@ import {
 import { audio } from '../services/soundEffects';
 
 export default function RemoteControl({
+  gutters,
   isOpen,
   onClose,
   currentChannel,
@@ -92,8 +93,25 @@ export default function RemoteControl({
   if (!isOpen) return null;
 
   return (
-    <div className="remote-stage fixed z-40 select-none animate-in fade-in slide-in-from-bottom-5 duration-300">
-      <div className="w-56 bg-gradient-to-b from-[#2a292e] via-[#1c1b20] to-[#121115] rounded-3xl p-4 shadow-2xl border-2 border-zinc-700/80 flex flex-col items-center">
+    <div
+      className="remote-stage z-40 select-none animate-in fade-in slide-in-from-bottom-5 duration-300"
+      style={
+        // Sits in the gutter beside the cabinet when one is actually wide enough
+        // to hold it -- measured, not guessed -- and falls back to the bottom
+        // right corner when it is not, where it overlaps nothing important.
+        gutters?.ready && gutters.fits
+          ? {
+              position: 'fixed',
+              top: '50%',
+              left: `${gutters.rightCenter}px`,
+              transform: 'translate(-50%, -50%)',
+            }
+          : { position: 'fixed', right: '1.5rem', bottom: '2.5rem' }
+      }
+    >
+      <div
+        style={{ width: `${Math.max(200, Math.min((gutters?.width || 0) - 40, 280))}px` }}
+        className="bg-gradient-to-b from-[#2a292e] via-[#1c1b20] to-[#121115] rounded-3xl p-4 shadow-2xl border-2 border-zinc-700/80 flex flex-col items-center">
         {/* Top IR Blaster & Header */}
         <div className="w-full flex items-center justify-between pb-3 border-b border-zinc-700/60">
           <div className="flex items-center gap-2">

@@ -3,6 +3,7 @@ import NavbarHeader from './components/NavbarHeader';
 import TvBoxCabinet from './components/TvBoxCabinet';
 import RemoteControl from './components/RemoteControl';
 import NowPlayingSleeve from './components/NowPlayingSleeve';
+import { useGutters } from './hooks/useGutters';
 import TvGuideModal from './components/TvGuideModal';
 import TapeRackDrawer from './components/TapeRackDrawer';
 import ArchiveSearchModal from './components/ArchiveSearchModal';
@@ -72,6 +73,7 @@ export default function App() {
   const [liveTvMode, setLiveTvMode] = useState(false); // Default to Start From Beginning!
   const [channelZap, setChannelZap] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const gutters = useGutters();
 
   // Picture Adjustments & Player Engines
   const [colorMode, setColorMode] = useState(() => {
@@ -691,9 +693,11 @@ export default function App() {
         currentProgram={currentProgram}
         currentChannel={displayChannel}
         powerOn={powerOn}
+        gutters={gutters}
       />
 
       <RemoteControl
+        gutters={gutters}
         isOpen={remoteOpen}
         onClose={() => setRemoteOpen(false)}
         currentChannel={displayChannel}
