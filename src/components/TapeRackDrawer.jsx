@@ -7,7 +7,6 @@ export default function TapeRackDrawer({
   onClose,
   currentChannel,
   channels = [],
-  onSelectProgram,
   onSelectChannel,
   onCustomTapePlay,
 }) {
@@ -39,12 +38,14 @@ export default function TapeRackDrawer({
   const selectedChan = channels.find((c) => c.id === activeChannelId) || currentChannel || channels[0];
   const tapes = selectedChan?.programs || [];
 
-  const handleTapeClick = (prog) => {
+  const handleTapeClick = (prog, idx) => {
     audio.playSwitch(true);
     if (selectedChan) {
-      onSelectChannel(selectedChan);
+      const progIdx = idx !== undefined && idx >= 0 ? idx : selectedChan.programs?.findIndex(
+        (p) => p.identifier === prog.identifier || p.videoUrl === prog.videoUrl
+      );
+      onSelectChannel(selectedChan, progIdx >= 0 ? progIdx : 0);
     }
-    onSelectProgram(prog);
     onClose();
   };
 
@@ -121,7 +122,7 @@ export default function TapeRackDrawer({
             {tapes.map((prog, idx) => (
               <div
                 key={prog.identifier || idx}
-                onClick={() => handleTapeClick(prog)}
+                onClick={() => handleTapeClick(prog, idx)}
                 className="group relative bg-[#0d0c0a] border-2 border-zinc-700 hover:border-amber-400 rounded-xl p-3 shadow-lg hover:shadow-amber-500/20 transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden"
               >
                 <div>

@@ -8,7 +8,6 @@ export default function TvGuideModal({
   channels = [],
   currentChannel,
   onSelectChannel,
-  onSelectProgram,
   onOpenChannelStudio,
 }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -30,10 +29,7 @@ export default function TvGuideModal({
 
   const handleTuneChannel = (channel, programIndex = 0) => {
     audio.playKnobClick();
-    onSelectChannel(channel);
-    if (channel.programs && channel.programs[programIndex]) {
-      onSelectProgram(channel.programs[programIndex]);
-    }
+    onSelectChannel(channel, programIndex);
     onClose();
   };
 

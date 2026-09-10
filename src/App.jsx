@@ -171,12 +171,12 @@ export default function App() {
   }, [activeExplicitProgram, currentChannel, baseProgram, liveTvMode, currentPrograms, channelEpisodesMap]);
 
   const displayChannel = useMemo(() => {
-    if (activeExplicitProgram) {
+    if (activeExplicitProgram?.isAuxiliary) {
       return {
         number: 'AUX',
         name: (activeExplicitProgram.title || 'ARCHIVE BROADCAST').slice(0, 24).toUpperCase(),
-        callsign: 'K-ARCH',
-        badge: 'ARCHIVE',
+        callsign: 'K-AUX',
+        badge: 'AUX/VCR',
         description: activeExplicitProgram.description,
       };
     }
@@ -240,14 +240,16 @@ export default function App() {
   }, [channels.length, triggerChannelZap]);
 
   const handleSelectChannel = useCallback(
-    (channel) => {
-      const idx = channels.findIndex((c) => c.number === channel.number);
+    (channel, programIndex = 0) => {
+      const idx = channels.findIndex(
+        (c) => c.number === channel.number || c.id === channel.id
+      );
       if (idx !== -1) {
         triggerChannelZap();
         setActiveExplicitProgram(null);
         setActiveEngine('direct');
         setCurrentChannelIndex(idx);
-        setCurrentProgramIndex(0);
+        setCurrentProgramIndex(programIndex >= 0 ? programIndex : 0);
       }
     },
     [channels, triggerChannelZap]
@@ -299,6 +301,7 @@ export default function App() {
           title: `${baseTitle} - ${nextEp.displayName}`,
           duration: nextEp.duration,
           seekSeconds: 0,
+          isAuxiliary: false,
         });
         return;
       }
@@ -311,11 +314,6 @@ export default function App() {
     }
   }, [activeExplicitProgram, currentPrograms.length, currentProgram]);
 
-  const handleSelectProgram = useCallback((prog) => {
-    triggerChannelZap();
-    setActiveExplicitProgram(prog);
-  }, [triggerChannelZap]);
-
   const handleEngineChange = useCallback((newEngine) => {
     if (typeof newEngine === 'string') {
       setActiveEngine(newEngine);
@@ -327,7 +325,10 @@ export default function App() {
   const handlePlayDirectItem = useCallback(
     (resolvedItem) => {
       triggerChannelZap();
-      setActiveExplicitProgram(resolvedItem);
+      setActiveExplicitProgram({
+        ...resolvedItem,
+        isAuxiliary: true,
+      });
       if (resolvedItem?.playerEngine) {
         setActiveEngine(resolvedItem.playerEngine);
       } else if (!resolvedItem?.videoUrl) {
@@ -370,10 +371,21 @@ export default function App() {
         title: `${baseTitle} - ${ep.displayName}`,
         duration: ep.duration,
         seekSeconds: 0,
+        isAuxiliary: false,
       });
     },
     [currentProgram, triggerChannelZap]
   );
+
+  const handleToggleAux = useCallback(() => {
+    triggerChannelZap();
+    if (activeExplicitProgram?.isAuxiliary) {
+      setActiveExplicitProgram(null);
+      setActiveEngine('direct');
+    } else {
+      setTapeRackOpen(true);
+    }
+  }, [activeExplicitProgram, triggerChannelZap]);
 
   // Cycle color mode
   const handleCycleColorMode = useCallback(() => {
@@ -566,11 +578,13 @@ export default function App() {
       <RemoteControl
         isOpen={remoteOpen}
         onClose={() => setRemoteOpen(false)}
+        currentChannel={displayChannel}
         powerOn={powerOn}
         onTogglePower={() => setPowerOn((p) => !p)}
         onNextChannel={handleNextChannel}
         onPrevChannel={handlePrevChannel}
         onSelectChannelByNumber={handleSelectChannelByNumber}
+        onToggleAux={handleToggleAux}
         volume={volume}
         onVolumeChange={setVolume}
         muted={muted}
@@ -596,7 +610,6 @@ export default function App() {
         channels={channels}
         currentChannel={displayChannel}
         onSelectChannel={handleSelectChannel}
-        onSelectProgram={handleSelectProgram}
         onOpenChannelStudio={() => handleOpenChannelStudio()}
       />
 
@@ -606,7 +619,6 @@ export default function App() {
         onClose={() => setTapeRackOpen(false)}
         currentChannel={displayChannel}
         channels={channels}
-        onSelectProgram={handleSelectProgram}
         onSelectChannel={handleSelectChannel}
         onCustomTapePlay={handleCustomTapePlay}
       />

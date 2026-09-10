@@ -21,11 +21,13 @@ import { audio } from '../services/soundEffects';
 export default function RemoteControl({
   isOpen,
   onClose,
+  currentChannel,
   powerOn,
   onTogglePower,
   onNextChannel,
   onPrevChannel,
   onSelectChannelByNumber,
+  onToggleAux,
   volume,
   onVolumeChange,
   muted,
@@ -111,21 +113,45 @@ export default function RemoteControl({
         </div>
 
         {/* Channel Digital Readout Display */}
-        <div className="w-full my-2.5 bg-black/80 rounded-lg p-2 border border-zinc-800 flex items-center justify-between font-vcr">
-          <span className="text-zinc-500 text-xs">DIAL:</span>
-          <span className="text-phosphor-green text-xl tracking-widest font-bold">
-            {digitBuffer ? `CH ${digitBuffer}` : '--'}
-          </span>
+        <div className="w-full my-2.5 bg-[#060b08] rounded-xl p-2.5 border-2 border-zinc-800 shadow-[inset_0_2px_8px_rgba(0,0,0,0.9)] flex flex-col font-vcr">
+          <div className="flex items-center justify-between text-[10px] font-pixel text-zinc-500 pb-1 border-b border-zinc-900/80">
+            <span className="tracking-wider text-zinc-400">RC-TUNER</span>
+            <div className="flex items-center gap-1.5">
+              {muted && <span className="text-amber-400 font-bold">MUTE</span>}
+              <span className={powerOn ? 'text-phosphor-green animate-pulse' : 'text-zinc-600'}>
+                {powerOn ? (currentChannel?.number === 'AUX' ? '● AUX-IN' : '● ON-AIR') : 'STANDBY'}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-baseline justify-between mt-1">
+            <span className="text-phosphor-green text-2xl tracking-widest font-bold drop-shadow-[0_0_8px_rgba(74,222,128,0.7)]">
+              {digitBuffer
+                ? `CH ${digitBuffer}_`
+                : currentChannel?.number
+                ? (currentChannel.number === 'AUX' ? 'AUX' : `CH ${currentChannel.number}`)
+                : 'CH --'}
+            </span>
+            <span className="text-phosphor-green/90 text-xs font-mono font-bold uppercase tracking-wider truncate max-w-[95px] text-right">
+              {currentChannel?.callsign || ''}
+            </span>
+          </div>
+
+          {currentChannel?.name && (
+            <div className="text-[10px] font-mono text-zinc-400 truncate mt-1 pt-0.5 border-t border-zinc-900/60">
+              {currentChannel.name}
+            </div>
+          )}
         </div>
 
-        {/* Top Power & Mute Row */}
-        <div className="w-full grid grid-cols-2 gap-2 mb-3">
+        {/* Top Power, TV/AUX, & Mute Row */}
+        <div className="w-full grid grid-cols-3 gap-1.5 mb-3">
           <button
             onClick={() => {
               triggerIr();
               onTogglePower();
             }}
-            className={`py-2 px-3 rounded-lg font-pixel text-xs font-bold flex items-center justify-center gap-1 cursor-pointer transition ${
+            className={`py-2 px-1.5 rounded-lg font-pixel text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer transition ${
               powerOn
                 ? 'bg-red-600 hover:bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.5)]'
                 : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-600'
@@ -138,9 +164,25 @@ export default function RemoteControl({
           <button
             onClick={() => {
               triggerIr();
+              if (onToggleAux) onToggleAux();
+            }}
+            title={currentChannel?.number === 'AUX' ? 'Return to Broadcast TV' : 'Switch to AUX / Tape Input'}
+            className={`py-2 px-1.5 rounded-lg font-pixel text-[10px] font-bold flex items-center justify-center gap-1 cursor-pointer transition border ${
+              currentChannel?.number === 'AUX'
+                ? 'bg-amber-500 text-black border-yellow-300 shadow-[0_0_8px_rgba(245,158,11,0.5)]'
+                : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-600'
+            }`}
+          >
+            <Radio className="w-3 h-3" />
+            <span>{currentChannel?.number === 'AUX' ? 'TV' : 'AUX'}</span>
+          </button>
+
+          <button
+            onClick={() => {
+              triggerIr();
               onToggleMute();
             }}
-            className={`py-2 px-3 rounded-lg font-pixel text-xs flex items-center justify-center gap-1 cursor-pointer transition ${
+            className={`py-2 px-1.5 rounded-lg font-pixel text-[11px] flex items-center justify-center gap-1 cursor-pointer transition ${
               muted
                 ? 'bg-amber-600 text-white'
                 : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-600'

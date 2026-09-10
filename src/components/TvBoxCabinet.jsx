@@ -151,7 +151,9 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
   };
 
   const currentChNum = parseInt(currentChannel?.number || '2', 10);
-  const dialRotation = ((currentChNum - 2) / 11) * 300 - 150;
+  const dialRotation = !Number.isNaN(currentChNum)
+    ? ((currentChNum - 2) / 11) * 300 - 150
+    : -150;
   const volumeRotation = volume * 270 - 135;
   const fineTuneRotation = (trackingOffset / 50) * 120;
 
