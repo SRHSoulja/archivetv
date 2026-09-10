@@ -220,11 +220,11 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
       <div
         className={`relative w-full rounded-3xl p-3 md:p-6 transition-all duration-300 ${
           cabinetStyle === 'woodgrain'
-            ? 'woodgrain-pattern border-6 md:border-12 border-[#2b170c] shadow-wood-cabinet'
+            ? 'woodgrain-pattern border-6 md:border-12 border-[#2b170c] shadow-wood-cabinet rounded-3xl'
             : cabinetStyle === 'trinitron'
-            ? 'bg-[#151518] border-6 md:border-12 border-[#222228] shadow-2xl'
+            ? 'bg-[#18181c] border-6 md:border-12 border-[#282830] shadow-[0_20px_60px_rgba(0,0,0,0.95)] rounded-2xl'
             : cabinetStyle === 'portable'
-            ? 'bg-[#403f44] border-6 md:border-12 border-[#2d2c30] shadow-2xl rounded-4xl'
+            ? 'bg-[#4a4950] border-6 md:border-12 border-[#38373d] shadow-[0_15px_40px_rgba(0,0,0,0.85)] rounded-4xl'
             : 'bg-black border-2 border-zinc-900 p-0 shadow-2xl'
         }`}
       >
@@ -232,15 +232,31 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
         {cabinetStyle !== 'pure' && (
           <div className="flex items-center justify-between px-2 md:px-4 pb-3">
             <div className="flex items-center gap-2">
-              <span className="font-pixel text-[11px] md:text-xs tracking-widest uppercase font-bold text-amber-500/80 drop-shadow">
+              <span className={`font-pixel text-[11px] md:text-xs tracking-widest uppercase font-bold drop-shadow ${
+                cabinetStyle === 'woodgrain'
+                  ? 'text-amber-500/90'
+                  : cabinetStyle === 'trinitron'
+                  ? 'text-cyan-400/90'
+                  : 'text-zinc-300'
+              }`}>
                 {cabinetStyle === 'woodgrain'
                   ? 'ARCHIVE-VISION DELUXE COLOR CONSOLE'
                   : cabinetStyle === 'trinitron'
-                  ? 'ARCHIVETRON • HI-BLACK MATRIX'
-                  : 'SOLID STATE 1984'}
+                  ? 'ARCHIVETRON • KV-SERIES BLACK TRINITRON'
+                  : 'ACTION-13 PORTABLE COLOR TV • 1993'}
               </span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/40 text-amber-300/70 border border-amber-600/30 hidden sm:inline">
-                SOLID STATE VHF/UHF
+              <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border hidden sm:inline ${
+                cabinetStyle === 'woodgrain'
+                  ? 'bg-black/40 text-amber-300/70 border-amber-600/30'
+                  : cabinetStyle === 'trinitron'
+                  ? 'bg-cyan-950/40 text-cyan-300/80 border-cyan-500/40'
+                  : 'bg-zinc-800 text-zinc-300 border-zinc-600'
+              }`}>
+                {cabinetStyle === 'woodgrain'
+                  ? 'SOLID STATE VHF/UHF'
+                  : cabinetStyle === 'trinitron'
+                  ? 'APERTURE GRILLE • AUTO-FINE TUNING'
+                  : 'AC/DC PORTABLE • VHF/UHF/CABLE'}
               </span>
             </div>
 
@@ -262,11 +278,17 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                 <div
                   className={`w-3 h-3 rounded-full transition-all duration-300 ${
                     powerOn
-                      ? 'bg-red-500 shadow-[0_0_12px_#ff3344] ring-2 ring-red-400/40'
-                      : 'bg-red-950/80 border border-red-900/50'
+                      ? cabinetStyle === 'trinitron'
+                        ? 'bg-green-500 shadow-[0_0_12px_#22c55e] ring-2 ring-green-400/40'
+                        : cabinetStyle === 'portable'
+                        ? 'bg-red-500 shadow-[0_0_10px_#ef4444]'
+                        : 'bg-red-500 shadow-[0_0_12px_#ff3344] ring-2 ring-red-400/40'
+                      : 'bg-zinc-900 border border-zinc-700'
                   }`}
                 />
-                <span className="font-pixel text-[10px] text-zinc-500">PWR</span>
+                <span className="font-pixel text-[10px] text-zinc-500">
+                  {cabinetStyle === 'trinitron' ? 'STANDBY' : 'PWR'}
+                </span>
               </div>
             </div>
           </div>
@@ -277,10 +299,14 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
           {/* CRT Screen Frame Bezel */}
           <div className="flex-1 flex flex-col">
             <div
-              className={`relative bg-[#131217] rounded-2xl md:rounded-3xl p-2.5 md:p-5 border-3 md:border-6 ${
+              className={`relative rounded-2xl md:rounded-3xl p-2.5 md:p-5 border-3 md:border-6 transition-all duration-300 ${
                 cabinetStyle === 'woodgrain'
-                  ? 'border-[#1a120d] shadow-inner'
-                  : 'border-[#1b1b20] shadow-inner'
+                  ? 'bg-[#150e09] border-[#20130b] shadow-[inset_0_4px_16px_rgba(0,0,0,0.9)]'
+                  : cabinetStyle === 'trinitron'
+                  ? 'bg-[#0f0f12] border-[#1d1d24] shadow-[inset_0_4px_12px_rgba(0,0,0,0.95)]'
+                  : cabinetStyle === 'portable'
+                  ? 'bg-[#2b2a2e] border-[#3a3940] shadow-[inset_0_3px_10px_rgba(0,0,0,0.85)] rounded-4xl'
+                  : 'bg-black border-0 p-0 shadow-none'
               }`}
             >
               <div
@@ -312,6 +338,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                   activeEngine={activeEngine}
                   onEngineChange={onEngineChange || onToggleEngine}
                   onTimeUpdateReport={handleTimeUpdateReport}
+                  cabinetStyle={cabinetStyle}
                 />
               </div>
             </div>
@@ -358,7 +385,15 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
 
           {/* 4. Side Control Panel */}
           {cabinetStyle !== 'pure' && (
-            <div className="lg:w-72 bg-[#1b1916] rounded-2xl p-4 border-2 border-black/60 flex flex-col justify-between gap-5 metal-brushed">
+            <div
+              className={`lg:w-72 rounded-2xl p-4 border-2 flex flex-col justify-between gap-5 transition-all duration-300 ${
+                cabinetStyle === 'woodgrain'
+                  ? 'bg-[#1e1a16] border-[#382618] metal-brushed'
+                  : cabinetStyle === 'trinitron'
+                  ? 'bg-[#121216] border-[#22222a] shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]'
+                  : 'bg-[#323136] border-[#424148] shadow-inner'
+              }`}
+            >
               {/* Channel & Volume Rotary Dials Section */}
               <div className="flex flex-row lg:flex-col items-center justify-around gap-4">
                 {/* ROTARY CHANNEL SELECTOR KNOB */}
@@ -575,14 +610,48 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                   <span className="font-pixel text-[9px] text-zinc-500 mt-1">MAIN POWER</span>
                 </div>
 
-                <div className="flex-1 h-14 rounded-lg speaker-grille border border-black/80 flex items-center justify-center relative overflow-hidden">
+                <div
+                  className={`flex-1 h-14 rounded-lg border flex items-center justify-center relative overflow-hidden transition-all duration-300 ${
+                    cabinetStyle === 'woodgrain'
+                      ? 'speaker-grille border-[#2d1b10]'
+                      : cabinetStyle === 'trinitron'
+                      ? 'bg-zinc-950 border-zinc-800 shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)]'
+                      : 'bg-[#252429] border-[#1d1c21] shadow-inner'
+                  }`}
+                >
+                  {/* Trinitron Slotted Grille */}
+                  {cabinetStyle === 'trinitron' && (
+                    <div className="absolute inset-0 flex flex-col justify-around py-1.5 opacity-40 pointer-events-none">
+                      <div className="w-full h-0.5 bg-zinc-700" />
+                      <div className="w-full h-0.5 bg-zinc-700" />
+                      <div className="w-full h-0.5 bg-zinc-700" />
+                      <div className="w-full h-0.5 bg-zinc-700" />
+                      <div className="w-full h-0.5 bg-zinc-700" />
+                    </div>
+                  )}
+
+                  {/* 90s Portable Circular Dot Matrix Grille */}
+                  {cabinetStyle === 'portable' && (
+                    <div className="absolute inset-0 speaker-grille opacity-60 pointer-events-none" />
+                  )}
+
                   <div
-                    className={`w-full h-full bg-amber-500/5 transition-opacity ${
-                      powerOn && !muted && volume > 0 ? 'animate-pulse' : 'opacity-0'
-                    }`}
+                    className={`w-full h-full transition-opacity ${
+                      cabinetStyle === 'trinitron'
+                        ? 'bg-cyan-500/10'
+                        : cabinetStyle === 'portable'
+                        ? 'bg-blue-500/10'
+                        : 'bg-amber-500/5'
+                    } ${powerOn && !muted && volume > 0 ? 'animate-pulse' : 'opacity-0'}`}
                   />
-                  <span className="absolute font-pixel text-[9px] text-zinc-600 tracking-wider">
-                    DYNAMIC SPEAKER
+                  <span className={`absolute font-pixel text-[9px] tracking-wider z-10 ${
+                    cabinetStyle === 'trinitron' ? 'text-zinc-500' : 'text-zinc-600'
+                  }`}>
+                    {cabinetStyle === 'trinitron'
+                      ? 'APERTURE STEREO'
+                      : cabinetStyle === 'portable'
+                      ? 'FRONT MONO SP'
+                      : 'DYNAMIC SPEAKER'}
                   </span>
                 </div>
               </div>

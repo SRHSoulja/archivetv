@@ -35,6 +35,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     activeEngine = 'direct',
     _onEngineChange,
     onTimeUpdateReport,
+    cabinetStyle = 'woodgrain',
   },
   ref
 ) {
@@ -507,12 +508,20 @@ const CrtScreen = forwardRef(function CrtScreen(
     return f;
   };
 
+  const eraCurvatureClass = curvatureEnabled
+    ? cabinetStyle === 'trinitron'
+      ? 'crt-style-trinitron'
+      : cabinetStyle === 'woodgrain'
+      ? 'crt-style-woodgrain'
+      : cabinetStyle === 'portable'
+      ? 'crt-style-portable'
+      : 'crt-style-pure'
+    : '';
+
   return (
     <div
       onClick={handleScreenClick}
-      className={`relative w-full h-full bg-[#050706] overflow-hidden flex items-center justify-center select-none ${
-        curvatureEnabled ? 'crt-curved' : ''
-      }`}
+      className={`relative w-full h-full bg-[#050706] overflow-hidden flex items-center justify-center select-none ${eraCurvatureClass}`}
       style={{
         aspectRatio: effectiveAspectRatio === '4:3' ? '4/3' : '16/9',
       }}
@@ -678,19 +687,38 @@ const CrtScreen = forwardRef(function CrtScreen(
         />
       )}
 
-      {/* 5. CRT Scanlines Overlay */}
+      {/* 5. CRT Scanlines Overlay - customized by era cabinet style */}
       {powerOn && scanlinesEnabled && (
-        <div className="absolute inset-0 crt-scanlines pointer-events-none z-20" />
+        <div
+          className={`absolute inset-0 pointer-events-none z-20 ${
+            cabinetStyle === 'trinitron'
+              ? 'crt-scanlines-trinitron'
+              : cabinetStyle === 'woodgrain'
+              ? 'crt-scanlines-woodgrain'
+              : cabinetStyle === 'portable'
+              ? 'crt-scanlines-portable'
+              : 'crt-scanlines'
+          }`}
+        />
+      )}
+
+      {/* 5b. Sony Trinitron Aperture Grille Vertical Slits */}
+      {powerOn && cabinetStyle === 'trinitron' && (
+        <div className="absolute inset-0 crt-aperture-grille opacity-50 pointer-events-none z-20" />
       )}
 
       {/* 6. Phosphor RGB Mask */}
       {powerOn && (
-        <div className="absolute inset-0 crt-rgb-mask mix-blend-overlay opacity-60 pointer-events-none z-20" />
+        <div
+          className={`absolute inset-0 crt-rgb-mask mix-blend-overlay pointer-events-none z-20 ${
+            cabinetStyle === 'trinitron' ? 'opacity-40' : cabinetStyle === 'portable' ? 'opacity-70' : 'opacity-60'
+          }`}
+        />
       )}
 
       {/* 7. Curved Glass Vignette & Reflection */}
-      <div className="absolute inset-0 crt-bezel-shadow pointer-events-none z-20" />
-      <div className="absolute inset-0 crt-glass-reflection pointer-events-none z-20" />
+      <div className={`absolute inset-0 crt-bezel-shadow pointer-events-none z-20 ${cabinetStyle === 'pure' ? 'opacity-40' : 'opacity-100'}`} />
+      <div className={`absolute inset-0 crt-glass-reflection pointer-events-none z-20 ${cabinetStyle === 'trinitron' ? 'opacity-60' : 'opacity-100'}`} />
 
       {/* 8. Channel Switch "Zap" Flash */}
       {channelZap && (
