@@ -4,7 +4,10 @@ import { audio } from '../services/soundEffects';
 import { resolvePlayableItem } from '../services/archiveApi';
 import {
   getAdSets,
-  saveAdSet,
+  createAdSet,
+  addSpotsToSet,
+  removeSpotFromSet,
+  renameAdSet,
   deleteAdSet,
   getAdConfig,
   setAdConfig,
@@ -20,6 +23,10 @@ export default function CommercialBreaksModal({ isOpen, onClose, currentChannel,
   const [candidate, setCandidate] = useState(null);
   const [picked, setPicked] = useState(new Set());
   const [setName, setSetName] = useState('');
+  const [targetSetId, setTargetSetId] = useState('NEW');
+  const [expandedSetId, setExpandedSetId] = useState(null);
+  const [renamingId, setRenamingId] = useState(null);
+  const [renameDraft, setRenameDraft] = useState('');
 
   useEffect(() => {
     if (!isOpen) return;
@@ -73,12 +80,19 @@ export default function CommercialBreaksModal({ isOpen, onClose, currentChannel,
           candidateStreamUrls: f.candidateStreamUrls || [f.videoUrl],
         };
       });
-    const set = { id: `set_${Date.now()}`, name: setName.trim() || 'Untitled reel', spots };
-    const next = saveAdSet(set);
+
+    let destinationId = targetSetId;
+    if (destinationId === 'NEW') {
+      destinationId = createAdSet(setName.trim() || 'Untitled reel').id;
+    }
+    const next = addSpotsToSet(destinationId, spots);
+
     setSets(next);
     setCandidate(null);
     setSourceId('');
-    if (!config.setId) push({ ...config, setId: set.id });
+    setTargetSetId(destinationId);
+    setExpandedSetId(destinationId);
+    if (!config.setId) push({ ...config, setId: destinationId });
   };
 
   const channelOverride = currentChannel?.id ? config.byChannel?.[currentChannel.id] : null;
@@ -194,33 +208,103 @@ export default function CommercialBreaksModal({ isOpen, onClose, currentChannel,
             {sets.map((s) => (
               <div
                 key={s.id}
-                className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg border-2 ${
+                className={`rounded-lg border-2 ${
                   config.setId === s.id
                     ? 'bg-amber-950/40 border-amber-600/60'
                     : 'bg-zinc-900/70 border-zinc-700'
                 }`}
               >
-                <button
-                  type="button"
-                  onClick={() => push({ ...config, setId: s.id })}
-                  className="min-w-0 flex-1 text-left cursor-pointer"
-                >
-                  <span className="block font-pixel text-[11px] text-zinc-200 truncate">{s.name}</span>
-                  <span className="block text-[10px] text-zinc-500">{s.spots.length} spots</span>
-                </button>
-                {config.setId === s.id && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const next = deleteAdSet(s.id);
-                    setSets(next);
-                    if (config.setId === s.id) push({ ...config, setId: next[0]?.id || null });
-                  }}
-                  className="shrink-0 text-red-400 hover:text-red-300 cursor-pointer"
-                  aria-label={`Delete ${s.name}`}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex items-center justify-between gap-2 px-3 py-2">
+                  {renamingId === s.id ? (
+                    <input
+                      autoFocus
+                      value={renameDraft}
+                      onChange={(e) => setRenameDraft(e.target.value)}
+                      onBlur={() => {
+                        setSets(renameAdSet(s.id, renameDraft));
+                        setRenamingId(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') e.currentTarget.blur();
+                        if (e.key === 'Escape') setRenamingId(null);
+                      }}
+                      className="flex-1 min-w-0 bg-black/60 border border-zinc-600 rounded px-2 py-1 text-[11px] text-zinc-100 outline-none"
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => push({ ...config, setId: s.id })}
+                      className="min-w-0 flex-1 text-left cursor-pointer"
+                    >
+                      <span className="block font-pixel text-[11px] text-zinc-200 truncate">
+                        {s.name}
+                      </span>
+                      <span className="block text-[10px] text-zinc-500">
+                        {s.spots.length} spots
+                        {s.spots.length > 0 &&
+                          ` \u00b7 ${new Set(s.spots.map((x) => x.identifier)).size} tapes`}
+                      </span>
+                    </button>
+                  )}
+                  {config.setId === s.id && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRenamingId(s.id);
+                      setRenameDraft(s.name);
+                    }}
+                    className="shrink-0 text-zinc-500 hover:text-amber-300 cursor-pointer font-pixel text-[9px]"
+                  >
+                    RENAME
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExpandedSetId(expandedSetId === s.id ? null : s.id)}
+                    className="shrink-0 text-zinc-500 hover:text-white cursor-pointer font-pixel text-[9px]"
+                  >
+                    {expandedSetId === s.id ? 'HIDE' : 'SPOTS'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = deleteAdSet(s.id);
+                      setSets(next);
+                      if (config.setId === s.id) push({ ...config, setId: next[0]?.id || null });
+                    }}
+                    className="shrink-0 text-red-400 hover:text-red-300 cursor-pointer"
+                    aria-label={`Delete ${s.name}`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {expandedSetId === s.id && (
+                  <div className="px-3 pb-2 max-h-40 overflow-y-auto retro-scroll">
+                    {s.spots.length === 0 && (
+                      <p className="text-[10px] text-zinc-600">
+                        Empty. Load a tape below and add spots to it.
+                      </p>
+                    )}
+                    {s.spots.map((spot, i) => (
+                      <div
+                        key={`${spot.identifier}_${spot.videoFile}_${i}`}
+                        className="flex items-center gap-2 py-1 border-t border-zinc-800/70 first:border-0"
+                      >
+                        <span className="flex-1 min-w-0 truncate text-[10px] text-zinc-400">
+                          {spot.title}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setSets(removeSpotFromSet(s.id, i))}
+                          className="shrink-0 text-zinc-600 hover:text-red-400 cursor-pointer"
+                          aria-label={`Remove ${spot.title}`}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -287,13 +371,28 @@ export default function CommercialBreaksModal({ isOpen, onClose, currentChannel,
 
           {candidate && (
             <div className="mt-3">
-              <input
-                type="text"
-                value={setName}
-                onChange={(e) => setSetName(e.target.value)}
-                placeholder="Reel name"
-                className="w-full bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1.5 text-xs text-zinc-100 outline-none"
-              />
+              <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">ADD TO</span>
+              <select
+                value={targetSetId}
+                onChange={(e) => setTargetSetId(e.target.value)}
+                className="w-full mt-1 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1.5 text-xs text-zinc-100 outline-none cursor-pointer"
+              >
+                <option value="NEW">+ New reel</option>
+                {sets.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.spots.length})
+                  </option>
+                ))}
+              </select>
+              {targetSetId === 'NEW' && (
+                <input
+                  type="text"
+                  value={setName}
+                  onChange={(e) => setSetName(e.target.value)}
+                  placeholder="New reel name"
+                  className="w-full mt-2 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1.5 text-xs text-zinc-100 outline-none"
+                />
+              )}
               <div className="mt-2 max-h-44 overflow-y-auto retro-scroll border border-zinc-800 rounded-lg divide-y divide-zinc-800/70">
                 {candidate.files.map((f, i) => (
                   <label
@@ -321,7 +420,10 @@ export default function CommercialBreaksModal({ isOpen, onClose, currentChannel,
                 disabled={picked.size === 0}
                 className="mt-2 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg font-pixel text-[10px] tracking-wider border-2 bg-green-900/60 hover:bg-green-800/70 border-green-600/60 text-green-200 cursor-pointer disabled:opacity-40"
               >
-                <Plus className="w-3.5 h-3.5" /> SAVE {picked.size} SPOTS AS A REEL
+                <Plus className="w-3.5 h-3.5" /> ADD {picked.size} SPOTS
+                {targetSetId === 'NEW'
+                  ? ' TO A NEW REEL'
+                  : ` TO ${(sets.find((x) => x.id === targetSetId)?.name || 'REEL').toUpperCase()}`}
               </button>
             </div>
           )}

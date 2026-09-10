@@ -36,6 +36,44 @@ export function saveAdSet(set) {
   return next;
 }
 
+// A reel is built the way a channel is: created empty, then filled from as many
+// tapes as you like. Spots are deduped on identifier + file so adding the same
+// tape twice does not double up.
+export function createAdSet(name) {
+  const set = { id: `set_${Date.now()}`, name: (name || 'New reel').trim(), spots: [] };
+  saveAdSet(set);
+  return set;
+}
+
+export function addSpotsToSet(setId, spots) {
+  const sets = getAdSets();
+  const target = sets.find((s) => s.id === setId);
+  if (!target) return sets;
+
+  const seen = new Set((target.spots || []).map((s) => `${s.identifier}::${s.videoFile}`));
+  const additions = (spots || []).filter((s) => {
+    const key = `${s.identifier}::${s.videoFile}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  return saveAdSet({ ...target, spots: [...(target.spots || []), ...additions] });
+}
+
+export function removeSpotFromSet(setId, index) {
+  const target = getAdSets().find((s) => s.id === setId);
+  if (!target) return getAdSets();
+  const spots = (target.spots || []).filter((_, i) => i !== index);
+  return saveAdSet({ ...target, spots });
+}
+
+export function renameAdSet(setId, name) {
+  const target = getAdSets().find((s) => s.id === setId);
+  if (!target) return getAdSets();
+  return saveAdSet({ ...target, name: (name || '').trim() || target.name });
+}
+
 export function deleteAdSet(id) {
   const next = getAdSets().filter((s) => s.id !== id);
   try {
