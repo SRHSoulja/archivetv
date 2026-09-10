@@ -64,6 +64,15 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
 
+  // Reset timestamps immediately when program or channel changes so previous values do not linger
+  useEffect(() => {
+    const initTime = currentProgram?.seekSeconds || 0;
+    const initDur = currentProgram?.duration || 0;
+    setCurrentTime(initTime);
+    setDuration(initDur);
+    setIsPlaying(true);
+  }, [currentProgram?.identifier, currentProgram?.videoUrl, currentChannel?.number]);
+
   // Expose imperative playback controls to parent (for hotkeys & shortcuts)
   useImperativeHandle(ref, () => ({
     seekTo: (seconds) => {

@@ -209,8 +209,10 @@ export default function App() {
     if (activeExplicitProgram?.isAuxiliary) {
       return {
         number: 'AUX',
+        baseChannelNumber: currentChannel?.number || '02',
+        baseChannelName: currentChannel?.name || 'BROADCAST',
         name: (activeExplicitProgram.title || 'ARCHIVE BROADCAST').slice(0, 24).toUpperCase(),
-        callsign: 'K-AUX',
+        callsign: `AUX-${currentChannel?.number || 'TV'}`,
         badge: 'AUX/VCR',
         description: activeExplicitProgram.description,
       };
@@ -338,14 +340,17 @@ export default function App() {
           seekSeconds: 0,
           isAuxiliary: false,
         });
+        setActiveEngine('direct');
         return;
       }
     }
 
     if (activeExplicitProgram) {
       setActiveExplicitProgram(null);
+      setActiveEngine('direct');
     } else if (currentPrograms.length > 1) {
       setCurrentProgramIndex((prev) => (prev + 1) % currentPrograms.length);
+      setActiveEngine('direct');
     }
   }, [activeExplicitProgram, currentPrograms.length, currentProgram]);
 
@@ -364,9 +369,9 @@ export default function App() {
         ...resolvedItem,
         isAuxiliary: true,
       });
-      if (resolvedItem?.playerEngine) {
-        setActiveEngine(resolvedItem.playerEngine);
-      } else if (!resolvedItem?.videoUrl) {
+      if (resolvedItem?.videoUrl) {
+        setActiveEngine('direct');
+      } else if (resolvedItem?.playerEngine === 'embed' || !resolvedItem?.videoUrl) {
         setActiveEngine('embed');
       } else {
         setActiveEngine('direct');
@@ -408,6 +413,7 @@ export default function App() {
         seekSeconds: 0,
         isAuxiliary: false,
       });
+      setActiveEngine('direct');
     },
     [currentProgram, triggerChannelZap]
   );

@@ -261,6 +261,56 @@ async function executeSearch(q, rows, sort, page) {
   }
 }
 
+function scoreVideoFile(f, identifier) {
+  const name = (f?.name || '').toLowerCase();
+  const format = (f?.format || '').toLowerCase();
+  const size = parseInt(f?.size, 10) || 0;
+  let score = 1000;
+
+  // Prefer standard web MP4
+  if (name.endsWith('.mp4')) score += 300;
+  if (name.endsWith('.ia.mp4')) score += 260; // Official Archive.org web-optimized derivative
+  if (name.endsWith('.m4v')) score += 180;
+  if (name.endsWith('.webm')) score += 150;
+
+  // Format bonuses
+  if (format.includes('h.264') || format.includes('h.264 hd')) score += 200;
+  if (format.includes('512kb')) score += 150;
+  if (format.includes('webm')) score += 120;
+
+  // Quality keywords in filename
+  if (name.includes('720p') || name.includes('h264') || name.includes('h.264')) score += 250;
+  if (name.includes('1080p')) score += 200;
+  if (name.includes('512kb')) score += 180;
+  if (name.includes('web') || name.includes('hd')) score += 120;
+
+  // Clean title match (e.g. identifier.mp4)
+  const cleanId = (identifier || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const cleanName = name.replace(/[^a-z0-9]/g, '');
+  if (cleanId && cleanName.startsWith(cleanId)) score += 100;
+
+  // Penalties for legacy console/device rips or unoptimized raw files
+  if (name.includes('_ps3') || name.includes('.ps3.')) score -= 500;
+  if (name.includes('_psp') || name.includes('.psp.')) score -= 500;
+  if (name.includes('_ipod') || name.includes('.ipod.')) score -= 400;
+  if (name.includes('_iphone') || name.includes('.iphone.')) score -= 250;
+  if (name.includes('sample') || name.includes('trailer') || name.includes('preview')) score -= 700;
+  if (name.includes('_raw') || name.includes('unrestored') || name.includes('master')) score -= 400;
+
+  // File size sweet spot: 30MB to 1.5GB
+  if (size >= 30 * 1024 * 1024 && size <= 1500 * 1024 * 1024) {
+    score += 250;
+  } else if (size > 1500 * 1024 * 1024 && size <= 2500 * 1024 * 1024) {
+    score += 50;
+  } else if (size > 2500 * 1024 * 1024) {
+    score -= 400; // Over 2.5GB often hits buffering timeouts on slow nodes
+  } else if (size > 0 && size < 5 * 1024 * 1024) {
+    score -= 400; // Under 5MB is likely an intro bumper or corrupt
+  }
+
+  return score;
+}
+
 /**
  * Universally inspects any Archive.org item and resolves playable video formats.
  * Cached in memory and sessionStorage for instant zero-latency channel tuning.
@@ -281,8 +331,10 @@ export async function resolvePlayableItem(inputIdentifier) {
     const cachedStr = sessionStorage.getItem(METADATA_CACHE_PREFIX + identifier);
     if (cachedStr) {
       const parsed = JSON.parse(cachedStr);
-      metadataMemoryCache.set(identifier, parsed);
-      return parsed;
+      if (parsed && parsed.videoUrl) {
+        metadataMemoryCache.set(identifier, parsed);
+        return parsed;
+      }
     }
   } catch {
     // Ignore storage errors
@@ -294,7 +346,7 @@ export async function resolvePlayableItem(inputIdentifier) {
   try {
     const url = `https://archive.org/metadata/${identifier}`;
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     const res = await fetch(url, { signal: controller.signal });
     clearTimeout(timeoutId);
@@ -307,13 +359,14 @@ export async function resolvePlayableItem(inputIdentifier) {
         description: 'Internet Archive broadcast stream.',
         videoFile: null,
         videoUrl: null,
+        candidateStreamUrls: [],
         embedUrl,
         thumbnailUrl: defaultThumbnail,
         duration: 3600,
         availableFiles: [],
         playerEngine: 'embed',
       };
-      cacheItem(identifier, fallbackItem);
+      metadataMemoryCache.set(identifier, fallbackItem);
       return fallbackItem;
     }
 
@@ -321,45 +374,64 @@ export async function resolvePlayableItem(inputIdentifier) {
     const files = data?.files || [];
     const meta = data?.metadata || {};
 
-    const videoExts = ['.mp4', '.m4v', '.webm', '.ogv', '.mov', '.mkv', '.avi'];
-    const videoFormats = ['512kb mpeg4', 'h.264', 'mpeg4', 'h.264 hd', 'item tile', 'webm', 'ogg video'];
-
+    const allVideoExts = ['.mp4', '.m4v', '.webm', '.ogv', '.mov', '.mkv', '.avi', '.flv', '.wmv'];
     const candidateFiles = files.filter((f) => {
       if (!f?.name) return false;
       const lower = f.name.toLowerCase();
-      const hasExt = videoExts.some((ext) => lower.endsWith(ext));
+      const hasExt = allVideoExts.some((ext) => lower.endsWith(ext));
       const formatStr = (f.format || '').toLowerCase();
-      const hasFormat = videoFormats.some((fmt) => formatStr.includes(fmt));
+      const hasFormat = /mpeg4|h\.264|webm|video|512kb/i.test(formatStr);
       return (hasExt || hasFormat) && !lower.endsWith('_thumb.jpg') && !lower.endsWith('.xml');
     });
 
-    let primaryVideo = null;
-    let availableFiles = [];
-
-    if (candidateFiles.length > 0) {
-      const sortedCandidates = [...candidateFiles].sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+    // Filter strictly for browser-playable HTML5 video formats
+    // HTML5 <video> can only natively play MP4 (H.264/AAC) and WebM.
+    // Non-browser containers (.mkv, .avi, .mov, .flv, .wmv) fail immediately.
+    const browserPlayableFiles = candidateFiles.filter((f) => {
+      const lower = f.name.toLowerCase();
+      if (
+        lower.endsWith('.mkv') ||
+        lower.endsWith('.avi') ||
+        lower.endsWith('.mov') ||
+        lower.endsWith('.flv') ||
+        lower.endsWith('.wmv')
+      ) {
+        return false;
+      }
+      return (
+        lower.endsWith('.mp4') ||
+        lower.endsWith('.m4v') ||
+        lower.endsWith('.webm') ||
+        lower.endsWith('.ia.mp4')
       );
+    });
 
-      availableFiles = sortedCandidates.map((f) => ({
-        name: f.name,
-        displayName: cleanFileName(f.name, identifier),
-        format: f.format || 'Video',
-        size: parseInt(f.size, 10) || 0,
-        duration: parseLength(f.length),
-        videoUrl: `https://archive.org/download/${identifier}/${encodeURIComponent(f.name)}`,
-      }));
+    let primaryVideo = null;
+    let candidateStreamUrls = [];
 
-      const cleanFiles = candidateFiles.filter((f) => !f.name.toLowerCase().endsWith('.ia.mp4'));
-      const pool = cleanFiles.length > 0 ? cleanFiles : candidateFiles;
-
-      primaryVideo = pool.sort((a, b) => {
-        const aIsMp4 = a.name.toLowerCase().endsWith('.mp4') ? 1 : 0;
-        const bIsMp4 = b.name.toLowerCase().endsWith('.mp4') ? 1 : 0;
-        if (aIsMp4 !== bIsMp4) return bIsMp4 - aIsMp4;
-        return (parseInt(b.size, 10) || 0) - (parseInt(a.size, 10) || 0);
-      })[0];
+    if (browserPlayableFiles.length > 0) {
+      const sortedPlayable = [...browserPlayableFiles].sort(
+        (a, b) => scoreVideoFile(b, identifier) - scoreVideoFile(a, identifier)
+      );
+      primaryVideo = sortedPlayable[0];
+      candidateStreamUrls = sortedPlayable.map(
+        (f) => `https://archive.org/download/${identifier}/${encodeURIComponent(f.name)}`
+      );
     }
+
+    const sortedCandidates = [...candidateFiles].sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+    );
+
+    const availableFiles = sortedCandidates.map((f) => ({
+      name: f.name,
+      displayName: cleanFileName(f.name, identifier),
+      format: f.format || 'Video',
+      size: parseInt(f.size, 10) || 0,
+      duration: parseLength(f.length),
+      videoUrl: `https://archive.org/download/${identifier}/${encodeURIComponent(f.name)}`,
+      isBrowserPlayable: browserPlayableFiles.some((b) => b.name === f.name),
+    }));
 
     const title = meta.title || identifier.replace(/[-_]/g, ' ');
     const desc = cleanDescription(meta.description || '');
@@ -374,6 +446,7 @@ export async function resolvePlayableItem(inputIdentifier) {
       videoUrl: primaryVideo
         ? `https://archive.org/download/${identifier}/${encodeURIComponent(primaryVideo.name)}`
         : null,
+      candidateStreamUrls,
       embedUrl,
       thumbnailUrl: defaultThumbnail,
       duration,
@@ -395,19 +468,21 @@ export async function resolvePlayableItem(inputIdentifier) {
       description: 'Streamed directly from Internet Archive.',
       videoFile: null,
       videoUrl: null,
+      candidateStreamUrls: [],
       embedUrl,
       thumbnailUrl: defaultThumbnail,
       duration: 3600,
       availableFiles: [],
       playerEngine: 'embed',
     };
-    cacheItem(identifier, guaranteed);
+    metadataMemoryCache.set(identifier, guaranteed);
     return guaranteed;
   }
 }
 
 function cacheItem(identifier, item) {
   metadataMemoryCache.set(identifier, item);
+  if (!item?.videoUrl) return; // Don't persist empty videoUrl fallbacks to sessionStorage
   try {
     sessionStorage.setItem(METADATA_CACHE_PREFIX + identifier, JSON.stringify(item));
   } catch {
@@ -502,12 +577,13 @@ export function sanitizeProgram(prog) {
     description: cleanDescription(prog.description || ''),
     videoFile: prog.videoFile || null,
     videoUrl: prog.videoUrl || null,
+    candidateStreamUrls: Array.isArray(prog.candidateStreamUrls) ? prog.candidateStreamUrls.slice(0, 3) : [],
     embedUrl: prog.embedUrl || (prog.identifier ? `https://archive.org/embed/${prog.identifier}?autoplay=1` : null),
     thumbnailUrl:
       prog.thumbnailUrl || (prog.identifier ? `https://archive.org/services/img/${prog.identifier}` : ''),
     duration: typeof prog.duration === 'number' && !isNaN(prog.duration) ? prog.duration : 1800,
     size: prog.size || 0,
-    playerEngine: prog.playerEngine || (prog.videoUrl ? 'direct' : 'embed'),
+    playerEngine: prog.videoUrl ? 'direct' : (prog.playerEngine || 'embed'),
   };
 }
 

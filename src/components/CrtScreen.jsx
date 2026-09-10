@@ -1,4 +1,12 @@
-import React, { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  useCallback,
+  useMemo,
+} from 'react';
 import { Radio, VolumeX } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 
@@ -24,7 +32,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     brightness = 100,
     contrast = 100,
     activeEngine = 'direct',
-    onEngineChange,
+    _onEngineChange,
     onTimeUpdateReport,
   },
   ref
@@ -39,29 +47,114 @@ const CrtScreen = forwardRef(function CrtScreen(
   const [osdVisible, setOsdVisible] = useState(true);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
 
+  // Direct candidate streams & graceful fallback state
+  const [candidateIndex, setCandidateIndex] = useState(0);
+  const [streamFailedAll, setStreamFailedAll] = useState(false);
+  const [embedTime, setEmbedTime] = useState(0);
+  const [embedPlaying, setEmbedPlaying] = useState(true);
+
+  // Compute prioritized list of direct playable video URLs for this item
+  const candidateUrls = useMemo(() => {
+    if (!currentProgram) return [];
+    const list = [];
+    if (currentProgram.videoUrl) list.push(currentProgram.videoUrl);
+    if (Array.isArray(currentProgram.candidateStreamUrls)) {
+      for (const u of currentProgram.candidateStreamUrls) {
+        if (u && !list.includes(u)) list.push(u);
+      }
+    }
+    if (Array.isArray(currentProgram.availableFiles)) {
+      for (const f of currentProgram.availableFiles) {
+        if (f.videoUrl && !list.includes(f.videoUrl)) {
+          const lower = (f.name || '').toLowerCase();
+          if (
+            lower.endsWith('.mp4') ||
+            lower.endsWith('.m4v') ||
+            lower.endsWith('.webm') ||
+            lower.endsWith('.ia.mp4')
+          ) {
+            list.push(f.videoUrl);
+          }
+        }
+      }
+    }
+    return list;
+  }, [currentProgram]);
+
+  const activeVideoUrl = candidateUrls[candidateIndex] || currentProgram?.videoUrl || null;
+  const canPlayDirect = activeEngine === 'direct' && Boolean(activeVideoUrl) && !streamFailedAll;
+
+  const handleTimeUpdate = useCallback(() => {
+    if (videoRef.current && onTimeUpdateReport) {
+      const cur = videoRef.current.currentTime;
+      const dur = videoRef.current.duration || duration || currentProgram?.duration || 0;
+      if (!isNaN(dur) && dur > 0) setDuration(dur);
+      onTimeUpdateReport(cur, dur, !videoRef.current.paused);
+    }
+  }, [duration, currentProgram?.duration, onTimeUpdateReport]);
+
   // Expose imperative methods to parent (for VCR deck and keyboard shortcuts)
   useImperativeHandle(ref, () => ({
     seekTo: (seconds) => {
-      if (videoRef.current) {
+      if (canPlayDirect && videoRef.current) {
         const dur = videoRef.current.duration || duration || 999999;
         videoRef.current.currentTime = Math.max(0, Math.min(seconds, dur));
+        handleTimeUpdate();
+      } else {
+        const dur = duration || currentProgram?.duration || 999999;
+        const target = Math.max(0, Math.min(seconds, dur));
+        setEmbedTime(target);
+        if (onTimeUpdateReport) {
+          onTimeUpdateReport(target, dur, embedPlaying);
+        }
+        if (iframeRef.current?.contentWindow) {
+          try {
+            iframeRef.current.contentWindow.postMessage({ method: 'seek', value: target }, '*');
+            iframeRef.current.contentWindow.postMessage({ event: 'seek', value: target }, '*');
+          } catch {}
+        }
       }
     },
     togglePlayPause: () => {
-      if (!videoRef.current) return;
-      if (videoRef.current.paused) {
-        videoRef.current.play().catch(() => {});
+      if (canPlayDirect && videoRef.current) {
+        if (videoRef.current.paused) {
+          videoRef.current.play().catch(() => {});
+        } else {
+          videoRef.current.pause();
+        }
+        handleTimeUpdate();
       } else {
-        videoRef.current.pause();
+        setEmbedPlaying((prev) => {
+          const next = !prev;
+          if (iframeRef.current?.contentWindow) {
+            try {
+              iframeRef.current.contentWindow.postMessage({ method: next ? 'play' : 'pause' }, '*');
+            } catch {}
+          }
+          if (onTimeUpdateReport) {
+            onTimeUpdateReport(embedTime, duration || currentProgram?.duration || 3600, next);
+          }
+          return next;
+        });
       }
     },
     restart: () => {
-      if (videoRef.current) {
+      if (canPlayDirect && videoRef.current) {
         videoRef.current.currentTime = 0;
         videoRef.current.play().catch(() => {});
-      } else if (iframeRef.current && currentProgram?.embedUrl) {
-        // Universal Archive.org Tube restart
-        iframeRef.current.src = currentProgram.embedUrl;
+        handleTimeUpdate();
+      } else {
+        setEmbedTime(0);
+        setEmbedPlaying(true);
+        if (iframeRef.current) {
+          const baseEmbed =
+            currentProgram?.embedUrl ||
+            `https://archive.org/embed/${currentProgram?.identifier}?autoplay=1`;
+          iframeRef.current.src = baseEmbed;
+        }
+        if (onTimeUpdateReport) {
+          onTimeUpdateReport(0, duration || currentProgram?.duration || 3600, true);
+        }
       }
       if (onRestartProgram) onRestartProgram();
     },
@@ -73,6 +166,81 @@ const CrtScreen = forwardRef(function CrtScreen(
       videoRef.current.playbackRate = playbackRate;
     }
   }, [playbackRate]);
+
+  // Reset timestamps and stream index on program/channel change
+  useEffect(() => {
+    setCandidateIndex(0);
+    setStreamFailedAll(false);
+    setVideoError(null);
+    setAutoplayBlocked(false);
+    const initialSeek = currentProgram?.seekSeconds || 0;
+    const initialDur = currentProgram?.duration || 0;
+    setDuration(initialDur);
+    setEmbedTime(initialSeek);
+    setEmbedPlaying(true);
+    if (onTimeUpdateReport) {
+      onTimeUpdateReport(initialSeek, initialDur, true);
+    }
+  }, [currentProgram?.identifier, currentProgram?.videoUrl, currentChannel?.number]);
+
+  // Direct Mode Heartbeat: ensures continuous, accurate 1-second VCR counter progression
+  useEffect(() => {
+    if (!powerOn || !canPlayDirect) return;
+    const heartbeat = setInterval(() => {
+      if (videoRef.current && !videoRef.current.paused) {
+        handleTimeUpdate();
+      }
+    }, 350);
+    return () => clearInterval(heartbeat);
+  }, [powerOn, canPlayDirect, handleTimeUpdate]);
+
+  // Tube Embed playback clock: ensures VCR counter & scrubber track real time even in embed mode
+  useEffect(() => {
+    if (!powerOn || canPlayDirect) return;
+    if (!embedPlaying) return;
+
+    const embedInterval = setInterval(() => {
+      setEmbedTime((prev) => {
+        const dur = duration || currentProgram?.duration || 3600;
+        const nextTime = Math.min(dur, prev + 0.5 * playbackRate);
+        if (onTimeUpdateReport) {
+          onTimeUpdateReport(nextTime, dur, true);
+        }
+        return nextTime;
+      });
+    }, 500);
+
+    return () => clearInterval(embedInterval);
+  }, [powerOn, canPlayDirect, embedPlaying, playbackRate, duration, currentProgram?.duration, onTimeUpdateReport]);
+
+  // PostMessage listener to sync timestamps from iframe if emitted
+  useEffect(() => {
+    const handleMessage = (e) => {
+      try {
+        const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+        if (!data) return;
+        if (typeof data.currentTime === 'number' && !isNaN(data.currentTime)) {
+          setEmbedTime(data.currentTime);
+          if (data.duration && !isNaN(data.duration)) setDuration(data.duration);
+          if (onTimeUpdateReport) {
+            onTimeUpdateReport(data.currentTime, data.duration || duration, true);
+          }
+        } else if (data.event === 'timeupdate' && typeof data.value === 'number') {
+          setEmbedTime(data.value);
+          if (onTimeUpdateReport) {
+            onTimeUpdateReport(data.value, duration, true);
+          }
+        } else if (data.event === 'pause') {
+          setEmbedPlaying(false);
+        } else if (data.event === 'play') {
+          setEmbedPlaying(true);
+        }
+      } catch {}
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [duration, onTimeUpdateReport]);
 
   const isOffAir =
     !currentProgram ||
@@ -169,31 +337,36 @@ const CrtScreen = forwardRef(function CrtScreen(
     }
   }, [volume, muted, autoplayBlocked]);
 
-  // Direct video source load with graceful autoplay policy handling
+  // Direct video source load with graceful autoplay policy handling & candidate stream rotation
   useEffect(() => {
-    setVideoError(null);
-    setAutoplayBlocked(false);
-
-    if (!videoRef.current || !currentProgram?.videoUrl || !powerOn) {
+    if (!canPlayDirect || !activeVideoUrl || !powerOn) {
       setVideoLoading(false);
       return;
     }
 
     setVideoLoading(true);
     const video = videoRef.current;
-    video.src = currentProgram.videoUrl;
-    video.load();
+    if (!video) return;
+
+    if (video.src !== activeVideoUrl) {
+      video.src = activeVideoUrl;
+      video.load();
+    }
 
     const handleLoadedMetadata = () => {
       setVideoLoading(false);
-      const dur = video.duration || currentProgram.duration || 0;
+      const dur = video.duration || currentProgram?.duration || 0;
       setDuration(dur);
 
-      if (liveTvMode && currentProgram.seekSeconds && video.duration) {
+      if (liveTvMode && currentProgram?.seekSeconds && video.duration) {
         video.currentTime = currentProgram.seekSeconds % video.duration;
+      } else if (currentProgram?.seekSeconds) {
+        video.currentTime = currentProgram.seekSeconds;
       } else {
         video.currentTime = 0;
       }
+
+      handleTimeUpdate();
 
       const playPromise = video.play();
       if (playPromise !== undefined) {
@@ -210,7 +383,21 @@ const CrtScreen = forwardRef(function CrtScreen(
 
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
     return () => video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-  }, [currentProgram?.videoUrl, currentProgram?.identifier, powerOn, liveTvMode]);
+  }, [activeVideoUrl, canPlayDirect, powerOn, liveTvMode, currentProgram?.seekSeconds, handleTimeUpdate]);
+
+  const handleVideoError = () => {
+    console.warn(`Direct stream error on candidate #${candidateIndex}: ${activeVideoUrl}`);
+    if (candidateIndex + 1 < candidateUrls.length) {
+      console.log(`Auto-switching to candidate stream #${candidateIndex + 1}: ${candidateUrls[candidateIndex + 1]}`);
+      setCandidateIndex((prev) => prev + 1);
+      setVideoLoading(true);
+    } else {
+      console.warn('All direct stream candidates failed for this program. Using embed player locally.');
+      setStreamFailedAll(true);
+      setVideoLoading(false);
+      setVideoError('DIRECT STREAM OFFLINE - TUBE BACKUP ACTIVE');
+    }
+  };
 
   // Screen click to unmute if blocked
   const handleScreenClick = () => {
@@ -227,15 +414,6 @@ const CrtScreen = forwardRef(function CrtScreen(
     const t = setTimeout(() => setOsdVisible(false), 5000);
     return () => clearTimeout(t);
   }, [currentChannel?.number, currentProgram?.identifier]);
-
-  const handleTimeUpdate = () => {
-    if (videoRef.current && onTimeUpdateReport) {
-      const cur = videoRef.current.currentTime;
-      const dur = videoRef.current.duration || duration || currentProgram?.duration || 0;
-      setDuration(dur);
-      onTimeUpdateReport(cur, dur, !videoRef.current.paused);
-    }
-  };
 
   // Build filter style for color modes and brightness
   const getFilterStyle = () => {
@@ -261,9 +439,10 @@ const CrtScreen = forwardRef(function CrtScreen(
       }}
     >
       {/* 1. Direct HTML5 Video Player */}
-      {powerOn && activeEngine === 'direct' && currentProgram?.videoUrl && (
+      {powerOn && canPlayDirect && (
         <video
           ref={videoRef}
+          src={activeVideoUrl}
           className={`w-full h-full object-cover transition-opacity duration-300 ${
             videoLoading ? 'opacity-20' : 'opacity-100'
           }`}
@@ -276,12 +455,12 @@ const CrtScreen = forwardRef(function CrtScreen(
           }}
           onTimeUpdate={handleTimeUpdate}
           onEnded={onProgramEnded}
-          onError={() => {
-            console.warn('Direct stream error, auto-fallback to Archive Tube embed');
-            setVideoError('DIRECT STREAM OFFLINE - SWITCHING TO ARCHIVE TUBE');
-            if (onEngineChange) onEngineChange('embed');
-          }}
+          onError={handleVideoError}
           onWaiting={() => setVideoLoading(true)}
+          onCanPlay={() => {
+            setVideoLoading(false);
+            handleTimeUpdate();
+          }}
           onPlaying={() => {
             setVideoLoading(false);
             handleTimeUpdate();
@@ -292,14 +471,14 @@ const CrtScreen = forwardRef(function CrtScreen(
       )}
 
       {/* 2. Universal Archive.org Tube Embed Player */}
-      {powerOn && (activeEngine === 'embed' || !currentProgram?.videoUrl) && (currentProgram?.embedUrl || currentProgram?.identifier) && (
+      {powerOn && !canPlayDirect && (currentProgram?.embedUrl || currentProgram?.identifier) && (
         <div
           className="absolute inset-0 w-full h-full bg-black flex items-center justify-center z-10"
           style={{ filter: getFilterStyle() }}
         >
           <iframe
             ref={iframeRef}
-            src={currentProgram.embedUrl || `https://archive.org/embed/${currentProgram.identifier}`}
+            src={currentProgram.embedUrl || `https://archive.org/embed/${currentProgram.identifier}?autoplay=1`}
             title={currentProgram.title}
             className="w-full h-full border-0"
             allow="autoplay; fullscreen"

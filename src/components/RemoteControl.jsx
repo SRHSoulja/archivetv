@@ -148,8 +148,10 @@ export default function RemoteControl({
             <span className="text-phosphor-green text-2xl tracking-widest font-bold drop-shadow-[0_0_8px_rgba(74,222,128,0.7)]">
               {digitBuffer
                 ? `CH ${digitBuffer}_`
+                : currentChannel?.number === 'AUX'
+                ? `AUX-${currentChannel.baseChannelNumber || '02'}`
                 : currentChannel?.number
-                ? (currentChannel.number === 'AUX' ? 'AUX' : `CH ${currentChannel.number}`)
+                ? `CH ${currentChannel.number}`
                 : 'CH --'}
             </span>
             <span className="text-phosphor-green/90 text-xs font-mono font-bold uppercase tracking-wider truncate max-w-[95px] text-right">
@@ -159,7 +161,7 @@ export default function RemoteControl({
 
           {currentChannel?.name && (
             <div className="text-[10px] font-mono text-zinc-400 truncate mt-1 pt-0.5 border-t border-zinc-900/60">
-              {currentChannel.name}
+              {currentChannel.number === 'AUX' ? `TAPE: ${currentChannel.name}` : currentChannel.name}
             </div>
           )}
         </div>
