@@ -43,7 +43,7 @@ export default function NavbarHeader({
   onToggleFullscreen,
 }) {
   return (
-    <header className="w-full bg-[#141210]/90 backdrop-blur-md border-b border-zinc-800/80 px-4 py-2.5 flex items-center justify-between gap-4 select-none z-30 sticky top-0">
+    <header className="nav-stage w-full bg-[#141210]/90 backdrop-blur-md border-b border-zinc-800/80 px-4 py-2.5 flex items-center justify-between gap-4 select-none z-30 sticky top-0">
       {/* Brand & Logo */}
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg border border-amber-400/40">
