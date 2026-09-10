@@ -109,7 +109,7 @@ export default function ArchiveSearchModal({
     }
   }, [isOpen, refreshBookmarks]);
 
-  const doSearch = async (newQuery = null, newPage = 1, append = false) => {
+  const doSearch = async (newQuery = null, newPage = 1, append = false, overrides = {}) => {
     const q = newQuery !== null ? newQuery : query;
     if (newPage === 1) {
       setLoading(true);
@@ -122,12 +122,12 @@ export default function ArchiveSearchModal({
       const data = await searchArchive(q, {
         rows: 24,
         page: newPage,
-        sort: sortBy,
-        collection: selectedCollection,
-        decade: selectedDecade,
-        durationCategory,
-        uploader: selectedUploader,
-        creator: selectedCreator,
+        sort: overrides.sort ?? sortBy,
+        collection: overrides.collection ?? selectedCollection,
+        decade: overrides.decade ?? selectedDecade,
+        durationCategory: overrides.durationCategory ?? durationCategory,
+        uploader: overrides.uploader ?? selectedUploader,
+        creator: overrides.creator ?? selectedCreator,
       });
 
       if (append) {
@@ -366,7 +366,7 @@ export default function ArchiveSearchModal({
                     value={sortBy}
                     onChange={(e) => {
                       setSortBy(e.target.value);
-                      setTimeout(() => doSearch(query, 1, false), 50);
+                      doSearch(query, 1, false, { sort: e.target.value });
                     }}
                     className="bg-transparent text-amber-300 focus:outline-none cursor-pointer"
                   >
@@ -385,7 +385,7 @@ export default function ArchiveSearchModal({
                     value={durationCategory}
                     onChange={(e) => {
                       setDurationCategory(e.target.value);
-                      setTimeout(() => doSearch(query, 1, false), 50);
+                      doSearch(query, 1, false, { durationCategory: e.target.value });
                     }}
                     className="bg-transparent text-amber-300 focus:outline-none cursor-pointer"
                   >
@@ -403,7 +403,7 @@ export default function ArchiveSearchModal({
                       className="w-3 h-3 cursor-pointer hover:text-white"
                       onClick={() => {
                         setSelectedCollection('');
-                        setTimeout(() => doSearch(query, 1, false), 50);
+                        doSearch(query, 1, false, { collection: '' });
                       }}
                     />
                   </span>
@@ -416,7 +416,7 @@ export default function ArchiveSearchModal({
                       className="w-3 h-3 shrink-0 cursor-pointer hover:text-white"
                       onClick={() => {
                         setSelectedUploader('');
-                        setTimeout(() => doSearch(query, 1, false), 50);
+                        doSearch(query, 1, false, { uploader: '' });
                       }}
                     />
                   </span>
@@ -429,7 +429,7 @@ export default function ArchiveSearchModal({
                       className="w-3 h-3 shrink-0 cursor-pointer hover:text-white"
                       onClick={() => {
                         setSelectedCreator('');
-                        setTimeout(() => doSearch(query, 1, false), 50);
+                        doSearch(query, 1, false, { creator: '' });
                       }}
                     />
                   </span>
@@ -442,7 +442,7 @@ export default function ArchiveSearchModal({
                       className="w-3 h-3 cursor-pointer hover:text-white"
                       onClick={() => {
                         setSelectedDecade('');
-                        setTimeout(() => doSearch(query, 1, false), 50);
+                        doSearch(query, 1, false, { decade: '' });
                       }}
                     />
                   </span>
@@ -751,7 +751,7 @@ export default function ArchiveSearchModal({
                                   if (!up) return;
                                   setSelectedCreator('');
                                   setSelectedUploader(up);
-                                  setTimeout(() => doSearch(query, 1, false), 50);
+                                  doSearch(query, 1, false, { uploader: up, creator: '' });
                                 }}
                                 className="shrink-0 px-1.5 py-0.5 rounded border border-emerald-700/70 bg-emerald-950/60 text-emerald-300 hover:text-white hover:border-emerald-500 text-[9px] tracking-wider cursor-pointer transition disabled:opacity-50"
                               >
@@ -764,7 +764,7 @@ export default function ArchiveSearchModal({
                                   e.stopPropagation();
                                   setSelectedUploader('');
                                   setSelectedCreator(item.creator);
-                                  setTimeout(() => doSearch(query, 1, false), 50);
+                                  doSearch(query, 1, false, { creator: item.creator, uploader: '' });
                                 }}
                                 className="truncate max-w-[120px] text-zinc-400 font-mono hover:text-amber-300 cursor-pointer transition"
                               >
