@@ -267,14 +267,17 @@ function scoreVideoFile(f, identifier) {
   const size = parseInt(f?.size, 10) || 0;
   let score = 1000;
 
-  // Prefer standard web MP4
-  if (name.endsWith('.mp4')) score += 300;
-  if (name.endsWith('.ia.mp4')) score += 260; // Official Archive.org web-optimized derivative
-  if (name.endsWith('.m4v')) score += 180;
-  if (name.endsWith('.webm')) score += 150;
+  // Prefer original standard web MP4 over derivative
+  if (name.endsWith('.mp4') && !name.endsWith('.ia.mp4')) score += 400;
+  if (name.endsWith('.ia.mp4')) score += 180; // Secondary fallback
+  if (name.endsWith('.m4v')) score += 200;
+  if (name.endsWith('.webm')) score += 160;
 
   // Format bonuses
-  if (format.includes('h.264') || format.includes('h.264 hd')) score += 200;
+  if (format.includes('h.264') || format.includes('h.264 hd')) {
+    score += name.endsWith('.ia.mp4') ? 50 : 200;
+  }
+  if (format.includes('mpeg4')) score += 200;
   if (format.includes('512kb')) score += 150;
   if (format.includes('webm')) score += 120;
 
@@ -423,7 +426,22 @@ export async function resolvePlayableItem(inputIdentifier) {
       a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
     );
 
-    const availableFiles = sortedCandidates.map((f) => ({
+    // Deduplicate candidate files for episode listing:
+    // If both 'episode.mp4' and 'episode.ia.mp4' exist, keep 'episode.mp4'
+    const deduplicatedCandidates = sortedCandidates.filter((f) => {
+      const lower = f.name.toLowerCase();
+      if (lower.endsWith('.ia.mp4')) {
+        const baseName = lower.slice(0, -7); // strip .ia.mp4
+        const hasBase = candidateFiles.some((cf) => {
+          const cfLower = cf.name.toLowerCase();
+          return cfLower === baseName + '.mp4' || cfLower === baseName + '.m4v';
+        });
+        if (hasBase) return false; // Skip redundant .ia derivative row!
+      }
+      return true;
+    });
+
+    const availableFiles = deduplicatedCandidates.map((f) => ({
       name: f.name,
       displayName: cleanFileName(f.name, identifier),
       format: f.format || 'Video',
@@ -491,9 +509,10 @@ function cacheItem(identifier, item) {
 }
 
 function cleanFileName(filename, identifier) {
-  let name = filename.replace(/\.(mp4|webm|ogv|m4v|mov|mkv)$/i, '');
+  let name = filename.replace(/\.(ia\.mp4|mp4|webm|ogv|m4v|mov|mkv|avi|flv)$/i, '');
+  name = name.replace(/\.ia$/i, '');
   name = name.replace(new RegExp(`^${identifier}[_\\-\\.]?`, 'i'), '');
-  name = name.replace(/[-_]/g, ' ').trim();
+  name = name.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
   return name || filename;
 }
 
