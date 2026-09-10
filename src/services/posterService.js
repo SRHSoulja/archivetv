@@ -60,6 +60,45 @@ const CURATED_POSTERS = {
   'A_Star_Is_Born': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/A_Star_Is_Born_%281937_poster%29.jpg/500px-A_Star_Is_Born_%281937_poster%29.jpg',
 };
 
+// Viewer-supplied art. Kept in its own key so it survives POSTER_CACHE_KEY
+// version bumps (those exist to flush bad automatic results, which is exactly
+// what a deliberate override is not) and always outranks lookup and curation.
+const OVERRIDE_KEY = 'archivetv_poster_overrides_v1';
+
+function loadOverrides() {
+  try {
+    return JSON.parse(localStorage.getItem(OVERRIDE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+let posterOverrides = loadOverrides();
+
+export function getPosterOverride(identifier) {
+  return identifier ? posterOverrides[identifier] || null : null;
+}
+
+export function setPosterOverride(identifier, url) {
+  if (!identifier || !url) return;
+  posterOverrides = { ...posterOverrides, [identifier]: url };
+  try {
+    localStorage.setItem(OVERRIDE_KEY, JSON.stringify(posterOverrides));
+  } catch {}
+  posterMemoryCache.set(identifier, url);
+}
+
+export function clearPosterOverride(identifier) {
+  if (!identifier) return;
+  const next = { ...posterOverrides };
+  delete next[identifier];
+  posterOverrides = next;
+  try {
+    localStorage.setItem(OVERRIDE_KEY, JSON.stringify(next));
+  } catch {}
+  posterMemoryCache.delete(identifier);
+}
+
 // Initialize persistent storage cache
 function loadLocalPosterCache() {
   try {
@@ -125,6 +164,8 @@ export function cleanTitleForSearch(title) {
  * Synchronously retrieves a cached poster URL if already known or memory-cached
  */
 export function getCachedPosterSync(title, year = '', identifier = '') {
+  if (identifier && posterOverrides[identifier]) return posterOverrides[identifier];
+
   const cacheKey = identifier || `${title}_${year}`;
   if (posterMemoryCache.has(cacheKey)) return posterMemoryCache.get(cacheKey);
   if (identifier && CURATED_POSTERS[identifier]) return CURATED_POSTERS[identifier];
@@ -160,7 +201,7 @@ export function getCachedPosterSync(title, year = '', identifier = '') {
  */
 export async function fetchTheatricalPoster(title, year = '', identifier = '') {
   const cacheKey = identifier || `${title}_${year}`;
-  
+
   const instant = getCachedPosterSync(title, year, identifier);
   if (instant) {
     saveLocalPosterCache(cacheKey, instant);

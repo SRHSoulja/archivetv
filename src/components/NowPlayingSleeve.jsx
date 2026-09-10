@@ -2,6 +2,8 @@ import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Film, Radio } from 'lucide-react';
 import { fetchTheatricalPoster, getCachedPosterSync } from '../services/posterService';
 import { fetchFullDescription } from '../services/archiveApi';
+import { ImagePlus } from 'lucide-react';
+import ArtOverridePanel from './ArtOverridePanel';
 
 function formatRuntime(seconds) {
   const total = Math.round(Number(seconds) || 0);
@@ -37,6 +39,7 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
   const [fullBlurb, setFullBlurb] = useState('');
   const [artFailed, setArtFailed] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [artToolOpen, setArtToolOpen] = useState(false);
   const [clipped, setClipped] = useState(false);
   const blurbRef = useRef(null);
 
@@ -46,6 +49,7 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
     let alive = true;
     setArtFailed(false);
     setExpanded(false);
+    setArtToolOpen(false);
     const instant = getCachedPosterSync(title, year, identifier);
     setPoster(instant || null);
     if (instant || !identifier) return undefined;
@@ -146,6 +150,7 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
       <div
         ref={panelRef}
         style={{
+          position: 'relative',
           width: `${sleeveWidth}px`,
           maxHeight: bandH ? `${bandH}px` : undefined,
         }}
@@ -156,11 +161,24 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
             <Film className="w-3.5 h-3.5 text-amber-400" />
             <span className="font-pixel text-[11px] text-zinc-400 tracking-wider">NOW PLAYING</span>
           </div>
-          {currentChannel?.callsign && (
-            <span className="font-pixel text-[9px] text-amber-500/90 tracking-wider">
-              {currentChannel.callsign}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {currentChannel?.callsign && (
+              <span className="font-pixel text-[9px] text-amber-500/90 tracking-wider">
+                {currentChannel.callsign}
+              </span>
+            )}
+            {identifier && (
+              <button
+                type="button"
+                onClick={() => setArtToolOpen(true)}
+                title="Suggest better box art"
+                aria-label="Suggest better box art"
+                className="text-zinc-600 hover:text-amber-400 transition-colors cursor-pointer"
+              >
+                <ImagePlus className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Box art, presented as a tape sleeve */}
@@ -249,6 +267,19 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
           >
             {expanded ? '- SHOW LESS' : '+ READ MORE'}
           </button>
+        )}
+
+        {artToolOpen && (
+          <ArtOverridePanel
+            identifier={identifier}
+            title={title}
+            year={year}
+            onClose={() => setArtToolOpen(false)}
+            onApplied={(next) => {
+              setArtFailed(false);
+              setPoster(next);
+            }}
+          />
         )}
       </div>
     </div>
