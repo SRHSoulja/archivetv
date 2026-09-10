@@ -62,12 +62,14 @@ export default function ChannelCustomizerModal({
   const [inspectedItem, setInspectedItem] = useState(null);
   const [inspectError, setInspectError] = useState(null);
   const [targetChannelId, setTargetChannelId] = useState('');
-  const [addAllEpisodes, setAddAllEpisodes] = useState(true);
   const [dropSuccessMessage, setDropSuccessMessage] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+  const [episodeFilter, setEpisodeFilter] = useState('');
+  const [selectedEpisodes, setSelectedEpisodes] = useState(new Set());
 
   // Search tab state
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchSort, setSearchSort] = useState('relevance');
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState(null);
@@ -153,7 +155,7 @@ export default function ChannelCustomizerModal({
     }
   }, [isOpen, initialDroppedUrl]);
 
-  const handleInspect = async (inputToInspect = null) => {
+  const handleInspect = async (inputToInspect = null, prefillFilter = '') => {
     const target = inputToInspect !== null ? inputToInspect : urlInput;
     if (!target.trim()) return;
 
@@ -166,6 +168,23 @@ export default function ChannelCustomizerModal({
       const resolved = await resolvePlayableItem(target.trim());
       setInspectedItem(resolved);
       audio.playSwitch(true);
+
+      const files = resolved?.availableFiles || [];
+      const filterToApply = prefillFilter || episodeFilter || searchQuery.trim();
+      if (filterToApply) {
+        setEpisodeFilter(filterToApply);
+        const matchSet = new Set();
+        files.forEach((f, idx) => {
+          const name = (f.displayName || f.name || '').toLowerCase();
+          if (name.includes(filterToApply.toLowerCase())) {
+            matchSet.add(idx);
+          }
+        });
+        setSelectedEpisodes(matchSet.size > 0 ? matchSet : new Set(files.map((_, i) => i)));
+      } else {
+        setEpisodeFilter('');
+        setSelectedEpisodes(new Set(files.map((_, i) => i)));
+      }
     } catch (err) {
       setInspectError(err.message || 'Could not resolve playable media from this Archive identifier or URL.');
     } finally {
@@ -173,7 +192,11 @@ export default function ChannelCustomizerModal({
     }
   };
 
-  const handleSearchArchive = async (q = searchQuery, coll = searchCollection) => {
+  const handleSearchArchive = async (
+    q = searchQuery,
+    coll = searchCollection,
+    sortMode = searchSort
+  ) => {
     const term = (q !== undefined ? q : searchQuery).trim();
     if (!term && !coll) return;
 
@@ -181,7 +204,11 @@ export default function ChannelCustomizerModal({
     setSearchLoading(true);
     setSearchError(null);
     try {
-      const res = await searchArchive(term, { collection: coll, rows: 24 });
+      const res = await searchArchive(term, {
+        collection: coll,
+        sort: sortMode,
+        rows: 30,
+      });
       setSearchResults(res.items || []);
       if ((res.items || []).length === 0) {
         setSearchError('No archive broadcasts found matching this search.');
@@ -268,7 +295,7 @@ export default function ChannelCustomizerModal({
   const handleInspectSearchResult = (item) => {
     setUrlInput(item.identifier);
     setActiveTab('drop');
-    handleInspect(item.identifier);
+    handleInspect(item.identifier, searchQuery.trim());
   };
 
   const handleCreateChannel = (e) => {
@@ -293,15 +320,36 @@ export default function ChannelCustomizerModal({
     if (onChannelsUpdated) onChannelsUpdated();
   };
 
-  const handleDropIntoChannel = () => {
+  const handleDropIntoChannel = (onlySingleEpisode = null) => {
     if (!inspectedItem) return;
 
     audio.playKnobClick();
     let programsToAdd = [];
 
-    if (addAllEpisodes && inspectedItem.availableFiles && inspectedItem.availableFiles.length > 1) {
-      // Add each file as an episode program
-      programsToAdd = inspectedItem.availableFiles.map((file, idx) =>
+    if (onlySingleEpisode) {
+      // Add just this single specific episode
+      programsToAdd = [
+        sanitizeProgram({
+          identifier: inspectedItem.identifier,
+          title: `${inspectedItem.title}: ${onlySingleEpisode.displayName || onlySingleEpisode.name}`,
+          seriesTitle: inspectedItem.title,
+          year: inspectedItem.year || 'Vintage',
+          description: `Episode: ${onlySingleEpisode.displayName || onlySingleEpisode.name}. ${inspectedItem.description || ''}`,
+          videoFile: onlySingleEpisode.name,
+          videoUrl: onlySingleEpisode.videoUrl,
+          embedUrl: inspectedItem.embedUrl,
+          thumbnailUrl: inspectedItem.thumbnailUrl,
+          duration: onlySingleEpisode.duration || inspectedItem.duration || 1800,
+          size: onlySingleEpisode.size || 0,
+        }),
+      ];
+    } else if (inspectedItem.availableFiles && inspectedItem.availableFiles.length > 1) {
+      // Use selected episodes from the episode explorer
+      const filesToInclude = inspectedItem.availableFiles.filter((_, idx) =>
+        selectedEpisodes.size > 0 ? selectedEpisodes.has(idx) : true
+      );
+
+      programsToAdd = filesToInclude.map((file, idx) =>
         sanitizeProgram({
           identifier: inspectedItem.identifier,
           title: `${inspectedItem.title}: ${file.displayName}`,
@@ -320,6 +368,12 @@ export default function ChannelCustomizerModal({
       programsToAdd = [sanitizeProgram(inspectedItem)];
     }
 
+    if (programsToAdd.length === 0) {
+      alert('No episodes selected. Please select at least one episode to add.');
+      return;
+    }
+
+    let chanName = '';
     if (targetChannelId === 'NEW_CHANNEL' || customChannels.length === 0) {
       // Create new channel with this program
       const nextList = saveCustomChannel({
@@ -330,23 +384,31 @@ export default function ChannelCustomizerModal({
         programs: programsToAdd,
       });
       setCustomChannels(nextList);
+      const createdChan = nextList[nextList.length - 1];
+      if (createdChan) {
+        setTargetChannelId(createdChan.id);
+        setSelectedChannelId(createdChan.id);
+        chanName = `CH ${createdChan.number} (${createdChan.name})`;
+      }
     } else {
       // Add to existing custom channel
       const nextList = addProgramToChannel(targetChannelId, programsToAdd);
       setCustomChannels(nextList);
+      const chan = nextList.find((c) => c.id === targetChannelId);
+      chanName = chan ? `CH ${chan.number}` : 'Channel';
     }
 
     setAllChannels(getChannelLineup());
     if (onChannelsUpdated) onChannelsUpdated();
 
     setDropSuccessMessage(
-      `Added ${programsToAdd.length} broadcast item${programsToAdd.length > 1 ? 's' : ''} to channel dial!`
+      `✓ Added ${programsToAdd.length} broadcast item${programsToAdd.length > 1 ? 's' : ''} to ${chanName || 'dial'}!`
     );
     setTimeout(() => {
       setDropSuccessMessage(null);
       setUrlInput('');
       setInspectedItem(null);
-    }, 2800);
+    }, 3500);
   };
 
   const handleExportLineup = () => {
@@ -918,7 +980,7 @@ export default function ChannelCustomizerModal({
                   value={searchCollection}
                   onChange={(e) => {
                     setSearchCollection(e.target.value);
-                    handleSearchArchive(searchQuery, e.target.value);
+                    handleSearchArchive(searchQuery, e.target.value, searchSort);
                   }}
                   className="w-full sm:w-auto bg-black/70 border border-zinc-700 focus:border-teal-400 rounded-xl px-3 py-2 text-xs text-zinc-300 font-mono cursor-pointer"
                 >
@@ -927,6 +989,22 @@ export default function ChannelCustomizerModal({
                       {col.name}
                     </option>
                   ))}
+                </select>
+
+                <select
+                  value={searchSort}
+                  onChange={(e) => {
+                    setSearchSort(e.target.value);
+                    handleSearchArchive(searchQuery, searchCollection, e.target.value);
+                  }}
+                  className="w-full sm:w-auto bg-black/70 border border-zinc-700 focus:border-teal-400 rounded-xl px-3 py-2 text-xs text-amber-300 font-mono cursor-pointer"
+                  title="Search ranking and sort order"
+                >
+                  <option value="relevance">⭐ Best Match (Title)</option>
+                  <option value="downloads desc">Most Popular</option>
+                  <option value="year desc">Year (Newest)</option>
+                  <option value="year asc">Year (Oldest)</option>
+                  <option value="titleSorter asc">Title (A–Z)</option>
                 </select>
 
                 <button
@@ -1020,6 +1098,30 @@ export default function ChannelCustomizerModal({
                           </div>
                         </div>
 
+                        {/* Match Badges */}
+                        <div className="flex flex-wrap items-center gap-1 mb-1.5">
+                          {item.matchType === 'exact_title' && (
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-950/90 border border-emerald-500 text-emerald-300 font-pixel text-[9px] shadow-sm">
+                              🎯 EXACT TITLE MATCH
+                            </span>
+                          )}
+                          {(item.matchType === 'title_starts' || item.matchType === 'title_contains') && (
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-600/80 text-emerald-300 font-pixel text-[9px]">
+                              📺 TITLE MATCH
+                            </span>
+                          )}
+                          {item.matchType === 'collection_mention' && (
+                            <span className="px-1.5 py-0.5 rounded bg-amber-950/90 border border-amber-500 text-amber-300 font-pixel text-[9px]">
+                              📁 IN ANTHOLOGY / EPISODES
+                            </span>
+                          )}
+                          {item.filesCount > 1 && (
+                            <span className="px-1.5 py-0.5 rounded bg-blue-950/80 border border-blue-500/80 text-blue-300 font-pixel text-[9px]">
+                              📺 {item.filesCount} EPISODES
+                            </span>
+                          )}
+                        </div>
+
                         {/* Info */}
                         <h4 className="font-pixel text-sm font-bold text-white group-hover:text-teal-300 line-clamp-1">
                           {item.title}
@@ -1027,6 +1129,12 @@ export default function ChannelCustomizerModal({
                         <p className="text-[11px] font-mono text-zinc-400 line-clamp-2 mt-1">
                           {item.description || 'Archive.org broadcast media item.'}
                         </p>
+
+                        {item.descriptionSnippet && (
+                          <div className="text-[10px] font-mono text-amber-300/90 bg-black/60 p-2 rounded-lg border border-amber-500/40 mt-1.5 italic leading-tight">
+                            <span className="text-amber-400 not-italic font-bold">MATCH: </span>"{item.descriptionSnippet}"
+                          </div>
+                        )}
                       </div>
 
                       {/* Action buttons */}
@@ -1214,17 +1322,122 @@ export default function ChannelCustomizerModal({
                   </div>
 
                   {inspectedItem.availableFiles && inspectedItem.availableFiles.length > 1 && (
-                    <div className="flex items-center gap-2 bg-black/50 p-2 rounded-xl border border-zinc-800">
-                      <input
-                        type="checkbox"
-                        id="addAllCheck"
-                        checked={addAllEpisodes}
-                        onChange={(e) => setAddAllEpisodes(e.target.checked)}
-                        className="w-4 h-4 text-teal-500 rounded cursor-pointer"
-                      />
-                      <label htmlFor="addAllCheck" className="text-xs font-pixel text-zinc-300 cursor-pointer">
-                        ADD ALL {inspectedItem.availableFiles.length} EPISODES AS COMPLETE SERIES
-                      </label>
+                    <div className="pt-4 border-t border-zinc-800 space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="bg-blue-950 text-blue-300 border border-blue-600/60 px-2.5 py-1 rounded font-pixel text-xs flex items-center gap-1.5">
+                            <Layers className="w-3.5 h-3.5" />
+                            <span>COLLECTION / EPISODES ({inspectedItem.availableFiles.length} TOTAL)</span>
+                          </span>
+                          <span className="text-xs font-mono text-zinc-400">
+                            {selectedEpisodes.size} SELECTED
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const matchIndices = new Set();
+                              inspectedItem.availableFiles.forEach((f, i) => {
+                                const name = (f.displayName || f.name || '').toLowerCase();
+                                if (!episodeFilter || name.includes(episodeFilter.toLowerCase())) {
+                                  matchIndices.add(i);
+                                }
+                              });
+                              setSelectedEpisodes(matchIndices);
+                            }}
+                            className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-teal-300 font-pixel text-[10px] border border-zinc-700 cursor-pointer"
+                          >
+                            SELECT FILTERED
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedEpisodes(new Set(inspectedItem.availableFiles.map((_, i) => i)))}
+                            className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-pixel text-[10px] border border-zinc-700 cursor-pointer"
+                          >
+                            ALL
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedEpisodes(new Set())}
+                            className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-400 font-pixel text-[10px] border border-zinc-700 cursor-pointer"
+                          >
+                            NONE
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Episode Search / Filter Input */}
+                      <div className="relative">
+                        <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          value={episodeFilter}
+                          onChange={(e) => setEpisodeFilter(e.target.value)}
+                          placeholder="Filter episodes/shows in this collection (e.g. 'Living Dead', 'Pilot', 'Episode 1')..."
+                          className="w-full bg-black/80 border border-zinc-700 focus:border-teal-400 rounded-xl pl-9 pr-3 py-2 text-xs text-white font-mono placeholder-zinc-500"
+                        />
+                      </div>
+
+                      {/* Episode Checkbox List */}
+                      <div className="max-h-52 overflow-y-auto retro-scroll space-y-1.5 pr-1 bg-black/40 p-2 rounded-xl border border-zinc-800">
+                        {inspectedItem.availableFiles
+                          .map((f, idx) => ({ ...f, originalIndex: idx }))
+                          .filter((f) => {
+                            if (!episodeFilter.trim()) return true;
+                            const name = (f.displayName || f.name || '').toLowerCase();
+                            return name.includes(episodeFilter.toLowerCase().trim());
+                          })
+                          .map((file) => {
+                            const isSelected = selectedEpisodes.has(file.originalIndex);
+                            return (
+                              <div
+                                key={file.name || file.originalIndex}
+                                className={`flex items-center justify-between p-2 rounded-lg border text-xs transition ${
+                                  isSelected
+                                    ? 'bg-teal-950/40 border-teal-600/70 text-white'
+                                    : 'bg-[#14131c] border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                                }`}
+                              >
+                                <label className="flex items-center gap-2.5 min-w-0 cursor-pointer flex-1">
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={(e) => {
+                                      const next = new Set(selectedEpisodes);
+                                      if (e.target.checked) {
+                                        next.add(file.originalIndex);
+                                      } else {
+                                        next.delete(file.originalIndex);
+                                      }
+                                      setSelectedEpisodes(next);
+                                    }}
+                                    className="w-3.5 h-3.5 text-teal-500 rounded cursor-pointer shrink-0"
+                                  />
+                                  <span className="font-mono text-zinc-500 shrink-0">#{file.originalIndex + 1}</span>
+                                  <span className="font-bold truncate text-zinc-200">
+                                    {file.displayName || file.name}
+                                  </span>
+                                  {file.duration > 0 && (
+                                    <span className="font-mono text-[10px] text-zinc-500 shrink-0">
+                                      ({Math.round(file.duration / 60)}m)
+                                    </span>
+                                  )}
+                                </label>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleDropIntoChannel(file)}
+                                  className="px-2 py-1 bg-zinc-800 hover:bg-teal-600 hover:text-black text-teal-300 rounded font-pixel text-[9px] cursor-pointer shrink-0 transition ml-2"
+                                  title="Add only this episode to the channel"
+                                >
+                                  + ONLY THIS
+                                </button>
+                              </div>
+                            );
+                          })}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1232,11 +1445,15 @@ export default function ChannelCustomizerModal({
                 {/* Action Button */}
                 <div className="pt-2 flex justify-end">
                   <button
-                    onClick={handleDropIntoChannel}
+                    onClick={() => handleDropIntoChannel()}
                     className="px-6 py-3 bg-teal-500 hover:bg-teal-400 text-black font-pixel text-xs font-bold rounded-xl cursor-pointer shadow-lg transition active:scale-95 flex items-center gap-2"
                   >
                     <Tv className="w-4 h-4" />
-                    <span>DROP INTO CHANNEL DIAL</span>
+                    <span>
+                      {selectedEpisodes.size > 0
+                        ? `DROP ${selectedEpisodes.size} BROADCAST${selectedEpisodes.size > 1 ? 'S' : ''} INTO DIAL`
+                        : 'DROP INTO CHANNEL DIAL'}
+                    </span>
                   </button>
                 </div>
               </div>

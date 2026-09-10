@@ -45,7 +45,7 @@ export default function ArchiveSearchModal({
   const [copiedId, setCopiedId] = useState(null);
 
   // Filters
-  const [sortBy, setSortBy] = useState('downloads desc');
+  const [sortBy, setSortBy] = useState('relevance');
   const [selectedCollection, setSelectedCollection] = useState('');
   const [selectedDecade, setSelectedDecade] = useState('');
   const [durationCategory, setDurationCategory] = useState('all');
@@ -364,10 +364,11 @@ export default function ArchiveSearchModal({
                     }}
                     className="bg-transparent text-amber-300 focus:outline-none cursor-pointer"
                   >
+                    <option value="relevance">⭐ Best Match & Title (Recommended)</option>
                     <option value="downloads desc">Most Popular (Downloads)</option>
                     <option value="date desc">Recently Uploaded</option>
-                    <option value="year asc">Release Year (Oldest First)</option>
                     <option value="year desc">Release Year (Newest First)</option>
+                    <option value="year asc">Release Year (Oldest First)</option>
                     <option value="titleSorter asc">Title (A–Z)</option>
                   </select>
                 </div>
@@ -680,6 +681,29 @@ export default function ArchiveSearchModal({
                             </div>
                           </div>
 
+                          <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                            {item.matchType === 'exact_title' && (
+                              <span className="px-1.5 py-0.5 rounded bg-emerald-950/90 border border-emerald-500 text-emerald-300 font-pixel text-[9px] shadow-sm">
+                                🎯 EXACT TITLE MATCH
+                              </span>
+                            )}
+                            {(item.matchType === 'title_starts' || item.matchType === 'title_contains') && (
+                              <span className="px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-600/80 text-emerald-300 font-pixel text-[9px]">
+                                📺 TITLE MATCH
+                              </span>
+                            )}
+                            {item.matchType === 'collection_mention' && (
+                              <span className="px-1.5 py-0.5 rounded bg-amber-950/90 border border-amber-500 text-amber-300 font-pixel text-[9px]">
+                                📁 IN ANTHOLOGY / EPISODES
+                              </span>
+                            )}
+                            {item.filesCount > 1 && (
+                              <span className="px-1.5 py-0.5 rounded bg-blue-950/80 border border-blue-500/80 text-blue-300 font-pixel text-[9px]">
+                                📺 {item.filesCount} EPISODES
+                              </span>
+                            )}
+                          </div>
+
                           <div className="flex items-center justify-between text-[11px] font-pixel text-amber-500 mb-1">
                             <span>YEAR: {item.year}</span>
                             <span className="truncate max-w-[120px] text-zinc-400 font-mono">
@@ -694,6 +718,12 @@ export default function ArchiveSearchModal({
                           <p className="text-xs text-zinc-400 line-clamp-2 mt-1 leading-relaxed">
                             {item.description || 'Public domain broadcast material from the Internet Archive.'}
                           </p>
+
+                          {item.descriptionSnippet && (
+                            <div className="text-[10px] font-mono text-amber-200/90 bg-black/60 p-2 rounded-lg border border-amber-500/40 mt-2 italic leading-tight">
+                              <span className="text-amber-400 not-italic font-bold">MATCH: </span>"{item.descriptionSnippet}"
+                            </div>
+                          )}
                         </div>
 
                         <div className="grid grid-cols-3 gap-1.5 mt-3 pt-2 border-t border-zinc-800">

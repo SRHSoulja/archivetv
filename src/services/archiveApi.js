@@ -44,8 +44,8 @@ export function extractIdentifier(input) {
  */
 export async function searchArchive(query, options = {}) {
   const {
-    rows = 24,
-    sort = 'downloads desc',
+    rows = 30,
+    sort = 'relevance',
     page = 1,
     collection = '',
     decade = '',
@@ -68,11 +68,15 @@ export async function searchArchive(query, options = {}) {
             title: resolved.title,
             year: resolved.year,
             description: resolved.description,
+            descriptionSnippet: '',
             downloads: resolved.downloads || 99999,
             creator: resolved.creator || 'Archive Item',
             thumbnailUrl: resolved.thumbnailUrl,
             directResolved: resolved,
             availableFiles: resolved.availableFiles || [],
+            matchType: 'exact_title',
+            score: 99999,
+            filesCount: (resolved.availableFiles || []).length || 1,
           };
           return { total: 1, items: [directItem] };
         }
@@ -82,7 +86,7 @@ export async function searchArchive(query, options = {}) {
     }
   }
 
-  // 2. Build Solr Query
+  // 2. Build Intelligent Solr Query
   const queryParts = ['(mediatype:(movies) OR mediatype:(video))'];
 
   if (collection) {
@@ -95,29 +99,113 @@ export async function searchArchive(query, options = {}) {
     queryParts.push(`year:[${startYear} TO ${endYear}]`);
   }
 
+  let cleanKeywords = [];
   if (raw) {
-    const cleanQuery = raw.replace(/["[\]^~:]/g, ' ').trim();
-    if (cleanQuery) {
-      queryParts.push(
-        `(title:(*${cleanQuery}*) OR title:(${cleanQuery}) OR subject:(${cleanQuery}) OR description:(${cleanQuery}) OR (${cleanQuery}))`
-      );
-    }
+    const clean = raw.replace(/["[\]^~:()]/g, ' ').replace(/\s+/g, ' ').trim();
+    const stopWords = new Set([
+      'of', 'the', 'a', 'an', 'in', 'on', 'and', 'or', 'to', 'for', 'with', 'at', 'by', 'from',
+    ]);
+    const allWords = clean.split(' ').filter(Boolean);
+    cleanKeywords = allWords.filter((w) => !stopWords.has(w.toLowerCase()));
+    if (cleanKeywords.length === 0) cleanKeywords = allWords;
+
+    // Targeted query structure:
+    // 1. Quoted exact phrase in title
+    // 2. All significant words in title
+    // 3. Quoted phrase in description or subject
+    // 4. Identifier keyword search
+    const titleAndWords = cleanKeywords.map((w) => `title:${w}`).join(' AND ');
+    queryParts.push(
+      `(title:"${clean}" OR (${titleAndWords}) OR description:"${clean}" OR subject:"${clean}" OR identifier:*${allWords.join('_')}*)`
+    );
   }
 
   const finalQuery = queryParts.join(' AND ');
+  const solrSort = sort === 'relevance' || !sort ? 'downloads desc' : sort;
 
   try {
-    const res = await executeSearch(finalQuery, rows, sort, page);
-    let items = res.docs.map((doc) => ({
-      identifier: doc.identifier,
-      title: doc.title || doc.identifier.replace(/[-_]/g, ' '),
-      year: doc.year || 'Vintage',
-      description: cleanDescription(doc.description),
-      downloads: doc.downloads || 0,
-      creator: doc.creator || 'Archive Contributor',
-      thumbnailUrl: `https://archive.org/services/img/${doc.identifier}`,
-      collection: doc.collection ? (Array.isArray(doc.collection) ? doc.collection[0] : doc.collection) : '',
-    }));
+    const res = await executeSearch(finalQuery, rows, solrSort, page);
+    const qLower = raw.toLowerCase().trim();
+
+    let items = res.docs.map((doc) => {
+      const tLower = (doc.title || doc.identifier || '').toLowerCase();
+      const rawDesc = Array.isArray(doc.description) ? doc.description.join(' ') : (doc.description || '');
+      const cleanDescText = rawDesc.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+      const descLower = cleanDescText.toLowerCase();
+
+      // Determine match quality & calculate relevance score
+      let score = 0;
+      let matchType = 'collection';
+
+      if (qLower) {
+        if (tLower === qLower) {
+          score += 10000;
+          matchType = 'exact_title';
+        } else if (tLower.startsWith(qLower)) {
+          score += 5000;
+          matchType = 'title_starts';
+        } else if (tLower.includes(qLower)) {
+          score += 3000;
+          matchType = 'title_contains';
+        } else if (
+          cleanKeywords.length > 0 &&
+          cleanKeywords.every((w) => tLower.includes(w.toLowerCase()))
+        ) {
+          score += 1000;
+          matchType = 'title_words';
+        } else if (descLower.includes(qLower)) {
+          score += 200;
+          matchType = 'collection_mention';
+        } else {
+          score += 50;
+        }
+
+        // Add logarithmic download factor to order within the same tier
+        score += Math.log10((doc.downloads || 1) + 1) * 10;
+      } else {
+        score = doc.downloads || 0;
+      }
+
+      // Extract matching snippet if matched in description/episodes
+      let snippet = '';
+      if (qLower && (matchType === 'collection_mention' || matchType === 'collection')) {
+        const idx = descLower.indexOf(qLower);
+        if (idx !== -1) {
+          const start = Math.max(0, idx - 40);
+          const end = Math.min(cleanDescText.length, idx + qLower.length + 65);
+          snippet =
+            (start > 0 ? '...' : '') +
+            cleanDescText.slice(start, end).trim() +
+            (end < cleanDescText.length ? '...' : '');
+        }
+      }
+
+      const filesCount = parseInt(doc.files_count, 10) || 1;
+
+      return {
+        identifier: doc.identifier,
+        title: doc.title || doc.identifier.replace(/[-_]/g, ' '),
+        year: doc.year || 'Vintage',
+        description: cleanDescription(doc.description),
+        descriptionSnippet: snippet,
+        downloads: doc.downloads || 0,
+        creator: doc.creator || 'Archive Contributor',
+        thumbnailUrl: `https://archive.org/services/img/${doc.identifier}`,
+        collection: doc.collection
+          ? Array.isArray(doc.collection)
+            ? doc.collection[0]
+            : doc.collection
+          : '',
+        matchType,
+        score,
+        filesCount,
+      };
+    });
+
+    // If sorting by relevance or default, sort items by calculated score
+    if (!sort || sort === 'relevance') {
+      items.sort((a, b) => b.score - a.score);
+    }
 
     if (durationCategory && durationCategory !== 'all') {
       items = items.filter((item) => {
@@ -140,15 +228,20 @@ export async function searchArchive(query, options = {}) {
 async function executeSearch(q, rows, sort, page) {
   const params = new URLSearchParams({
     q,
-    'fl[]': 'identifier,title,year,description,downloads,creator,mediatype,collection',
-    'sort[]': sort,
+    'fl[]': 'identifier,title,year,description,downloads,creator,mediatype,collection,files_count',
     rows: String(rows),
     page: String(page),
     output: 'json',
   });
 
+  if (sort && sort !== 'relevance') {
+    params.append('sort[]', sort);
+  } else {
+    params.append('sort[]', 'downloads desc');
+  }
+
   const url = `https://archive.org/advancedsearch.php?${params.toString()}`;
-  
+
   // 12s timeout controller
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 12000);
