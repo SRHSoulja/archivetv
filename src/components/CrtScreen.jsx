@@ -258,7 +258,6 @@ const CrtScreen = forwardRef(function CrtScreen(
         setEmbedPlaying(true);
         onTimeUpdateReportRef.current?.(0, duration || currentProgram?.duration || 3600, true);
       }
-      if (onRestartProgram) onRestartProgram();
     },
   }));
 

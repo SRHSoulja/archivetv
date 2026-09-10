@@ -107,7 +107,6 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
     },
     restart: () => {
       crtRef.current?.restart();
-      if (onRestartProgram) onRestartProgram();
     },
     toggleFullscreen: () => {
       crtRef.current?.toggleFullscreen();
@@ -177,9 +176,11 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
   };
 
   const handleRestart = () => {
-    if (crtRef.current) {
-      crtRef.current.restart();
+    if (onRestartProgram) {
+      onRestartProgram();
+      return;
     }
+    crtRef.current?.restart();
   };
 
   const currentChNum = parseInt(currentChannel?.number || '2', 10);
