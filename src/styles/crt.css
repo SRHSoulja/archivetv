@@ -1,0 +1,206 @@
+/* CRT Television Visual Effects and Shaders */
+
+.crt-bezel-shadow {
+  box-shadow: 
+    inset 0 0 80px rgba(0, 0, 0, 0.95),
+    inset 0 0 25px rgba(0, 0, 0, 0.9),
+    0 0 15px rgba(0, 0, 0, 0.8);
+}
+
+.crt-glass-reflection {
+  background: radial-gradient(
+    ellipse 80% 50% at 50% 20%,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 60%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+  pointer-events: none;
+}
+
+.crt-scanlines {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.4) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+}
+
+.crt-scanlines-heavy {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.65) 50%
+  );
+  background-size: 100% 3px;
+  pointer-events: none;
+}
+
+.crt-rgb-mask {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.06),
+    rgba(0, 255, 0, 0.04),
+    rgba(0, 0, 255, 0.06)
+  );
+  background-size: 3px 100%;
+  pointer-events: none;
+}
+
+/* CRT Screen Curvature */
+.crt-curved {
+  border-radius: 24px / 32px;
+  overflow: hidden;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.85);
+}
+
+/* Authentic CRT Power Off collapse */
+@keyframes crtTurnOff {
+  0% {
+    transform: scale(1, 1);
+    filter: brightness(1);
+    opacity: 1;
+  }
+  40% {
+    transform: scale(1, 0.003);
+    filter: brightness(3);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(0.005, 0.003);
+    filter: brightness(5);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(0, 0);
+    filter: brightness(10);
+    opacity: 0;
+  }
+}
+
+/* Authentic CRT Power On ignition */
+@keyframes crtTurnOn {
+  0% {
+    transform: scale(0, 0);
+    filter: brightness(10);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(0.005, 0.003);
+    filter: brightness(5);
+    opacity: 0.9;
+  }
+  60% {
+    transform: scale(1, 0.004);
+    filter: brightness(3);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1, 1);
+    filter: brightness(1);
+    opacity: 1;
+  }
+}
+
+.crt-power-off {
+  animation: crtTurnOff 0.45s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.crt-power-on {
+  animation: crtTurnOn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Scanline rolling bar */
+@keyframes rollSync {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(1000%);
+  }
+}
+
+.crt-roll-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 100%
+  );
+  animation: rollSync 10s linear infinite;
+  pointer-events: none;
+}
+
+/* Phosphor green / cyan text glow */
+.text-phosphor-green {
+  color: #33ff66;
+  text-shadow: 0 0 8px rgba(51, 255, 102, 0.7), 0 0 20px rgba(51, 255, 102, 0.3);
+}
+
+.text-phosphor-amber {
+  color: #ffb000;
+  text-shadow: 0 0 8px rgba(255, 176, 0, 0.7), 0 0 20px rgba(255, 176, 0, 0.3);
+}
+
+.text-phosphor-blue {
+  color: #38bdf8;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.7), 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+/* Wood grain texture generator */
+.woodgrain-pattern {
+  background-color: #3d2314;
+  background-image: 
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 12px),
+    linear-gradient(180deg, #4a2d1a 0%, #301a0d 50%, #24140a 100%);
+}
+
+.woodgrain-panel {
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.6),
+    0 10px 25px rgba(0, 0, 0, 0.6);
+}
+
+/* Vintage metal control plate */
+.metal-brushed {
+  background: linear-gradient(180deg, #3a3835 0%, #262422 50%, #1a1816 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), inset 0 -1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Speaker grille mesh */
+.speaker-grille {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.9) 25%, transparent 26%);
+  background-size: 5px 5px;
+  background-color: #1a1816;
+}
+
+/* Knobs */
+.rotary-knob-shadow {
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.7),
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Custom scrollbar for retro guide and tape rack */
+.retro-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.retro-scroll::-webkit-scrollbar-track {
+  background: #111015;
+  border-left: 1px solid #222;
+}
+.retro-scroll::-webkit-scrollbar-thumb {
+  background: #3a3844;
+  border-radius: 4px;
+}
+.retro-scroll::-webkit-scrollbar-thumb:hover {
+  background: #555266;
+}

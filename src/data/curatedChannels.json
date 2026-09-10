@@ -1,0 +1,2918 @@
+[
+  {
+    "id": "ch02",
+    "number": "02",
+    "name": "SATURDAY MORNING TOONS",
+    "callsign": "W-TOON",
+    "badge": "CARTOONS",
+    "themeColor": "#f59e0b",
+    "query": "collection:(animationandcartoons) AND mediatype:(movies)",
+    "description": "Classic Golden Age animation, Popeye, Betty Boop, Superman, and vintage theatrical shorts.",
+    "programs": [
+      {
+        "identifier": "ElephantsDream",
+        "title": "Elephants Dream",
+        "year": "2006",
+        "description": "From <a href=\"http://elephantsdream.org/\" rel=\"ugc nofollow\">the official website</a>:\n\n\"Elephants Dream is the story of two strange characters exploring a capricious and seemingly infinite machine. The elder, Proog, acts as a tour-guide and protector, happily showing off the ...",
+        "videoFile": "ed_1024.mp4",
+        "videoUrl": "https://archive.org/download/ElephantsDream/ed_1024.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/ElephantsDream",
+        "duration": 653,
+        "size": 67835590
+      },
+      {
+        "identifier": "Popeye_forPresident",
+        "title": "Popeye for President",
+        "year": "1956",
+        "description": "Popeye and Bluto are both running for president. They are tied with exactly the same number of votes, but Miss Olive Oyl has yet to cast her ballot. Which candidate will be able to impress her the most and earn her precious vote?",
+        "videoFile": "Popeye_forPresident_512kb.mp4",
+        "videoUrl": "https://archive.org/download/Popeye_forPresident/Popeye_forPresident_512kb.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Popeye_forPresident",
+        "duration": 370,
+        "size": 26989036
+      },
+      {
+        "identifier": "popeye_patriotic_popeye",
+        "title": "Patriotic Popeye",
+        "year": "1957",
+        "description": "Popeye's nephews want to play with fireworks on July 4th, but Popeye tries to dissuade them. They manage to light some off and get into trouble. Popeye saves the day. Animation by Tom Johnson and Frank Endres. Story by Caryl Meyer. Music by Winston Sharples. Produced in 1957.",
+        "videoFile": "popeye_patriotic_popeye_512kb.mp4",
+        "videoUrl": "https://archive.org/download/popeye_patriotic_popeye/popeye_patriotic_popeye_512kb.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/popeye_patriotic_popeye",
+        "duration": 363,
+        "size": 26402792
+      },
+      {
+        "identifier": "Sintel",
+        "title": "Sintel",
+        "year": "2010",
+        "description": "Sintel is an open movie from the Blender Foundation licensed under the Creative Commons Attribution 3.0 license.",
+        "videoFile": "sintel-2048-surround.mp4",
+        "videoUrl": "https://archive.org/download/Sintel/sintel-2048-surround.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Sintel",
+        "duration": 888,
+        "size": 310674005
+      }
+    ]
+  },
+  {
+    "id": "ch03",
+    "number": "03",
+    "name": "THE TWILIGHT & SCI-FI ZONE",
+    "callsign": "W-SCIFI",
+    "badge": "SCI-FI",
+    "themeColor": "#06b6d4",
+    "query": "subject:(sci-fi) AND mediatype:(movies) AND (collection:(SciFi_Horror) OR collection:(feature_films))",
+    "description": "Vintage sci-fi anthologies, 1950s space expeditions, UFO thrillers, and cosmic mystery teleplays.",
+    "programs": [
+      {
+        "identifier": "Cosmos_War_of_the_Planets",
+        "title": "Cosmos: War of the Planets",
+        "year": "1977",
+        "description": "A spaceship intercepts a mysterious message and then crashes on the planet the message is being sent from. There they uncover a force that threatens to take over the Earth.\n\nThere is an AVI of the film <a href=\"http://www.archive.org/details/CosmosWarofthePlanets\" rel=\"ugc nof...",
+        "videoFile": "Cosmos_War_of_the_Planets.mp4",
+        "videoUrl": "https://archive.org/download/Cosmos_War_of_the_Planets/Cosmos_War_of_the_Planets.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Cosmos_War_of_the_Planets",
+        "duration": 5343,
+        "size": 557202578
+      },
+      {
+        "identifier": "teenagers_from_outerspace",
+        "title": "Teenagers from Outer Space",
+        "year": "1959",
+        "description": "A young alien (David Love) falls for a pretty teenage Earth girl (Dawn Anderson) and they team up to try to stop the plans of his invading cohorts.",
+        "videoFile": "Teenagers_from_Outer_Space.mp4",
+        "videoUrl": "https://archive.org/download/teenagers_from_outerspace/Teenagers_from_Outer_Space.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/teenagers_from_outerspace",
+        "duration": 5128,
+        "size": 1046447923
+      },
+      {
+        "identifier": "horror_express_ipod",
+        "title": "Horror Express",
+        "year": "1976",
+        "description": "An English anthropologist (Christopher Lee) has discovered a frozen monster in the frozen wastes of Manchuria which he believes may be the Missing Link. He brings the creature back to Europe aboard a trans-Siberian express, but during the trip the monster thaws out and starts ...",
+        "videoFile": "horror_express.mp4",
+        "videoUrl": "https://archive.org/download/horror_express_ipod/horror_express.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/horror_express_ipod",
+        "duration": 5223,
+        "size": 956190539
+      },
+      {
+        "identifier": "StarWreckInThePirkining",
+        "title": "Star Wreck: In the Pirkining",
+        "year": "2005",
+        "description": "A Finnish culthit that became internationaly known through it's open CC-license.\n\nFrom IMDB:\nThe future looks bleak for Captain Pirk. Originally from the far future, he traveled back to save the world, but was shipwrecked on the 21st century. The world of the past is a dangero...",
+        "videoFile": "StarWreck_512kb.mp4",
+        "videoUrl": "https://archive.org/download/StarWreckInThePirkining/StarWreck_512kb.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/StarWreckInThePirkining",
+        "duration": 6211,
+        "size": 451124058
+      }
+    ]
+  },
+  {
+    "id": "ch04",
+    "number": "04",
+    "name": "THE LONE RANGER (1949)",
+    "callsign": "K-RNGR",
+    "badge": "WESTERN",
+    "themeColor": "#d97706",
+    "query": "theloneranger_201705",
+    "description": "Hi-Yo Silver, Away! The complete 1949 classic Western television series starring Clayton Moore as The Lone Ranger and Jay Silverheels as Tonto.",
+    "programs": [
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: Enter the Lone Ranger",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 1: Enter the Lone Ranger. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e01_EntertheLoneRanger.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1520,
+        "size": 130937929,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: The Lone Ranger Fights On",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 2: The Lone Ranger Fights On. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e02_TheLoneRangerFightsOn.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1455,
+        "size": 114723024,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: The Lone Ranger's Triumph",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 3: The Lone Ranger's Triumph. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e03TheLoneRangersTriumph.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1475,
+        "size": 116838907,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: The Legion of Old Timers",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 4: The Legion of Old Timers. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e04_TheLegionofOldTimers.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1357,
+        "size": 104451638,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: Rustler's Hideout",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 5: Rustler's Hideout. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e05_RustlersHideout.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1367,
+        "size": 104655441,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: War Horse",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 6: War Horse. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e06_Warhorse.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1331,
+        "size": 114263447,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: Pete and Pedro",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 7: Pete and Pedro. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e07_PeteandPedro.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1303,
+        "size": 110513835,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: The Renegades",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 8: The Renegades. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e08_TheRenegades.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1355,
+        "size": 101837793,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: The Tenderfeet",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 9: The Tenderfeet. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e09_TheTenderfeet.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1298,
+        "size": 99564247,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: High Heels",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 10: High Heels. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e10_Highheels.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1296,
+        "size": 102753775,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: Six Gun's Legacy",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 11: Six Gun's Legacy. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e11_SixgunsLegacy.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1303,
+        "size": 83897659,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: Return of the Convict",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 12: Return of the Convict. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e12_Returnoftheconvict.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1307,
+        "size": 76872519,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: Finders Keepers",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 13: Finders Keepers. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e13_finderskeepers.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1302,
+        "size": 73708499,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: The Masked Rider",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 14: The Masked Rider. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e14_themaskedrider.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1307,
+        "size": 74044509,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: Old Joe's Sister",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 15: Old Joe's Sister. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e15_OldJoesSister.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1306,
+        "size": 80409808,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      },
+      {
+        "identifier": "theloneranger_201705",
+        "title": "The Lone Ranger: Cannonball McKay",
+        "seriesTitle": "The Lone Ranger",
+        "year": "1949",
+        "description": "Season 1, Episode 16: Cannonball McKay. Classic 1949 television broadcast starring Clayton Moore as the masked rider of the plains and Jay Silverheels as Tonto.",
+        "videoFile": "s01e16_CanonBallMckay.mp4",
+        "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4",
+        "embedUrl": "https://archive.org/embed/theloneranger_201705?autoplay=1",
+        "thumbnailUrl": "https://archive.org/services/img/theloneranger_201705",
+        "duration": 1297,
+        "size": 77011455,
+        "availableFiles": [
+          {
+            "name": "s01e01_EntertheLoneRanger.mp4",
+            "displayName": "Episode 1: Enter the Lone Ranger",
+            "format": "512Kb MPEG4",
+            "size": 130937929,
+            "duration": 1520,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e01_EntertheLoneRanger.mp4"
+          },
+          {
+            "name": "s01e02_TheLoneRangerFightsOn.mp4",
+            "displayName": "Episode 2: The Lone Ranger Fights On",
+            "format": "512Kb MPEG4",
+            "size": 114723024,
+            "duration": 1455,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e02_TheLoneRangerFightsOn.mp4"
+          },
+          {
+            "name": "s01e03TheLoneRangersTriumph.mp4",
+            "displayName": "Episode 3: The Lone Ranger's Triumph",
+            "format": "512Kb MPEG4",
+            "size": 116838907,
+            "duration": 1475,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e03TheLoneRangersTriumph.mp4"
+          },
+          {
+            "name": "s01e04_TheLegionofOldTimers.mp4",
+            "displayName": "Episode 4: The Legion of Old Timers",
+            "format": "512Kb MPEG4",
+            "size": 104451638,
+            "duration": 1357,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e04_TheLegionofOldTimers.mp4"
+          },
+          {
+            "name": "s01e05_RustlersHideout.mp4",
+            "displayName": "Episode 5: Rustler's Hideout",
+            "format": "512Kb MPEG4",
+            "size": 104655441,
+            "duration": 1367,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e05_RustlersHideout.mp4"
+          },
+          {
+            "name": "s01e06_Warhorse.mp4",
+            "displayName": "Episode 6: War Horse",
+            "format": "512Kb MPEG4",
+            "size": 114263447,
+            "duration": 1331,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e06_Warhorse.mp4"
+          },
+          {
+            "name": "s01e07_PeteandPedro.mp4",
+            "displayName": "Episode 7: Pete and Pedro",
+            "format": "512Kb MPEG4",
+            "size": 110513835,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e07_PeteandPedro.mp4"
+          },
+          {
+            "name": "s01e08_TheRenegades.mp4",
+            "displayName": "Episode 8: The Renegades",
+            "format": "512Kb MPEG4",
+            "size": 101837793,
+            "duration": 1355,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e08_TheRenegades.mp4"
+          },
+          {
+            "name": "s01e09_TheTenderfeet.mp4",
+            "displayName": "Episode 9: The Tenderfeet",
+            "format": "512Kb MPEG4",
+            "size": 99564247,
+            "duration": 1298,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e09_TheTenderfeet.mp4"
+          },
+          {
+            "name": "s01e10_Highheels.mp4",
+            "displayName": "Episode 10: High Heels",
+            "format": "512Kb MPEG4",
+            "size": 102753775,
+            "duration": 1296,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e10_Highheels.mp4"
+          },
+          {
+            "name": "s01e11_SixgunsLegacy.mp4",
+            "displayName": "Episode 11: Six Gun's Legacy",
+            "format": "512Kb MPEG4",
+            "size": 83897659,
+            "duration": 1303,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e11_SixgunsLegacy.mp4"
+          },
+          {
+            "name": "s01e12_Returnoftheconvict.mp4",
+            "displayName": "Episode 12: Return of the Convict",
+            "format": "512Kb MPEG4",
+            "size": 76872519,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e12_Returnoftheconvict.mp4"
+          },
+          {
+            "name": "s01e13_finderskeepers.mp4",
+            "displayName": "Episode 13: Finders Keepers",
+            "format": "512Kb MPEG4",
+            "size": 73708499,
+            "duration": 1302,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e13_finderskeepers.mp4"
+          },
+          {
+            "name": "s01e14_themaskedrider.mp4",
+            "displayName": "Episode 14: The Masked Rider",
+            "format": "512Kb MPEG4",
+            "size": 74044509,
+            "duration": 1307,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e14_themaskedrider.mp4"
+          },
+          {
+            "name": "s01e15_OldJoesSister.mp4",
+            "displayName": "Episode 15: Old Joe's Sister",
+            "format": "512Kb MPEG4",
+            "size": 80409808,
+            "duration": 1306,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e15_OldJoesSister.mp4"
+          },
+          {
+            "name": "s01e16_CanonBallMckay.mp4",
+            "displayName": "Episode 16: Cannonball McKay",
+            "format": "512Kb MPEG4",
+            "size": 77011455,
+            "duration": 1297,
+            "videoUrl": "https://archive.org/download/theloneranger_201705/s01e16_CanonBallMckay.mp4"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ch05",
+    "number": "05",
+    "name": "DRIVE-IN HORROR THEATER",
+    "callsign": "W-FRGHT",
+    "badge": "HORROR",
+    "themeColor": "#ef4444",
+    "query": "subject:(horror) AND mediatype:(movies) AND (collection:(SciFi_Horror) OR collection:(feature_films))",
+    "description": "Late-night creature features, haunted manors, B-movie shocks, and midnight cinema.",
+    "programs": [
+      {
+        "identifier": "house_on_haunted_hill_ipod",
+        "title": "House on Haunted Hill",
+        "year": "1959",
+        "description": "Frederick Loren has invited five strangers to a party of a lifetime. He is offering each of them $10,000 if they can stay the night in a house.",
+        "videoFile": "house_on_haunted_hill.mp4",
+        "videoUrl": "https://archive.org/download/house_on_haunted_hill_ipod/house_on_haunted_hill.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/house_on_haunted_hill_ipod",
+        "duration": 4483,
+        "size": 843645455
+      },
+      {
+        "identifier": "BloodyPitOfHorror",
+        "title": "Bloody Pit of Horror",
+        "year": "1965",
+        "description": "A group of models and cameramen go to a castle to shoot covers for horror novels where they're captured and tortured by the castle's owner, the Crimson Executioner.\nFind out more about this film on <a href=\"http://www.imdb.com/title/tt0058983/\" rel=\"ugc nofollow\">it's IMDB pag...",
+        "videoFile": "BloodyPitOfHorror.mp4",
+        "videoUrl": "https://archive.org/download/BloodyPitOfHorror/BloodyPitOfHorror.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/BloodyPitOfHorror",
+        "duration": 4943,
+        "size": 515381078
+      },
+      {
+        "identifier": "TheNakedWitch",
+        "title": "The Naked Witch",
+        "year": "Vintage",
+        "description": "One of Larry Buchanan's first films, so don't expect the polish and complex character interactions of his later work, like \"Mars Needs Women\" or \"Zontar, the Thing from Venus.\"",
+        "videoFile": "TheNakedWitch1964FullMovieFilmHorror.mp4",
+        "videoUrl": "https://archive.org/download/TheNakedWitch/TheNakedWitch1964FullMovieFilmHorror.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/TheNakedWitch",
+        "duration": 3547,
+        "size": 190418272
+      },
+      {
+        "identifier": "ThePhantomoftheOpera",
+        "title": "The Phantom of the Opera",
+        "year": "1925",
+        "description": "At the Opera of Paris, a mysterious phantom threatens a famous lyric singer, Carlotta and thus forces her to give up her role (Marguerite in Faust) for unknown Christine Daae. \nChristine meets this phantom (a masked man) in the catacombs, where he lives.",
+        "videoFile": "Phantom_of_the_Opera_512kb.mp4",
+        "videoUrl": "https://archive.org/download/ThePhantomoftheOpera/Phantom_of_the_Opera_512kb.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/ThePhantomoftheOpera",
+        "duration": 6388,
+        "size": 463554725
+      }
+    ]
+  },
+  {
+    "id": "ch06",
+    "number": "06",
+    "name": "RETRO COMMERCIAL BREAK",
+    "callsign": "W-ADVT",
+    "badge": "COMMERCIALS",
+    "themeColor": "#84cc16",
+    "query": "collection:(classic_tv_commercials) AND mediatype:(movies)",
+    "description": "Nostalgic 1950s through 1990s television commercials, toy pitches, cereal promos, and vintage ads.",
+    "programs": [
+      {
+        "identifier": "ctvc",
+        "title": "Classic Television Commercials",
+        "year": "Vintage",
+        "description": "Classic Television Commercials",
+        "videoFile": "ctvc_JELLO_512kb.mp4",
+        "videoUrl": "https://archive.org/download/ctvc/ctvc_JELLO_512kb.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/ctvc",
+        "duration": 89,
+        "size": 6380633
+      },
+      {
+        "identifier": "KelloggsSugarFrostedFlakesCereal1976",
+        "title": "Kellogg's Sugar Frosted Flakes Cereal",
+        "year": "1976",
+        "description": "A teacher takes her students on a corn-field trip to meet Tony the Tiger in this 1976 cereal commercial.  <br />",
+        "videoFile": "Kellogg's Sugar Frosted Flakes Cereal (1976).mp4",
+        "videoUrl": "https://archive.org/download/KelloggsSugarFrostedFlakesCereal1976/Kellogg%27s%20Sugar%20Frosted%20Flakes%20Cereal%20%281976%29.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/KelloggsSugarFrostedFlakesCereal1976",
+        "duration": 30,
+        "size": 7868419
+      },
+      {
+        "identifier": "Election_Ads",
+        "title": "1960 Presidential Campaign Election Commercials",
+        "year": "Vintage",
+        "description": "1960 Presidential Campaign Election Commercials\nJohn F Kennedy, Richard M Nixon",
+        "videoFile": "Commercial-Nixon1960ElectionAd_512kb.mp4",
+        "videoUrl": "https://archive.org/download/Election_Ads/Commercial-Nixon1960ElectionAd_512kb.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Election_Ads",
+        "duration": 62,
+        "size": 4528332
+      },
+      {
+        "identifier": "ItsAMadMadMadMadWorld_201407",
+        "title": "It's a Mad, Mad, Mad, Mad World",
+        "year": "Vintage",
+        "description": "Spencer Tracy heads a hilariously zany cast that stars Hollywood's greatest comedians (Milton Berle, Sid Caesar, Buddy Hackett, Ethel Merman, Mickey Rooney, Dick Shawn, Phil Silvers, Terry-Thomas and Jonathan Winters) and features cameo appearances by every joker and jester in...",
+        "videoFile": "It's a Mad Mad Mad Mad World.mp4",
+        "videoUrl": "https://archive.org/download/ItsAMadMadMadMadWorld_201407/It%27s%20a%20Mad%20Mad%20Mad%20Mad%20World.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/ItsAMadMadMadMadWorld_201407",
+        "duration": 9645,
+        "size": 1000737338
+      }
+    ]
+  },
+  {
+    "id": "ch07",
+    "number": "07",
+    "name": "FILM NOIR & DETECTIVE",
+    "callsign": "W-NOIR",
+    "badge": "FILM NOIR",
+    "themeColor": "#8b5cf6",
+    "query": "collection:(Film_Noir) AND mediatype:(movies)",
+    "description": "Shadowy streets, gritty gumshoes, hard-boiled crime mysteries, and classic cinematic suspense.",
+    "programs": [
+      {
+        "identifier": "suddenly",
+        "title": "Suddenly",
+        "year": "1954",
+        "description": "\"Three gunmen, who have been hired to assassinate the President, hold a family hostage while waiting for their target. Interesting B film which focuses on psychopathic killer well-portrayed against type by Frank Sinatra.\" - noir expert Spencer Selby |\n\nCast: Frank Sinatra, Ste...",
+        "videoFile": "suddenly.mp4",
+        "videoUrl": "https://archive.org/download/suddenly/suddenly.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/suddenly",
+        "duration": 4533,
+        "size": 472229483
+      },
+      {
+        "identifier": "TheStranger_0",
+        "title": "The Stranger",
+        "year": "1946",
+        "description": "Set Connecticut after World War II, The Stranger is a cat and mouse game between Wilson (Edward G. Robinson), a member of the Allied War Crimes Commission and Franz Kindler (Orson Welles), a Nazi who has assumed the false identity of Dr. Charles Rankin. \nTo complete his new in...",
+        "videoFile": "The_Stranger.mp4",
+        "videoUrl": "https://archive.org/download/TheStranger_0/The_Stranger.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/TheStranger_0",
+        "duration": 5472,
+        "size": 570456474
+      },
+      {
+        "identifier": "ScarletStreet",
+        "title": "Scarlet Street",
+        "year": "1945",
+        "description": "German director Fritz Lang is best known for the highly influential films from relatively early in his career, especially Metropolis (1927) and M (1931). \nBut he also had a brief Hollywood heyday during the mid 1940s, when he made some of his best films.\n\nScarlet Street has be...",
+        "videoFile": "Scarlet_Street.mp4",
+        "videoUrl": "https://archive.org/download/ScarletStreet/Scarlet_Street.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/ScarletStreet",
+        "duration": 6086,
+        "size": 633398173
+      },
+      {
+        "identifier": "impact",
+        "title": "Impact",
+        "year": "1949",
+        "description": "\"Wealthy businessman survives attempt by wife to have him killed, makes it look like she succeeded and starts a new life in small town as auto mechanic. Variation on idea elevated to noir importance by The Killers (1946), where victim of femme fatale tries to abandon the city ...",
+        "videoFile": "impact.mp4",
+        "videoUrl": "https://archive.org/download/impact/impact.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/impact",
+        "duration": 6578,
+        "size": 686028700
+      }
+    ]
+  },
+  {
+    "id": "ch08",
+    "number": "08",
+    "name": "WILD WEST CHRONICLES",
+    "callsign": "W-WEST",
+    "badge": "WESTERN",
+    "themeColor": "#d97706",
+    "query": "subject:(western) AND mediatype:(movies) AND (collection:(feature_films) OR collection:(classic_tv))",
+    "description": "Frontier justice, six-shooters, horse chases, and dusty western adventure serials.",
+    "programs": [
+      {
+        "identifier": "mclintok_widescreen",
+        "title": "McLintock!",
+        "year": "1963",
+        "description": "John Wayne Comedy Western filmed in widescreeen.",
+        "videoFile": "McLintock.mp4",
+        "videoUrl": "https://archive.org/download/mclintok_widescreen/McLintock.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/mclintok_widescreen",
+        "duration": 7607,
+        "size": 1553674262
+      },
+      {
+        "identifier": "AngelAndTheBadman",
+        "title": "Angel and the Badman",
+        "year": "1947",
+        "description": "Quirt Evans, an all-round bad guy, is nursed back to health by a Quaker family and their daughter Penelope. He finds himself torn between his old reckless outlaw life and Penelope.",
+        "videoFile": "Angel_and_the_Badman_512kb.mp4",
+        "videoUrl": "https://archive.org/download/AngelAndTheBadman/Angel_and_the_Badman_512kb.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/AngelAndTheBadman",
+        "duration": 6010,
+        "size": 442981710
+      },
+      {
+        "identifier": "cco_thegunandthepulpit",
+        "title": "The Gun and the Pulpit",
+        "year": "1974",
+        "description": "An on the run gunfighter, wanted for a crime he didn't commit, stumbles upon the body of a preacher who's been killed.  In an attempt to hide from his pursuers, he takes on the dead preacher's identity and proceeds to make quite an impression on an entire town that is being bu...",
+        "videoFile": "ccoPublicDomainThe_Gun_and_the_Pulpit.mp4",
+        "videoUrl": "https://archive.org/download/cco_thegunandthepulpit/ccoPublicDomainThe_Gun_and_the_Pulpit.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/cco_thegunandthepulpit",
+        "duration": 4432,
+        "size": 459761063
+      },
+      {
+        "identifier": "Santa_Fe_Trail_movie",
+        "title": "Santa Fe Trail",
+        "year": "1940",
+        "description": "<table width=\"95%\" align=\"center\" cellpadding=\"12\"><tr bgcolor=\"#DDDDDD\"><td>\n<font size=\"+1\">The year is 1854.  Robert E. Lee is Superintendent of West Point, where J.E.B. Stuart (Errol Flynn) and George A. Custer (Ronald Reagan) are classmates.  In the dormitory, one of the ...",
+        "videoFile": "Santa_Fe_Trail.mp4",
+        "videoUrl": "https://archive.org/download/Santa_Fe_Trail_movie/Santa_Fe_Trail.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Santa_Fe_Trail_movie",
+        "duration": 6575,
+        "size": 684335863
+      }
+    ]
+  },
+  {
+    "id": "ch09",
+    "number": "09",
+    "name": "COMPUTER CHRONICLES & TECH",
+    "callsign": "W-BYTE",
+    "badge": "RETRO TECH",
+    "themeColor": "#10b981",
+    "query": "collection:(computerchronicles) AND mediatype:(movies)",
+    "description": "Silicon Valley in its golden age, vintage microcomputers, Stewart Cheifet, Steve Jobs, and retro tech.",
+    "programs": [
+      {
+        "identifier": "CC517_commodore_64",
+        "title": "Commodore 64",
+        "year": "Vintage",
+        "description": "The Commodore 64 was the first computer for many families. This program looks at what you can do with the famous C-64. Demonstrations include The Wine Steward, Skate or Die, Strike Fleet, the Koala Pad, Master Composer, Tetris, and Berkeley Software's GEOS. Includes a visit to...",
+        "videoFile": "CC517_commodore_64.mp4",
+        "videoUrl": "https://archive.org/download/CC517_commodore_64/CC517_commodore_64.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/CC517_commodore_64",
+        "duration": 1711,
+        "size": 168063295
+      },
+      {
+        "identifier": "GaryKild",
+        "title": "Gary Kildall Special",
+        "year": "Vintage",
+        "description": "A profile on computer pioneer Gary Kildall and the important contributions he made to the PC industry including the true story on how IBM ended up using MS-DOS rather than CP/M.  Kildall developed CP/M, the first personal computer operating system.  He was also a co-host on th...",
+        "videoFile": "GaryKild.mp4",
+        "videoUrl": "https://archive.org/download/GaryKild/GaryKild.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/GaryKild",
+        "duration": 1681,
+        "size": 168065105
+      },
+      {
+        "identifier": "CC501_hypercard",
+        "title": "Hypercard",
+        "year": "Vintage",
+        "description": "An introduction to Apple's Hypercard. Guests include Apple Fellow and Hypercard creator Bill Atkinson, Hypercard senior engineer Dan Winkler, author of \"The Complete Hypercard Handbook\" Danny Goodman, and Robert Stein, Publisher of Voyager Company. Demonstrations include Hyper...",
+        "videoFile": "CC501_hypercard.mp4",
+        "videoUrl": "https://archive.org/download/CC501_hypercard/CC501_hypercard.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/CC501_hypercard",
+        "duration": 1611,
+        "size": 157921491
+      },
+      {
+        "identifier": "TheMacin1985",
+        "title": "The Macintosh Computer",
+        "year": "1985",
+        "description": "An in-depth look at the early Apple Macintosh computer, available software and hardware add-ons. Originally broadcast in 1985. <br /><strong>Guests:</strong> Joanna Hoffman, Apple; Bob Foster, Telos Software; Lee Lorenzen, Digital Research; Ben Wiseman, InfoCorp; Gary Kildall,...",
+        "videoFile": "TheMacin1985_edit.mp4",
+        "videoUrl": "https://archive.org/download/TheMacin1985/TheMacin1985_edit.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/TheMacin1985",
+        "duration": 1773,
+        "size": 191046183
+      }
+    ]
+  },
+  {
+    "id": "ch10",
+    "number": "10",
+    "name": "SLAPSTICK & COMEDY CLUB",
+    "callsign": "W-LAFF",
+    "badge": "COMEDY",
+    "themeColor": "#f97316",
+    "query": "subject:(comedy) AND mediatype:(movies) AND (collection:(classic_tv) OR collection:(feature_films))",
+    "description": "Physical slapstick, pratfalls, silent comedy pioneers, and early talkie humor.",
+    "programs": [
+      {
+        "identifier": "charlie_chaplin_film_fest",
+        "title": "Charlie Chaplin Festival",
+        "year": "1938",
+        "description": "Four Chaplin shorts from 1917: The Adventurer, The Cure, Easy Street and The Immigrant, presented with music and sound effects.\n\nYou can find more information regarding this film on <a href=\"http://imdb.com/title/tt0284688/\" rel=\"ugc nofollow\">its IMDb page</a>.",
+        "videoFile": "charlie_chaplin_film_fest.mp4",
+        "videoUrl": "https://archive.org/download/charlie_chaplin_film_fest/charlie_chaplin_film_fest.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/charlie_chaplin_film_fest",
+        "duration": 4646,
+        "size": 483532211
+      },
+      {
+        "identifier": "his_girl_friday",
+        "title": "His Girl Friday",
+        "year": "1940",
+        "description": "Hilarious romantic comedy starring Cary Grant and Rosalind Russell.  Russell is rough and tumble reporter looking to get out of the news racket by marrying and becoming a house wife after her divorce from newspaper publisher Grant.  Just when she is about to leave town with he...",
+        "videoFile": "his_girl_friday.mp4",
+        "videoUrl": "https://archive.org/download/his_girl_friday/his_girl_friday.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/his_girl_friday",
+        "duration": 5504,
+        "size": 575274912
+      },
+      {
+        "identifier": "3stooges",
+        "title": "Three Stooges Episodes",
+        "year": "Vintage",
+        "description": "4 Episodes Of The 3 Stooges.\nDownloads include:\nDisorder In The Court\nBrideless Groom\nSing A Song Of Six Pants\nMalice In The Palace",
+        "videoFile": "3stooges_NewApants2.mp4",
+        "videoUrl": "https://archive.org/download/3stooges/3stooges_NewApants2.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/3stooges",
+        "duration": 1014,
+        "size": 105468993
+      },
+      {
+        "identifier": "mclintok_widescreen",
+        "title": "McLintock!",
+        "year": "1963",
+        "description": "John Wayne Comedy Western filmed in widescreeen.",
+        "videoFile": "McLintock.mp4",
+        "videoUrl": "https://archive.org/download/mclintok_widescreen/McLintock.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/mclintok_widescreen",
+        "duration": 7607,
+        "size": 1553674262
+      }
+    ]
+  },
+  {
+    "id": "ch11",
+    "number": "11",
+    "name": "MID-CENTURY NEWS & SPACE RACE",
+    "callsign": "W-NEWS",
+    "badge": "NEWSREELS",
+    "themeColor": "#3b82f6",
+    "query": "collection:(universal_newsreels) AND mediatype:(movies)",
+    "description": "Universal Newsreel cinema dispatches, NASA Apollo missions, and 20th century world history as it happened.",
+    "programs": [
+      {
+        "identifier": "1934-10-17_King_Alexander_Assassination",
+        "title": "Extra!! Scoop! - First Actual Pictures - Assassination,  1934/10/17",
+        "year": "1934",
+        "description": "King Alexander and Louis Barthou, Shot Down in Streets of Marseilles by Revolutionists. Furious Spectators Batter Killer to Death As His Victims Die. Alexander Murdered - \"Universal Newsreel brings you the First Actual motion pictures of the murder of King Alexander of Jugosla...",
+        "videoFile": "1934-10-17_King_Alexander_Assassination.mp4",
+        "videoUrl": "https://archive.org/download/1934-10-17_King_Alexander_Assassination/1934-10-17_King_Alexander_Assassination.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/1934-10-17_King_Alexander_Assassination",
+        "duration": 189,
+        "size": 18114114
+      },
+      {
+        "identifier": "1958-02-03_First_US_Satellite_Launched",
+        "title": "First U.S. Satellite Launched!  1958/02/03",
+        "year": "1958",
+        "description": "(1) Cape Canaveral launch of 30-pound Explorer satellite by 3-stage Redstone missile, press conference with von Braun and Van Allen with model, night time launch showing spinning satellite on top of rocket (2) \"Egypt, Syria Merge In New Arab Republic\" - Nasser and Kawakli? of ...",
+        "videoFile": "1958-02-03_First_US_Satellite_Launched.mp4",
+        "videoUrl": "https://archive.org/download/1958-02-03_First_US_Satellite_Launched/1958-02-03_First_US_Satellite_Launched.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/1958-02-03_First_US_Satellite_Launched",
+        "duration": 169,
+        "size": 16320172
+      },
+      {
+        "identifier": "1942-01-07_Gen_Adolph_Takes_Over",
+        "title": "Gen. Adolf Takes Over, 1942/01/07",
+        "year": "1942",
+        "description": "\"The cleverest anti-Nazi propaganda yet! You will howl with glee when you see and hear what our London newsreel friends have cooked up for Hitler and his goose-stepping armies. The 'Nasties' skip and sway in tune to the Lambeth Walk!\" - humorous editing of German newsreels to ...",
+        "videoFile": "1942-01-07_Gen_Adolph_Takes_Over_512kb.mp4",
+        "videoUrl": "https://archive.org/download/1942-01-07_Gen_Adolph_Takes_Over/1942-01-07_Gen_Adolph_Takes_Over_512kb.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/1942-01-07_Gen_Adolph_Takes_Over",
+        "duration": 111,
+        "size": 8086281
+      },
+      {
+        "identifier": "1933-10-11_Farmer_Plays_Tune_With_Hands",
+        "title": "Farmer Plays Tune With Hands,  1933/10/11",
+        "year": "1933",
+        "description": "Chicago: Exclusive sound pictures of Cecil H. Dill, of Traverse City, Michigan, an aspiring radio artist demonstrating his ability to render popular melodies by pressing his hands together. Dill modestly tells how he discovered his unusual talent. (partial newsreel, Universal ...",
+        "videoFile": "1933-10-11_Farmer_Plays_Tune_With_Hands.mp4",
+        "videoUrl": "https://archive.org/download/1933-10-11_Farmer_Plays_Tune_With_Hands/1933-10-11_Farmer_Plays_Tune_With_Hands.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/1933-10-11_Farmer_Plays_Tune_With_Hands",
+        "duration": 94,
+        "size": 9133869
+      }
+    ]
+  },
+  {
+    "id": "ch12",
+    "number": "12",
+    "name": "SILENT CINEMA MASTERPIECES",
+    "callsign": "W-SILNT",
+    "badge": "SILENT ERA",
+    "themeColor": "#a855f7",
+    "query": "collection:(silent_films) AND mediatype:(movies)",
+    "description": "Expressionist silent masterpieces, early visual effects, and silver-screen origins.",
+    "programs": [
+      {
+        "identifier": "ThePhantomoftheOpera",
+        "title": "The Phantom of the Opera",
+        "year": "1925",
+        "description": "At the Opera of Paris, a mysterious phantom threatens a famous lyric singer, Carlotta and thus forces her to give up her role (Marguerite in Faust) for unknown Christine Daae. \nChristine meets this phantom (a masked man) in the catacombs, where he lives.",
+        "videoFile": "Phantom_of_the_Opera_512kb.mp4",
+        "videoUrl": "https://archive.org/download/ThePhantomoftheOpera/Phantom_of_the_Opera_512kb.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/ThePhantomoftheOpera",
+        "duration": 6388,
+        "size": 463554725
+      },
+      {
+        "identifier": "20000LeaguesUndertheSea",
+        "title": "20,000 Leagues Under the Sea",
+        "year": "1916",
+        "description": "The Universal Film Manufacturing Company was not known in the silent era as premier producer of motion pictures. \nYet, in 1916 they produced a film that could not be made effectively without expensive special effects and special photography. \nThe novel had previously been made...",
+        "videoFile": "20000_Leagues_Under_the_Sea_512kb.mp4",
+        "videoUrl": "https://archive.org/download/20000LeaguesUndertheSea/20000_Leagues_Under_the_Sea_512kb.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/20000LeaguesUndertheSea",
+        "duration": 5922,
+        "size": 429700405
+      },
+      {
+        "identifier": "DasKabinettdesDoktorCaligariTheCabinetofDrCaligari",
+        "title": "Das Kabinett des Doktor Caligari ( The Cabinet of Dr. Caligari )",
+        "year": "1919",
+        "description": "The Cabinet of Dr. Caligari is the first modern Horror Film and it influence a number of contemporary productions.\nA real classic! \n\nPLOT:\nA man named Francis relates a story about his best friend Alan and his fiancée Jane. Alan takes him to a fair where they meet Dr. Caligari...",
+        "videoFile": "The_Cabinet_of_Dr._Caligari_512kb.mp4",
+        "videoUrl": "https://archive.org/download/DasKabinettdesDoktorCaligariTheCabinetofDrCaligari/The_Cabinet_of_Dr._Caligari_512kb.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/DasKabinettdesDoktorCaligariTheCabinetofDrCaligari",
+        "duration": 3061,
+        "size": 222148532
+      },
+      {
+        "identifier": "CC_1916_10_02_ThePawnshop",
+        "title": "Charlie Chaplin's \" The Pawnshop\"",
+        "year": "1916",
+        "description": "Charlie Chaplin's 56th Film Released Oct 02 1916.\n\nThe Pawnshop was Charlie Chaplin's sixth film for Mutual Film Company. Chaplin played the role of assistant to the pawnshop owner. Henry Bergman played the owner and Edna Purviance the owner's daughter. Albert Austin played an...",
+        "videoFile": "CC_1916_10_02_ThePawnshop_512kb.mp4",
+        "videoUrl": "https://archive.org/download/CC_1916_10_02_ThePawnshop/CC_1916_10_02_ThePawnshop_512kb.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/CC_1916_10_02_ThePawnshop",
+        "duration": 1221,
+        "size": 88687079
+      }
+    ]
+  },
+  {
+    "id": "ch13",
+    "number": "13",
+    "name": "VINTAGE EDUCATIONAL & SHORTS",
+    "callsign": "W-SCHL",
+    "badge": "VINTAGE SHORTS",
+    "themeColor": "#0ea5e9",
+    "query": "collection:(prelinger) AND mediatype:(movies) AND (subject:(guidance) OR subject:(educational))",
+    "description": "Classic Prelinger Archives mid-century classroom hygiene, social guidance, and safety films.",
+    "programs": [
+      {
+        "identifier": "GoodEati1951",
+        "title": "Good Eating Habits",
+        "year": "1951",
+        "description": "Drama focusing on gluttony and \"hidden hunger,\" where well-nourished people eat poorly and malnourish themselves.",
+        "videoFile": "GoodEati1951_edit.mp4",
+        "videoUrl": "https://archive.org/download/GoodEati1951/GoodEati1951_edit.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/GoodEati1951",
+        "duration": 585,
+        "size": 117109492
+      },
+      {
+        "identifier": "HowtoBeW1949",
+        "title": "How to Be Well Groomed",
+        "year": "1949",
+        "description": "Siblings Don and Sue show how they keep themselves well groomed throughout the school week and for their Friday night dates.",
+        "videoFile": "HowtoBeW1949_edit.mp4",
+        "videoUrl": "https://archive.org/download/HowtoBeW1949/HowtoBeW1949_edit.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/HowtoBeW1949",
+        "duration": 640,
+        "size": 139177173
+      },
+      {
+        "identifier": "DatingDo1949",
+        "title": "Dating: Do's and Don'ts",
+        "year": "1949",
+        "description": "Classic instructional film for teen daters, presented here in the rare (but incomplete) Kodachrome version.",
+        "videoFile": "DatingDo1949_edit.mp4",
+        "videoUrl": "https://archive.org/download/DatingDo1949/DatingDo1949_edit.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/DatingDo1949",
+        "duration": 745,
+        "size": 141226682
+      },
+      {
+        "identifier": "DateWith1950",
+        "title": "Date With Your Family, A",
+        "year": "1950",
+        "description": "Advises children to do whatever is necessary -- even lie -- to achieve harmonious family relations. This portrait of manners among the affluent places a premium on pleasant, unemotional behavior, and contains some interesting do's and don'ts sequences. Key line: \"These boys tr...",
+        "videoFile": "DateWith1950_edit.mp4",
+        "videoUrl": "https://archive.org/download/DateWith1950/DateWith1950_edit.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/DateWith1950",
+        "duration": 600,
+        "size": 125194226
+      }
+    ]
+  }
+]

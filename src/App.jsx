@@ -1,0 +1,662 @@
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import NavbarHeader from './components/NavbarHeader';
+import TvBoxCabinet from './components/TvBoxCabinet';
+import RemoteControl from './components/RemoteControl';
+import TvGuideModal from './components/TvGuideModal';
+import TapeRackDrawer from './components/TapeRackDrawer';
+import ArchiveSearchModal from './components/ArchiveSearchModal';
+import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
+import EpisodePickerModal from './components/EpisodePickerModal';
+import ChannelCustomizerModal from './components/ChannelCustomizerModal';
+import AboutModal from './components/AboutModal';
+import { getChannelLineup, calculateLiveTvSlot, resolvePlayableItem } from './services/archiveApi';
+import { audio } from './services/soundEffects';
+
+export default function App() {
+  const cabinetRef = useRef(null);
+
+  // Television State with persistent memory
+  const [channels, setChannels] = useState(() => getChannelLineup());
+  const [currentChannelIndex, setCurrentChannelIndex] = useState(0);
+  const [currentProgramIndex, setCurrentProgramIndex] = useState(0);
+  const [activeExplicitProgram, setActiveExplicitProgram] = useState(null);
+  const [powerOn, setPowerOn] = useState(true);
+
+  const [volume, setVolume] = useState(() => {
+    try {
+      const saved = localStorage.getItem('archivetv_volume');
+      return saved !== null ? parseFloat(saved) : 0.8;
+    } catch {
+      return 0.8;
+    }
+  });
+
+  const [muted, setMuted] = useState(() => {
+    try {
+      return localStorage.getItem('archivetv_muted') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const [scanlinesEnabled, setScanlinesEnabled] = useState(true);
+  const [curvatureEnabled, setCurvatureEnabled] = useState(true);
+
+  const [aspectRatio, setAspectRatio] = useState(() => {
+    try {
+      return localStorage.getItem('archivetv_aspect_ratio') || '4:3';
+    } catch {
+      return '4:3';
+    }
+  });
+
+  const [cabinetStyle, setCabinetStyle] = useState(() => {
+    try {
+      return localStorage.getItem('archivetv_cabinet_style') || 'woodgrain';
+    } catch {
+      return 'woodgrain';
+    }
+  });
+
+  const [trackingOffset, setTrackingOffset] = useState(0);
+  const [antennaAngle, setAntennaAngle] = useState(0);
+  const [liveTvMode, setLiveTvMode] = useState(false); // Default to Start From Beginning!
+  const [channelZap, setChannelZap] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Picture Adjustments & Player Engines
+  const [colorMode, setColorMode] = useState(() => {
+    try {
+      return localStorage.getItem('archivetv_color_mode') || 'color';
+    } catch {
+      return 'color';
+    }
+  });
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [activeEngine, setActiveEngine] = useState('direct'); // 'direct' | 'embed'
+
+  // Persist user settings
+  useEffect(() => {
+    try {
+      localStorage.setItem('archivetv_volume', String(volume));
+    } catch {}
+    audio.setVolume(volume);
+  }, [volume]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('archivetv_muted', String(muted));
+    } catch {}
+    audio.setMuted(muted);
+  }, [muted]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('archivetv_cabinet_style', cabinetStyle);
+    } catch {}
+  }, [cabinetStyle]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('archivetv_color_mode', colorMode);
+    } catch {}
+  }, [colorMode]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('archivetv_aspect_ratio', aspectRatio);
+    } catch {}
+  }, [aspectRatio]);
+
+  // Modals
+  const [remoteOpen, setRemoteOpen] = useState(true);
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [tapeRackOpen, setTapeRackOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [episodesOpen, setEpisodesOpen] = useState(false);
+  const [customizerOpen, setCustomizerOpen] = useState(false);
+  const [customizerInitialUrl, setCustomizerInitialUrl] = useState('');
+  const [aboutOpen, setAboutOpen] = useState(false);
+
+  const reloadChannels = useCallback(() => {
+    setChannels(getChannelLineup());
+  }, []);
+
+  const handleOpenChannelStudio = useCallback((url = '') => {
+    setCustomizerInitialUrl(url || '');
+    setCustomizerOpen(true);
+  }, []);
+
+  const currentChannel = channels[currentChannelIndex] || channels[0];
+  const currentPrograms = currentChannel?.programs || [];
+  const baseProgram = currentPrograms[currentProgramIndex] || currentPrograms[0];
+
+  // Current Program Resolver
+  const currentProgram = useMemo(() => {
+    if (activeExplicitProgram) {
+      return {
+        ...activeExplicitProgram,
+        seekSeconds: 0,
+      };
+    }
+
+    if (!baseProgram) return null;
+
+    if (liveTvMode) {
+      const slot = calculateLiveTvSlot(currentChannel);
+      const prog = currentPrograms[slot.programIndex] || baseProgram;
+      return {
+        ...prog,
+        seekSeconds: slot.seekSeconds,
+      };
+    }
+
+    return {
+      ...baseProgram,
+      seekSeconds: 0,
+    };
+  }, [activeExplicitProgram, currentChannel, baseProgram, liveTvMode, currentPrograms]);
+
+  const displayChannel = useMemo(() => {
+    if (activeExplicitProgram) {
+      return {
+        number: 'AUX',
+        name: (activeExplicitProgram.title || 'ARCHIVE BROADCAST').slice(0, 24).toUpperCase(),
+        callsign: 'K-ARCH',
+        badge: 'ARCHIVE',
+        description: activeExplicitProgram.description,
+      };
+    }
+    return currentChannel;
+  }, [activeExplicitProgram, currentChannel]);
+
+  const signalQuality = useMemo(() => {
+    const antennaDist = Math.abs(antennaAngle % 60);
+    const trackingPenalty = Math.abs(trackingOffset) * 0.7;
+    return Math.max(15, Math.min(100, 100 - antennaDist * 0.4 - trackingPenalty));
+  }, [antennaAngle, trackingOffset]);
+
+  const triggerChannelZap = useCallback(() => {
+    setChannelZap(true);
+    audio.playChannelZap(0.35);
+    setTimeout(() => {
+      setChannelZap(false);
+    }, 350);
+  }, []);
+
+  // Dynamic episode discovery: if tuned program has multiple files on Archive.org, resolve them
+  useEffect(() => {
+    if (!currentProgram?.identifier) return;
+    if (currentProgram.availableFiles && currentProgram.availableFiles.length > 1) return;
+
+    let isMounted = true;
+    resolvePlayableItem(currentProgram.identifier)
+      .then((resolved) => {
+        if (!isMounted) return;
+        if (resolved?.availableFiles && resolved.availableFiles.length > 1) {
+          setActiveExplicitProgram((prev) => {
+            if (prev && prev.identifier === currentProgram.identifier) {
+              return { ...prev, availableFiles: resolved.availableFiles };
+            }
+            return { ...currentProgram, availableFiles: resolved.availableFiles };
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentProgram?.identifier, currentProgram?.availableFiles]);
+
+  // Channel Navigation Handlers
+  const handleNextChannel = useCallback(() => {
+    triggerChannelZap();
+    setActiveExplicitProgram(null);
+    setCurrentChannelIndex((prev) => (prev + 1) % channels.length);
+    setCurrentProgramIndex(0);
+  }, [channels.length, triggerChannelZap]);
+
+  const handlePrevChannel = useCallback(() => {
+    triggerChannelZap();
+    setActiveExplicitProgram(null);
+    setCurrentChannelIndex((prev) => (prev - 1 + channels.length) % channels.length);
+    setCurrentProgramIndex(0);
+  }, [channels.length, triggerChannelZap]);
+
+  const handleSelectChannel = useCallback(
+    (channel) => {
+      const idx = channels.findIndex((c) => c.number === channel.number);
+      if (idx !== -1) {
+        triggerChannelZap();
+        setActiveExplicitProgram(null);
+        setCurrentChannelIndex(idx);
+        setCurrentProgramIndex(0);
+      }
+    },
+    [channels, triggerChannelZap]
+  );
+
+  const handleSelectChannelByNumber = useCallback(
+    (numStr) => {
+      const idx = channels.findIndex(
+        (c) => c.number === numStr || parseInt(c.number, 10) === parseInt(numStr, 10)
+      );
+      if (idx !== -1) {
+        triggerChannelZap();
+        setActiveExplicitProgram(null);
+        setCurrentChannelIndex(idx);
+        setCurrentProgramIndex(0);
+      }
+    },
+    [channels, triggerChannelZap]
+  );
+
+  const handleRandomChannel = useCallback(() => {
+    if (channels.length <= 1) return;
+    let nextIdx = currentChannelIndex;
+    while (nextIdx === currentChannelIndex) {
+      nextIdx = Math.floor(Math.random() * channels.length);
+    }
+    triggerChannelZap();
+    setActiveExplicitProgram(null);
+    setCurrentChannelIndex(nextIdx);
+    setCurrentProgramIndex(0);
+  }, [channels.length, currentChannelIndex, triggerChannelZap]);
+
+  // Program advancement (loop to next program or episode)
+  const handleProgramEnded = useCallback(() => {
+    if (currentProgram?.availableFiles && currentProgram.availableFiles.length > 1) {
+      // Find current file index and advance to next episode
+      const curFile = currentProgram.videoUrl;
+      const files = currentProgram.availableFiles;
+      const curIdx = files.findIndex((f) => f.videoUrl === curFile);
+      if (curIdx !== -1 && curIdx < files.length - 1) {
+        const nextEp = files[curIdx + 1];
+        const baseTitle = currentProgram.seriesTitle || currentProgram.title.split(' - ')[0] || currentProgram.title;
+        setActiveExplicitProgram({
+          ...currentProgram,
+          seriesTitle: baseTitle,
+          videoUrl: nextEp.videoUrl,
+          title: `${baseTitle} - ${nextEp.displayName}`,
+          duration: nextEp.duration,
+          seekSeconds: 0,
+        });
+        return;
+      }
+    }
+
+    if (activeExplicitProgram) {
+      setActiveExplicitProgram(null);
+    } else if (currentPrograms.length > 1) {
+      setCurrentProgramIndex((prev) => (prev + 1) % currentPrograms.length);
+    }
+  }, [activeExplicitProgram, currentPrograms.length, currentProgram]);
+
+  const handleSelectProgram = useCallback((prog) => {
+    triggerChannelZap();
+    setActiveExplicitProgram(prog);
+  }, [triggerChannelZap]);
+
+  const handleEngineChange = useCallback((newEngine) => {
+    if (typeof newEngine === 'string') {
+      setActiveEngine(newEngine);
+    } else {
+      setActiveEngine((prev) => (prev === 'direct' ? 'embed' : 'direct'));
+    }
+  }, []);
+
+  const handlePlayDirectItem = useCallback(
+    (resolvedItem) => {
+      triggerChannelZap();
+      setActiveExplicitProgram(resolvedItem);
+      if (resolvedItem?.playerEngine) {
+        setActiveEngine(resolvedItem.playerEngine);
+      } else if (!resolvedItem?.videoUrl) {
+        setActiveEngine('embed');
+      } else {
+        setActiveEngine('direct');
+      }
+    },
+    [triggerChannelZap]
+  );
+
+  const handleCustomTapePlay = useCallback(
+    async (identifier) => {
+      const resolved = await resolvePlayableItem(identifier);
+      handlePlayDirectItem(resolved);
+    },
+    [handlePlayDirectItem]
+  );
+
+  const handleRestartProgram = useCallback(() => {
+    audio.playSwitch(true);
+    cabinetRef.current?.restart();
+    if (activeExplicitProgram) {
+      setActiveExplicitProgram({ ...activeExplicitProgram, seekSeconds: 0 });
+    } else {
+      setLiveTvMode(false);
+    }
+  }, [activeExplicitProgram]);
+
+  // Episode selection from multi-file modal
+  const handleSelectEpisode = useCallback(
+    (ep) => {
+      if (!currentProgram) return;
+      triggerChannelZap();
+      const baseTitle = currentProgram.seriesTitle || currentProgram.title.split(' - ')[0] || currentProgram.title;
+      setActiveExplicitProgram({
+        ...currentProgram,
+        seriesTitle: baseTitle,
+        videoUrl: ep.videoUrl,
+        title: `${baseTitle} - ${ep.displayName}`,
+        duration: ep.duration,
+        seekSeconds: 0,
+      });
+    },
+    [currentProgram, triggerChannelZap]
+  );
+
+  // Cycle color mode
+  const handleCycleColorMode = useCallback(() => {
+    audio.playSwitch(true);
+    const modes = ['color', 'bw', 'amber', 'green'];
+    const nextIdx = (modes.indexOf(colorMode) + 1) % modes.length;
+    setColorMode(modes[nextIdx]);
+  }, [colorMode]);
+
+  // Fullscreen
+  const handleToggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen().catch(() => {});
+      setIsFullscreen(false);
+    }
+  };
+
+  // Keyboard Navigation & Scrubbing Listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+
+      const key = e.key;
+
+      if (key === 'ArrowUp') {
+        e.preventDefault();
+        handleNextChannel();
+      } else if (key === 'ArrowDown') {
+        e.preventDefault();
+        handlePrevChannel();
+      } else if (key === 'ArrowLeft') {
+        e.preventDefault();
+        const skip = e.shiftKey ? -60 : -10;
+        cabinetRef.current?.seekDelta(skip);
+      } else if (key === 'ArrowRight') {
+        e.preventDefault();
+        const skip = e.shiftKey ? 60 : 10;
+        cabinetRef.current?.seekDelta(skip);
+      } else if (key.toLowerCase() === 'j') {
+        e.preventDefault();
+        cabinetRef.current?.seekDelta(-10);
+      } else if (key.toLowerCase() === 'l') {
+        e.preventDefault();
+        cabinetRef.current?.seekDelta(10);
+      } else if (key.toLowerCase() === 'k' || key === ' ') {
+        e.preventDefault();
+        cabinetRef.current?.togglePlayPause();
+      } else if (key === '+' || key === '=') {
+        e.preventDefault();
+        setVolume((v) => Math.min(1, Number((v + 0.1).toFixed(1))));
+      } else if (key === '-' || key === '_') {
+        e.preventDefault();
+        setVolume((v) => Math.max(0, Number((v - 0.1).toFixed(1))));
+      } else if (key.toLowerCase() === 'm') {
+        e.preventDefault();
+        setMuted((m) => !m);
+      } else if (key.toLowerCase() === 'p') {
+        e.preventDefault();
+        setPowerOn((p) => !p);
+      } else if (key.toLowerCase() === 'c') {
+        e.preventDefault();
+        handleCycleColorMode();
+      } else if (key.toLowerCase() === 'e') {
+        e.preventDefault();
+        if (currentProgram?.availableFiles?.length > 1) {
+          setEpisodesOpen(true);
+        }
+      } else if (key.toLowerCase() === 'g') {
+        e.preventDefault();
+        setGuideOpen((g) => !g);
+      } else if (key.toLowerCase() === 'u') {
+        e.preventDefault();
+        handleOpenChannelStudio();
+      } else if (key.toLowerCase() === 's') {
+        e.preventDefault();
+        setSearchOpen((s) => !s);
+      } else if (key.toLowerCase() === 't') {
+        e.preventDefault();
+        setTapeRackOpen((t) => !t);
+      } else if (key.toLowerCase() === 'r') {
+        e.preventDefault();
+        setRemoteOpen((r) => !r);
+      } else if (key.toLowerCase() === 'backspace' || key.toLowerCase() === 'home') {
+        e.preventDefault();
+        handleRestartProgram();
+      } else if (key.toLowerCase() === 'a') {
+        e.preventDefault();
+        setAspectRatio((a) => (a === '4:3' ? '16:9' : '4:3'));
+      } else if (key.toLowerCase() === 'f') {
+        e.preventDefault();
+        handleToggleFullscreen();
+      } else if (key === '?') {
+        e.preventDefault();
+        setShortcutsOpen(true);
+      } else if (key >= '0' && key <= '9') {
+        const num = key === '0' ? '10' : key.padStart(2, '0');
+        handleSelectChannelByNumber(num);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    handleNextChannel,
+    handlePrevChannel,
+    handleSelectChannelByNumber,
+    handleRestartProgram,
+    handleCycleColorMode,
+    handleOpenChannelStudio,
+    currentProgram,
+  ]);
+
+  return (
+    <div className="min-h-screen bg-[#0d0b0a] text-zinc-200 flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+      {/* 1. Header Toolbar */}
+      <NavbarHeader
+        cabinetStyle={cabinetStyle}
+        onSelectCabinetStyle={setCabinetStyle}
+        scanlinesEnabled={scanlinesEnabled}
+        onToggleScanlines={() => setScanlinesEnabled((s) => !s)}
+        curvatureEnabled={curvatureEnabled}
+        onToggleCurvature={() => setCurvatureEnabled((c) => !c)}
+        aspectRatio={aspectRatio}
+        onToggleAspectRatio={() => setAspectRatio((a) => (a === '4:3' ? '16:9' : '4:3'))}
+        remoteOpen={remoteOpen}
+        onToggleRemote={() => setRemoteOpen((r) => !r)}
+        onOpenGuide={() => setGuideOpen(true)}
+        onOpenSearch={() => setSearchOpen(true)}
+        onOpenTapeRack={() => setTapeRackOpen(true)}
+        onOpenChannelStudio={() => handleOpenChannelStudio()}
+        onOpenShortcuts={() => setShortcutsOpen(true)}
+        onOpenAbout={() => setAboutOpen(true)}
+        currentChannel={displayChannel}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={handleToggleFullscreen}
+      />
+
+      {/* 2. Television Stage Area */}
+      <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-6 relative">
+        <TvBoxCabinet
+          ref={cabinetRef}
+          cabinetStyle={cabinetStyle}
+          powerOn={powerOn}
+          onTogglePower={() => setPowerOn((p) => !p)}
+          currentChannel={displayChannel}
+          currentProgram={currentProgram}
+          onProgramEnded={handleProgramEnded}
+          channels={channels}
+          onSelectChannel={handleSelectChannel}
+          onNextChannel={handleNextChannel}
+          onPrevChannel={handlePrevChannel}
+          volume={volume}
+          onVolumeChange={setVolume}
+          muted={muted}
+          onToggleMute={() => setMuted((m) => !m)}
+          scanlinesEnabled={scanlinesEnabled}
+          onToggleScanlines={() => setScanlinesEnabled((s) => !s)}
+          curvatureEnabled={curvatureEnabled}
+          onToggleCurvature={() => setCurvatureEnabled((c) => !c)}
+          aspectRatio={aspectRatio}
+          onToggleAspectRatio={() => setAspectRatio((a) => (a === '4:3' ? '16:9' : '4:3'))}
+          trackingOffset={trackingOffset}
+          onTrackingChange={setTrackingOffset}
+          antennaAngle={antennaAngle}
+          onAntennaAngleChange={setAntennaAngle}
+          signalQuality={signalQuality}
+          liveTvMode={liveTvMode}
+          onToggleLiveTv={() => setLiveTvMode((l) => !l)}
+          onRestartProgram={handleRestartProgram}
+          onOpenGuide={() => setGuideOpen(true)}
+          onOpenSearch={() => setSearchOpen(true)}
+          onOpenTapeRack={() => setTapeRackOpen(true)}
+          onOpenShortcuts={() => setShortcutsOpen(true)}
+          onOpenEpisodes={() => setEpisodesOpen(true)}
+          channelZap={channelZap}
+          colorMode={colorMode}
+          onCycleColorMode={handleCycleColorMode}
+          playbackRate={playbackRate}
+          onChangePlaybackRate={setPlaybackRate}
+          activeEngine={activeEngine}
+          onEngineChange={handleEngineChange}
+          onToggleEngine={() => handleEngineChange()}
+        />
+      </main>
+
+      {/* 3. Floating Remote Control */}
+      <RemoteControl
+        isOpen={remoteOpen}
+        onClose={() => setRemoteOpen(false)}
+        powerOn={powerOn}
+        onTogglePower={() => setPowerOn((p) => !p)}
+        onNextChannel={handleNextChannel}
+        onPrevChannel={handlePrevChannel}
+        onSelectChannelByNumber={handleSelectChannelByNumber}
+        volume={volume}
+        onVolumeChange={setVolume}
+        muted={muted}
+        onToggleMute={() => setMuted((m) => !m)}
+        onOpenGuide={() => setGuideOpen(true)}
+        onOpenSearch={() => setSearchOpen(true)}
+        onOpenTapeRack={() => setTapeRackOpen(true)}
+        onOpenChannelStudio={() => handleOpenChannelStudio()}
+        onToggleLiveTv={() => setLiveTvMode((l) => !l)}
+        onRestartProgram={handleRestartProgram}
+        liveTvMode={liveTvMode}
+        aspectRatio={aspectRatio}
+        onToggleAspectRatio={() => setAspectRatio((a) => (a === '4:3' ? '16:9' : '4:3'))}
+        onRandomChannel={handleRandomChannel}
+        colorMode={colorMode}
+        onCycleColorMode={handleCycleColorMode}
+      />
+
+      {/* 4. Electronic Program Guide (TV Guide) Modal */}
+      <TvGuideModal
+        isOpen={guideOpen}
+        onClose={() => setGuideOpen(false)}
+        channels={channels}
+        currentChannel={displayChannel}
+        onSelectChannel={handleSelectChannel}
+        onSelectProgram={handleSelectProgram}
+        onOpenChannelStudio={() => handleOpenChannelStudio()}
+      />
+
+      {/* 5. VHS Cassette Tape Rack Drawer */}
+      <TapeRackDrawer
+        isOpen={tapeRackOpen}
+        onClose={() => setTapeRackOpen(false)}
+        currentChannel={displayChannel}
+        channels={channels}
+        onSelectProgram={handleSelectProgram}
+        onSelectChannel={handleSelectChannel}
+        onCustomTapePlay={handleCustomTapePlay}
+      />
+
+      {/* 6. Internet Archive Deep Antenna Explorer Modal */}
+      <ArchiveSearchModal
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onPlayDirectItem={handlePlayDirectItem}
+        onChannelAdded={reloadChannels}
+        onOpenChannelStudio={handleOpenChannelStudio}
+      />
+
+      {/* 7. Multi-Episode / Track Picker Modal */}
+      <EpisodePickerModal
+        isOpen={episodesOpen}
+        onClose={() => setEpisodesOpen(false)}
+        currentProgram={currentProgram}
+        onSelectEpisode={handleSelectEpisode}
+      />
+
+      {/* 8. Keyboard Shortcuts Help Modal */}
+      <KeyboardShortcutsModal
+        isOpen={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
+      />
+
+      {/* 9. Channel Studio & Customizer Modal */}
+      <ChannelCustomizerModal
+        isOpen={customizerOpen}
+        onClose={() => setCustomizerOpen(false)}
+        onChannelsUpdated={reloadChannels}
+        onTuneChannel={handleSelectChannel}
+        initialDroppedUrl={customizerInitialUrl}
+      />
+
+      {/* 10. About & Legal Disclaimer Modal */}
+      <AboutModal
+        isOpen={aboutOpen}
+        onClose={() => setAboutOpen(false)}
+      />
+
+      {/* Footer Info Bar */}
+      <footer className="w-full bg-[#100e0d] border-t border-zinc-900 px-4 py-2 text-center text-xs font-mono text-zinc-500 flex flex-col sm:flex-row items-center justify-between gap-2 select-none">
+        <div className="flex items-center gap-2 font-pixel text-[11px]">
+          <span className="text-amber-500 font-bold">ARCHIVETV</span>
+          <span>•</span>
+          <span>INTERNET ARCHIVE PUBLIC DOMAIN DATABASE EXPLORER</span>
+        </div>
+        <div className="flex items-center gap-3 text-[11px]">
+          <button
+            onClick={() => setAboutOpen(true)}
+            className="hover:text-amber-400 cursor-pointer font-pixel text-zinc-400"
+          >
+            [⚖️ LEGAL & ABOUT]
+          </button>
+          <span>•</span>
+          <button
+            onClick={() => setShortcutsOpen(true)}
+            className="hover:text-amber-400 cursor-pointer font-pixel"
+          >
+            [?] HOTKEYS
+          </button>
+          <span>•</span>
+          <span>USE VCR SCRUB BAR OR J/K/L TO SEEK</span>
+        </div>
+      </footer>
+    </div>
+  );
+}

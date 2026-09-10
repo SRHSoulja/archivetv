@@ -1,0 +1,44 @@
+{
+  "name": "archivetv",
+  "version": "1.0.0",
+  "description": "Retro CRT television & VCR interface for streaming public domain media from the Internet Archive",
+  "license": "MIT",
+  "type": "module",
+  "homepage": "https://github.com/SRHSoulja/archivetv",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SRHSoulja/archivetv.git"
+  },
+  "keywords": [
+    "retro",
+    "crt",
+    "vcr",
+    "internet-archive",
+    "public-domain",
+    "television",
+    "vintage",
+    "react",
+    "vite",
+    "sound-effects",
+    "shaders"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.16.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.0.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
+    "vite": "^6.2.0"
+  }
+}
