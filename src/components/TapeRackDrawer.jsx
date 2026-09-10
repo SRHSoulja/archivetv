@@ -64,6 +64,13 @@ export default function TapeRackDrawer({
 
   const tapes = (selectedChan?.programs || []).filter(Boolean);
 
+  // Seeded from the identifier so a tape always leans the same way.
+  const tiltFor = (id) => {
+    let h = 0;
+    for (let i = 0; i < (id || '').length; i += 1) h = (h * 31 + id.charCodeAt(i)) % 997;
+    return (((h % 7) - 3) * 0.22).toFixed(2);
+  };
+
   const shownName = (p) => (getCustomTitle(p.identifier) || p.title || '').toLowerCase();
   const shownYear = (p) => getCustomYear(p.identifier) || p.year || '';
   const yearOf = (p) => {
@@ -368,7 +375,7 @@ export default function TapeRackDrawer({
           ) : viewMode === 'boxart' ? (
             /* Authentic VHS Box Art / Movie Poster Slipcovers Grid */
             <div
-              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+              className="vhs-shelf-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
             >
               {sortedList.map((prog, idx) => {
                 if (!prog) return null;
@@ -380,7 +387,11 @@ export default function TapeRackDrawer({
 
                 return (
                   <div
-                    key={`boxart_${activeTab}_${selectedChan?.id || 'ch'}_${prog.identifier || 'prog'}_${prog.videoFile || prog.videoUrl || ''}`}
+                    key={`shelf_${activeTab}_${selectedChan?.id || 'ch'}_${prog.identifier || 'prog'}_${prog.videoFile || prog.videoUrl || ''}`}
+                    className="vhs-shelf-cell"
+                    style={{ '--tilt': `${tiltFor(prog.identifier)}deg` }}
+                  >
+                  <div
                     draggable={sortMode === 'custom'}
                     onDragStart={(e) => {
                       setDragId(prog.identifier);
@@ -522,6 +533,7 @@ export default function TapeRackDrawer({
                         PLAY
                       </span>
                     </div>
+                  </div>
                   </div>
                 );
               })}

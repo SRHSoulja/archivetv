@@ -385,3 +385,68 @@
   zoom: 1 !important;
 }
 
+
+/* =========================================================
+   VIDEO STORE SHELF
+   Tapes stand on a board with their covers facing out, the way a rental
+   store racked them. Each cell draws its own segment of board and the
+   segments butt together across the grid gap into one continuous plank,
+   so this works at any column count without knowing the row height.
+   ========================================================= */
+
+.vhs-shelf-grid {
+  padding: 22px 14px 4px;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.22) 30%, rgba(0, 0, 0, 0.5) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0 3px, transparent 3px 11px),
+    #150f0a;
+  box-shadow:
+    inset 0 12px 30px rgba(0, 0, 0, 0.9),
+    inset 0 -6px 18px rgba(0, 0, 0, 0.7),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.vhs-shelf-cell {
+  position: relative;
+  padding-bottom: 20px;
+  /* a fraction of a degree per tape, seeded from the identifier so it never
+     reshuffles on re-render -- a shelf nobody has straightened */
+  transform: rotate(var(--tilt, 0deg));
+  transform-origin: bottom center;
+}
+
+.vhs-shelf-cell::after {
+  content: '';
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  bottom: 0;
+  height: 13px;
+  z-index: 0;
+  border-radius: 1px;
+  background: linear-gradient(180deg, #6b4527 0%, #4a2e1a 40%, #2f1d10 100%);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 220, 180, 0.22),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.7);
+}
+
+/* contact shadow where the tape meets the board */
+.vhs-shelf-cell::before {
+  content: '';
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 10px;
+  height: 12px;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0) 72%);
+}
+
+@media (max-width: 640px) {
+  .vhs-shelf-grid {
+    padding: 16px 10px 4px;
+  }
+}
