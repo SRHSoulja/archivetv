@@ -15,6 +15,7 @@ import {
   resolvePlayableItem,
   saveCustomChannel,
   decodeSharedChannel,
+  getCanonicalEpisodeKey,
 } from './services/archiveApi';
 import { audio } from './services/soundEffects';
 
@@ -51,9 +52,9 @@ export default function App() {
 
   const [aspectRatio, setAspectRatio] = useState(() => {
     try {
-      return localStorage.getItem('archivetv_aspect_ratio') || '4:3';
+      return localStorage.getItem('archivetv_aspect_ratio') || 'auto';
     } catch {
-      return '4:3';
+      return 'auto';
     }
   });
 
@@ -324,24 +325,36 @@ export default function App() {
   // Program advancement (loop to next program or episode)
   const handleProgramEnded = useCallback(() => {
     if (currentProgram?.availableFiles && currentProgram.availableFiles.length > 1) {
-      // Find current file index and advance to next episode
+      // Find current file index and advance to next distinct episode
       const curFile = currentProgram.videoUrl;
       const files = currentProgram.availableFiles;
       const curIdx = files.findIndex((f) => f.videoUrl === curFile);
-      if (curIdx !== -1 && curIdx < files.length - 1) {
-        const nextEp = files[curIdx + 1];
-        const baseTitle = currentProgram.seriesTitle || currentProgram.title.split(' - ')[0] || currentProgram.title;
-        setActiveExplicitProgram({
-          ...currentProgram,
-          seriesTitle: baseTitle,
-          videoUrl: nextEp.videoUrl,
-          title: `${baseTitle} - ${nextEp.displayName}`,
-          duration: nextEp.duration,
-          seekSeconds: 0,
-          isAuxiliary: false,
-        });
-        setActiveEngine('direct');
-        return;
+      if (curIdx !== -1) {
+        const curKey = getCanonicalEpisodeKey(files[curIdx].name || files[curIdx].displayName || '');
+        let nextIdx = curIdx + 1;
+        while (
+          nextIdx < files.length &&
+          getCanonicalEpisodeKey(files[nextIdx].name || files[nextIdx].displayName || '') === curKey
+        ) {
+          nextIdx++;
+        }
+
+        if (nextIdx < files.length) {
+          const nextEp = files[nextIdx];
+          const baseTitle = currentProgram.seriesTitle || currentProgram.title.split(' - ')[0] || currentProgram.title;
+          setActiveExplicitProgram({
+            ...currentProgram,
+            seriesTitle: baseTitle,
+            videoUrl: nextEp.videoUrl,
+            candidateStreamUrls: nextEp.candidateStreamUrls || [nextEp.videoUrl],
+            title: `${baseTitle} - ${nextEp.displayName}`,
+            duration: nextEp.duration,
+            seekSeconds: 0,
+            isAuxiliary: false,
+          });
+          setActiveEngine('direct');
+          return;
+        }
       }
     }
 
@@ -408,6 +421,7 @@ export default function App() {
         ...currentProgram,
         seriesTitle: baseTitle,
         videoUrl: ep.videoUrl,
+        candidateStreamUrls: ep.candidateStreamUrls || [ep.videoUrl],
         title: `${baseTitle} - ${ep.displayName}`,
         duration: ep.duration,
         seekSeconds: 0,
@@ -445,6 +459,16 @@ export default function App() {
     const nextIdx = (modes.indexOf(colorMode) + 1) % modes.length;
     setColorMode(modes[nextIdx]);
   }, [colorMode]);
+
+  // Cycle aspect ratio: AUTO -> 4:3 -> 16:9 -> AUTO
+  const handleCycleAspectRatio = useCallback(() => {
+    audio.playSwitch(true);
+    setAspectRatio((prev) => {
+      if (prev === 'auto') return '4:3';
+      if (prev === '4:3') return '16:9';
+      return 'auto';
+    });
+  }, []);
 
   // Fullscreen
   const handleToggleFullscreen = () => {
@@ -527,7 +551,7 @@ export default function App() {
         handleRestartProgram();
       } else if (key.toLowerCase() === 'a') {
         e.preventDefault();
-        setAspectRatio((a) => (a === '4:3' ? '16:9' : '4:3'));
+        handleCycleAspectRatio();
       } else if (key.toLowerCase() === 'f') {
         e.preventDefault();
         handleToggleFullscreen();
@@ -548,6 +572,7 @@ export default function App() {
     handleSelectChannelByNumber,
     handleRestartProgram,
     handleCycleColorMode,
+    handleCycleAspectRatio,
     handleOpenChannelStudio,
     currentProgram,
   ]);
@@ -563,7 +588,7 @@ export default function App() {
         curvatureEnabled={curvatureEnabled}
         onToggleCurvature={() => setCurvatureEnabled((c) => !c)}
         aspectRatio={aspectRatio}
-        onToggleAspectRatio={() => setAspectRatio((a) => (a === '4:3' ? '16:9' : '4:3'))}
+        onToggleAspectRatio={handleCycleAspectRatio}
         remoteOpen={remoteOpen}
         onToggleRemote={() => setRemoteOpen((r) => !r)}
         onOpenGuide={() => setGuideOpen(true)}
@@ -600,7 +625,7 @@ export default function App() {
           curvatureEnabled={curvatureEnabled}
           onToggleCurvature={() => setCurvatureEnabled((c) => !c)}
           aspectRatio={aspectRatio}
-          onToggleAspectRatio={() => setAspectRatio((a) => (a === '4:3' ? '16:9' : '4:3'))}
+          onToggleAspectRatio={handleCycleAspectRatio}
           trackingOffset={trackingOffset}
           onTrackingChange={setTrackingOffset}
           antennaAngle={antennaAngle}
@@ -652,7 +677,7 @@ export default function App() {
         onRestartProgram={handleRestartProgram}
         liveTvMode={liveTvMode}
         aspectRatio={aspectRatio}
-        onToggleAspectRatio={() => setAspectRatio((a) => (a === '4:3' ? '16:9' : '4:3'))}
+        onToggleAspectRatio={handleCycleAspectRatio}
         onRandomChannel={handleRandomChannel}
         colorMode={colorMode}
         onCycleColorMode={handleCycleColorMode}

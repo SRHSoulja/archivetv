@@ -45,7 +45,7 @@ export default function RemoteControl({
   onToggleLiveTv,
   onRestartProgram,
   liveTvMode,
-  aspectRatio = '4:3',
+  aspectRatio = 'auto',
   onToggleAspectRatio,
   onRandomChannel,
   colorMode = 'color',
@@ -417,11 +417,11 @@ export default function RemoteControl({
                 triggerIr();
                 onToggleAspectRatio();
               }}
-              title="Toggle Aspect Ratio (4:3 / 16:9)"
+              title="Cycle Aspect Ratio (AUTO / 4:3 / 16:9)"
               className="py-1.5 px-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-zinc-300 rounded font-pixel text-[10px] flex items-center justify-center gap-1 cursor-pointer"
             >
               <Tv className="w-3 h-3 text-blue-400" />
-              <span>{aspectRatio}</span>
+              <span>{aspectRatio?.toUpperCase() || 'AUTO'}</span>
             </button>
           )}
 

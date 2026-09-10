@@ -23,7 +23,7 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }) {
     { key: 'S', desc: 'Open Deep Archive Search & Explorer' },
     { key: 'T', desc: 'Open VHS Cassette Tape Shelf' },
     { key: 'R', desc: 'Toggle Handheld Infrared Remote' },
-    { key: 'A', desc: 'Toggle Aspect Ratio (4:3 / 16:9)' },
+    { key: 'A', desc: 'Cycle Aspect Ratio (Auto / 4:3 / 16:9)' },
     { key: 'F', desc: 'Toggle Fullscreen Mode' },
   ];
 

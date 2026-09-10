@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import { Radio, VolumeX } from 'lucide-react';
 import { audio } from '../services/soundEffects';
+import { getCanonicalEpisodeKey } from '../services/archiveApi';
 
 const CrtScreen = forwardRef(function CrtScreen(
   {
@@ -20,7 +21,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     muted,
     scanlinesEnabled = true,
     curvatureEnabled = true,
-    aspectRatio = '4:3',
+    aspectRatio = 'auto',
     trackingOffset = 0,
     signalQuality = 100,
     liveTvMode = false,
@@ -46,6 +47,7 @@ const CrtScreen = forwardRef(function CrtScreen(
   const [duration, setDuration] = useState(0);
   const [osdVisible, setOsdVisible] = useState(true);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [detectedAspectRatio, setDetectedAspectRatio] = useState('4:3');
 
   // Direct candidate streams & graceful fallback state
   const [candidateIndex, setCandidateIndex] = useState(0);
@@ -53,7 +55,7 @@ const CrtScreen = forwardRef(function CrtScreen(
   const [embedTime, setEmbedTime] = useState(0);
   const [embedPlaying, setEmbedPlaying] = useState(true);
 
-  // Compute prioritized list of direct playable video URLs for this item
+  // Compute prioritized list of direct playable video URLs for this item / episode
   const candidateUrls = useMemo(() => {
     if (!currentProgram) return [];
     const list = [];
@@ -63,23 +65,20 @@ const CrtScreen = forwardRef(function CrtScreen(
         if (u && !list.includes(u)) list.push(u);
       }
     }
-    if (Array.isArray(currentProgram.availableFiles)) {
+    // Also look for fallback files for THIS specific canonical episode only
+    if (Array.isArray(currentProgram.availableFiles) && currentProgram.videoUrl) {
+      const curName = currentProgram.videoFile || currentProgram.videoUrl.split('/').pop();
+      const curKey = getCanonicalEpisodeKey(curName);
       for (const f of currentProgram.availableFiles) {
-        if (f.videoUrl && !list.includes(f.videoUrl)) {
-          const lower = (f.name || '').toLowerCase();
-          if (
-            lower.endsWith('.mp4') ||
-            lower.endsWith('.m4v') ||
-            lower.endsWith('.webm') ||
-            lower.endsWith('.ia.mp4')
-          ) {
-            list.push(f.videoUrl);
-          }
+        if (getCanonicalEpisodeKey(f.name) === curKey && f.videoUrl && !list.includes(f.videoUrl)) {
+          list.push(f.videoUrl);
         }
       }
     }
     return list;
   }, [currentProgram]);
+
+  const effectiveAspectRatio = aspectRatio === 'auto' ? detectedAspectRatio : aspectRatio;
 
   const activeVideoUrl = candidateUrls[candidateIndex] || currentProgram?.videoUrl || null;
   const canPlayDirect = activeEngine === 'direct' && Boolean(activeVideoUrl) && !streamFailedAll;
@@ -413,7 +412,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     setOsdVisible(true);
     const t = setTimeout(() => setOsdVisible(false), 5000);
     return () => clearTimeout(t);
-  }, [currentChannel?.number, currentProgram?.identifier]);
+  }, [currentChannel?.number, currentProgram?.identifier, aspectRatio]);
 
   // Build filter style for color modes and brightness
   const getFilterStyle = () => {
@@ -435,7 +434,7 @@ const CrtScreen = forwardRef(function CrtScreen(
         curvatureEnabled ? 'crt-curved' : ''
       }`}
       style={{
-        aspectRatio: aspectRatio === '4:3' ? '4/3' : '16/9',
+        aspectRatio: effectiveAspectRatio === '4:3' ? '4/3' : '16/9',
       }}
     >
       {/* 1. Direct HTML5 Video Player */}
@@ -443,11 +442,21 @@ const CrtScreen = forwardRef(function CrtScreen(
         <video
           ref={videoRef}
           src={activeVideoUrl}
-          className={`w-full h-full object-cover transition-opacity duration-300 ${
+          className={`w-full h-full object-contain bg-black transition-opacity duration-300 ${
             videoLoading ? 'opacity-20' : 'opacity-100'
           }`}
           style={{ filter: getFilterStyle() }}
           playsInline
+          onLoadedMetadata={(e) => {
+            const v = e.target;
+            if (v.duration && !isNaN(v.duration)) {
+              setDuration(v.duration);
+            }
+            if (v.videoWidth && v.videoHeight) {
+              const ratio = v.videoWidth / v.videoHeight;
+              setDetectedAspectRatio(ratio >= 1.5 ? '16:9' : '4:3');
+            }
+          }}
           onDurationChange={(e) => {
             if (e.target.duration && !isNaN(e.target.duration)) {
               setDuration(e.target.duration);
@@ -612,7 +621,7 @@ const CrtScreen = forwardRef(function CrtScreen(
           <div className="flex items-center gap-2 text-xs font-pixel bg-black/80 px-2.5 py-1 rounded border border-green-500/40 text-green-300">
             <span>{colorMode.toUpperCase()} MODE</span>
             <span>•</span>
-            <span>{aspectRatio}</span>
+            <span>{aspectRatio === 'auto' ? `AUTO (${effectiveAspectRatio})` : aspectRatio}</span>
           </div>
         </div>
       )}

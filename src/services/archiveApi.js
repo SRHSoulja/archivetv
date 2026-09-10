@@ -261,6 +261,28 @@ async function executeSearch(q, rows, sort, page) {
   }
 }
 
+/**
+ * Normalizes filenames to identify canonical episode groups.
+ * Strips container extensions (.mp4, .ia.mp4, .mkv, .avi, etc.) and
+ * automated Archive.org derivative tags (_512kb, _h264, _vbr, .ia, etc.),
+ * while preserving genuine distinct episode titles, cuts, parts, and numbers.
+ */
+export function getCanonicalEpisodeKey(filename) {
+  if (!filename) return '';
+  let stem = filename.toLowerCase().trim();
+
+  // 1. Strip file extension
+  stem = stem.replace(/\.(ia\.mp4|mp4|m4v|webm|ogv|mov|mkv|avi|flv|wmv|mpg|mpeg|ts)$/i, '');
+
+  // 2. Strip standard Archive.org derivative/transcode suffixes at end of stem
+  stem = stem.replace(/(\.ia|_ia|_512kb|_h264|_h264_hd|_vbr|_sd|_hd|_lores|_archive)$/i, '');
+
+  // 3. Normalize whitespace and delimiters
+  stem = stem.replace(/[._-]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+  return stem;
+}
+
 function scoreVideoFile(f, identifier) {
   const name = (f?.name || '').toLowerCase();
   const format = (f?.format || '').toLowerCase();
@@ -409,10 +431,61 @@ export async function resolvePlayableItem(inputIdentifier) {
       );
     });
 
+    // Group candidate files into canonical episodes to collapse automated IA derivatives (.ia.mp4, _512kb.mp4, etc.)
+    // while preserving genuine distinct episodes, parts, and cuts.
+    const episodeGroups = new Map();
+    for (const f of candidateFiles) {
+      const key = getCanonicalEpisodeKey(f.name);
+      if (!episodeGroups.has(key)) {
+        episodeGroups.set(key, []);
+      }
+      episodeGroups.get(key).push(f);
+    }
+
+    const availableFiles = [];
+    for (const [key, filesInGroup] of episodeGroups.entries()) {
+      const playable = filesInGroup.filter((f) => browserPlayableFiles.includes(f));
+      const sorted = (playable.length > 0 ? playable : filesInGroup).sort(
+        (a, b) => scoreVideoFile(b, identifier) - scoreVideoFile(a, identifier)
+      );
+      const primary = sorted[0];
+      const sortedPlayable = playable.sort(
+        (a, b) => scoreVideoFile(b, identifier) - scoreVideoFile(a, identifier)
+      );
+      const groupCandidateUrls = sortedPlayable.map(
+        (f) => `https://archive.org/download/${identifier}/${encodeURIComponent(f.name)}`
+      );
+
+      availableFiles.push({
+        name: primary.name,
+        displayName: cleanFileName(primary.name, identifier),
+        canonicalKey: key,
+        format: primary.format || 'Video',
+        size: parseInt(primary.size, 10) || 0,
+        duration: parseLength(primary.length),
+        videoUrl: `https://archive.org/download/${identifier}/${encodeURIComponent(primary.name)}`,
+        candidateStreamUrls:
+          groupCandidateUrls.length > 0
+            ? groupCandidateUrls
+            : [`https://archive.org/download/${identifier}/${encodeURIComponent(primary.name)}`],
+        isBrowserPlayable: browserPlayableFiles.some((b) => b.name === primary.name),
+      });
+    }
+
+    // Sort available files naturally by name / episode number
+    availableFiles.sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+    );
+
     let primaryVideo = null;
     let candidateStreamUrls = [];
 
-    if (browserPlayableFiles.length > 0) {
+    if (availableFiles.length > 0) {
+      // Primary video is the first episode's primary file, or highest-scored playable file
+      const firstPlayable = availableFiles.find((f) => f.isBrowserPlayable) || availableFiles[0];
+      primaryVideo = files.find((f) => f.name === firstPlayable.name) || null;
+      candidateStreamUrls = firstPlayable.candidateStreamUrls || [];
+    } else if (browserPlayableFiles.length > 0) {
       const sortedPlayable = [...browserPlayableFiles].sort(
         (a, b) => scoreVideoFile(b, identifier) - scoreVideoFile(a, identifier)
       );
@@ -421,35 +494,6 @@ export async function resolvePlayableItem(inputIdentifier) {
         (f) => `https://archive.org/download/${identifier}/${encodeURIComponent(f.name)}`
       );
     }
-
-    const sortedCandidates = [...candidateFiles].sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
-    );
-
-    // Deduplicate candidate files for episode listing:
-    // If both 'episode.mp4' and 'episode.ia.mp4' exist, keep 'episode.mp4'
-    const deduplicatedCandidates = sortedCandidates.filter((f) => {
-      const lower = f.name.toLowerCase();
-      if (lower.endsWith('.ia.mp4')) {
-        const baseName = lower.slice(0, -7); // strip .ia.mp4
-        const hasBase = candidateFiles.some((cf) => {
-          const cfLower = cf.name.toLowerCase();
-          return cfLower === baseName + '.mp4' || cfLower === baseName + '.m4v';
-        });
-        if (hasBase) return false; // Skip redundant .ia derivative row!
-      }
-      return true;
-    });
-
-    const availableFiles = deduplicatedCandidates.map((f) => ({
-      name: f.name,
-      displayName: cleanFileName(f.name, identifier),
-      format: f.format || 'Video',
-      size: parseInt(f.size, 10) || 0,
-      duration: parseLength(f.length),
-      videoUrl: `https://archive.org/download/${identifier}/${encodeURIComponent(f.name)}`,
-      isBrowserPlayable: browserPlayableFiles.some((b) => b.name === f.name),
-    }));
 
     const title = meta.title || identifier.replace(/[-_]/g, ' ');
     const desc = cleanDescription(meta.description || '');
