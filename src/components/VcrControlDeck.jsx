@@ -10,7 +10,6 @@ import {
   Bookmark,
   BookmarkCheck,
   List,
-  Tv,
 } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { isBookmarked, saveBookmark, removeBookmark } from '../services/archiveApi';
@@ -25,8 +24,6 @@ export default function VcrControlDeck({
   onRestart,
   playbackRate = 1,
   onChangePlaybackRate,
-  activeEngine = 'direct',
-  onToggleEngine,
   onOpenEpisodes,
   episodesCount = 0,
 }) {
@@ -306,18 +303,6 @@ export default function VcrControlDeck({
             }`}
           >
             {bookmarked ? <BookmarkCheck className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
-          </button>
-
-          {/* Player Engine Switch */}
-          <button
-            onClick={onToggleEngine}
-            title="Toggle between Direct CRT player and Archive.org Tube embed"
-            className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 font-pixel text-[11px] flex items-center gap-1 cursor-pointer transition"
-          >
-            <Tv className="w-3.5 h-3.5 text-green-400" />
-            <span className="hidden lg:inline">
-              {activeEngine === 'embed' ? 'TUBE EMBED' : 'DIRECT CRT'}
-            </span>
           </button>
         </div>
       </div>
