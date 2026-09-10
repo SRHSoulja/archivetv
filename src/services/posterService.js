@@ -2,12 +2,17 @@
 // Fetches authentic posters from Wikimedia Commons / Wikipedia API & Archive.org image files,
 // with persistent localStorage caching to minimize network lookups and avoid rate limits.
 
-const POSTER_CACHE_KEY = 'archivetv_poster_cache_v3';
+const POSTER_CACHE_KEY = 'archivetv_poster_cache_v4';
 const posterMemoryCache = new Map();
 
 // Known authentic posters for classic public domain and archive masterpieces
 const CURATED_POSTERS = {
-  // The Lone Ranger (1949 TV Series starring Clayton Moore & Jay Silverheels - NOT Johnny Depp!)
+  // Teenage Mutant Ninja Turtles (1987 Classic Animated Series)
+  'tmnt-season-1-2': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
+  'Teenage_Mutant_Ninja_Turtles_1987': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
+  'Teenage_Mutant_Ninja_Turtles': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
+
+  // The Lone Ranger (1949 TV Series starring Clayton Moore & Jay Silverheels)
   'theloneranger_201705': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Lone_ranger_silver_1965.JPG/500px-Lone_ranger_silver_1965.JPG',
   'The_Lone_Ranger': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Lone_ranger_silver_1965.JPG/500px-Lone_ranger_silver_1965.JPG',
   'The_Lone_Ranger__Enter_the_Lone_Ranger': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Lone_ranger_silver_1965.JPG/500px-Lone_ranger_silver_1965.JPG',
@@ -86,9 +91,10 @@ export function cleanTitleForSearch(title) {
   return title
     .replace(/[_]/g, ' ')
     .replace(/^the\s+lone\s+ranger\s*[:\-].*$/i, 'The Lone Ranger 1949 TV series')
+    .replace(/\bteenage\s+mutant\s+ninja\s+turtles\b.*$/i, 'Teenage Mutant Ninja Turtles 1987 TV series')
     .replace(/\s*\([^)]*\)/g, '')
     .replace(/\s*\[[^\]]*\]/g, '')
-    .replace(/\b(1080p|720p|480p|dvd|bluray|vhs|remastered|restored|rip|complete|full movie|hd)\b/gi, '')
+    .replace(/\b(1080p|720p|480p|dvd|bluray|vhs|remastered|restored|rip|complete|full movie|hd|season\s*\d+|upscale)\b/gi, '')
     .replace(/\s{2,}/g, ' ')
     .trim();
 }
@@ -117,7 +123,6 @@ export async function fetchTheatricalPoster(title, year = '', identifier = '') {
     return CURATED_POSTERS[normalizedKey];
   }
 
-  // Look for exact matches in curated list ignoring case
   for (const [k, v] of Object.entries(CURATED_POSTERS)) {
     if (k.toLowerCase() === normalizedKey.toLowerCase()) {
       saveLocalPosterCache(cacheKey, v);
@@ -127,7 +132,38 @@ export async function fetchTheatricalPoster(title, year = '', identifier = '') {
 
   if (!clean || clean.length < 3) return null;
 
-  // 3. Query Wikipedia API with search + pageimages
+  // 3a. Try opensearch to find exact Wikipedia article title first
+  try {
+    const openSearchUrl = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(
+      clean
+    )}&limit=3&format=json&origin=*`;
+    const openRes = await fetch(openSearchUrl);
+    if (openRes.ok) {
+      const openData = await openRes.json();
+      const articleTitles = openData[1] || [];
+      if (articleTitles.length > 0) {
+        // Query thumbnail for the matched article titles
+        const titlesQuery = articleTitles.slice(0, 3).join('|');
+        const imgUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(
+          titlesQuery
+        )}&prop=pageimages&pilicense=any&pithumbsize=500&format=json&origin=*`;
+        const imgRes = await fetch(imgUrl);
+        if (imgRes.ok) {
+          const imgData = await imgRes.json();
+          const pages = imgData?.query?.pages || {};
+          for (const page of Object.values(pages)) {
+            const thumb = page?.thumbnail?.source;
+            if (thumb) {
+              saveLocalPosterCache(cacheKey, thumb);
+              return thumb;
+            }
+          }
+        }
+      }
+    }
+  } catch {}
+
+  // 3b. Fallback generator search
   const isYearValid = year && year !== 'Vintage' && parseInt(year, 10) > 1900;
   const searchQueries = isYearValid
     ? [
@@ -136,13 +172,13 @@ export async function fetchTheatricalPoster(title, year = '', identifier = '') {
         `${clean} (${year})`,
         `${clean} film`,
       ]
-    : [`${clean} film`, `${clean} TV series`, clean];
+    : [`${clean} TV series`, `${clean} film`, clean];
 
   for (const q of searchQueries) {
     try {
       const endpoint = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(
         q
-      )}&gsrlimit=1&prop=pageimages&pilicense=any&pithumbsize=500&format=json&origin=*`;
+      )}&gsrlimit=5&prop=pageimages&pilicense=any&pithumbsize=500&format=json&origin=*`;
 
       const res = await fetch(endpoint, {
         headers: {
@@ -155,11 +191,13 @@ export async function fetchTheatricalPoster(title, year = '', identifier = '') {
       const data = await res.json();
       const pages = data?.query?.pages;
       if (pages) {
-        const firstPage = Object.values(pages)[0];
-        const posterUrl = firstPage?.thumbnail?.source;
-        if (posterUrl) {
-          saveLocalPosterCache(cacheKey, posterUrl);
-          return posterUrl;
+        // Find first page that actually contains a valid thumbnail
+        for (const page of Object.values(pages)) {
+          const posterUrl = page?.thumbnail?.source;
+          if (posterUrl) {
+            saveLocalPosterCache(cacheKey, posterUrl);
+            return posterUrl;
+          }
         }
       }
     } catch {}

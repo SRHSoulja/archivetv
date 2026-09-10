@@ -458,19 +458,34 @@ const CrtScreen = forwardRef(function CrtScreen(
     return () => clearTimeout(t);
   }, [currentChannel?.number, currentProgram?.identifier, aspectRatio]);
 
-  // Derive the content era from the program year for era-aware visual styling
+  // Derive the content era from the program year or title for era-aware visual styling
   const contentEra = useMemo(() => {
+    let year = null;
     const yearStr = currentProgram?.year;
-    if (!yearStr || yearStr === 'Vintage') return 'modern';
-    const year = parseInt(yearStr, 10);
-    if (isNaN(year)) return 'modern';
+    if (yearStr && yearStr !== 'Vintage') {
+      const parsed = parseInt(String(yearStr).slice(0, 4), 10);
+      if (!isNaN(parsed) && parsed >= 1900 && parsed <= 2035) {
+        year = parsed;
+      }
+    }
+
+    if (!year) {
+      // Scan title and identifier for explicit year (e.g. "1987", "1993", "1959")
+      const textToScan = `${currentProgram?.title || ''} ${currentProgram?.identifier || ''}`;
+      const match = textToScan.match(/\b(19\d\d|20[0-2]\d)\b/);
+      if (match) {
+        year = parseInt(match[1], 10);
+      }
+    }
+
+    if (!year) return 'modern';
     if (year < 1930) return 'silent';      // Silent Era: heavy B&W grain
     if (year < 1950) return 'golden';      // Golden Age: warm sepia, slight flicker
     if (year < 1965) return 'early-color'; // Early Color TV: desaturated, soft
     if (year < 1980) return 'broadcast';   // Classic Broadcast: vivid but warm
-    if (year < 2000) return 'vhs';         // VHS Era: slightly washed, warm
+    if (year < 2000) return 'vhs';         // VHS Era (80s & 90s, e.g. 1987 TMNT): authentic warm VHS glow
     return 'modern';                        // Digital era: clean
-  }, [currentProgram?.year]);
+  }, [currentProgram?.year, currentProgram?.title, currentProgram?.identifier]);
 
   // Build filter style for color modes, brightness, AND era-aware automatic tinting
   const getFilterStyle = () => {

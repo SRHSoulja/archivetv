@@ -182,10 +182,13 @@ export async function searchArchive(query, options = {}) {
 
       const filesCount = parseInt(doc.files_count, 10) || 1;
 
+      const title = doc.title || doc.identifier.replace(/[-_]/g, ' ');
+      const year = extractYearFromMetadata(doc.year, title, doc.identifier);
+
       return {
         identifier: doc.identifier,
-        title: doc.title || doc.identifier.replace(/[-_]/g, ' '),
-        year: doc.year || 'Vintage',
+        title,
+        year,
         description: cleanDescription(doc.description),
         descriptionSnippet: snippet,
         downloads: doc.downloads || 0,
@@ -499,10 +502,12 @@ export async function resolvePlayableItem(inputIdentifier) {
     const desc = cleanDescription(meta.description || '');
     const duration = primaryVideo ? parseLength(primaryVideo.length) : 3600;
 
+    const year = extractYearFromMetadata(meta.year || meta.date, title, identifier);
+
     const resolved = {
       identifier,
       title,
-      year: meta.year || meta.date?.slice(0, 4) || 'Vintage',
+      year,
       description: desc || 'Public domain broadcast from the Internet Archive.',
       videoFile: primaryVideo ? primaryVideo.name : null,
       videoUrl: primaryVideo
@@ -626,6 +631,30 @@ export function cleanDescription(desc) {
     .trim();
   return clean.length > 300 ? clean.slice(0, 297) + '...' : clean;
 }
+
+export function extractYearFromMetadata(rawYear, title = '', identifier = '') {
+  if (rawYear && String(rawYear).trim() !== 'Vintage') {
+    const parsed = parseInt(String(rawYear).slice(0, 4), 10);
+    if (!isNaN(parsed) && parsed >= 1900 && parsed <= 2035) {
+      return String(parsed);
+    }
+  }
+
+  // Scan title and identifier for explicit release year (e.g. "1987", "1993", "1959")
+  for (const text of [title, identifier]) {
+    if (!text) continue;
+    const match = text.match(/\b(19\d\d|20[0-2]\d)\b/);
+    if (match) {
+      const y = parseInt(match[1], 10);
+      if (y >= 1900 && y <= 2035) {
+        return String(y);
+      }
+    }
+  }
+
+  return 'Vintage';
+}
+
 
 /**
  * Sanitizes program items to prevent storage bloat (e.g. strips duplicated availableFiles arrays).
