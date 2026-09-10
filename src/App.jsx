@@ -9,7 +9,13 @@ import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import EpisodePickerModal from './components/EpisodePickerModal';
 import ChannelCustomizerModal from './components/ChannelCustomizerModal';
 import AboutModal from './components/AboutModal';
-import { getChannelLineup, calculateLiveTvSlot, resolvePlayableItem } from './services/archiveApi';
+import {
+  getChannelLineup,
+  calculateLiveTvSlot,
+  resolvePlayableItem,
+  saveCustomChannel,
+  decodeSharedChannel,
+} from './services/archiveApi';
 import { audio } from './services/soundEffects';
 
 export default function App() {
@@ -108,6 +114,34 @@ export default function App() {
       localStorage.setItem('archivetv_aspect_ratio', aspectRatio);
     } catch {}
   }, [aspectRatio]);
+
+  // Automatic Channel Import from URL Share Links (?shareChannel=... or ?importChannel=...)
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const sharedData = params.get('shareChannel') || params.get('importChannel');
+      if (sharedData) {
+        const decoded = decodeSharedChannel(sharedData);
+        if (decoded) {
+          saveCustomChannel(decoded);
+          const fullLineup = getChannelLineup();
+          setChannels(fullLineup);
+          const targetIndex = fullLineup.findIndex(
+            (c) => c.id === decoded.id || (c.number === decoded.number && c.name === decoded.name)
+          );
+          if (targetIndex !== -1) {
+            setCurrentChannelIndex(targetIndex);
+            setCurrentProgramIndex(0);
+          }
+          // Clean the address bar without reload
+          window.history.replaceState({}, document.title, window.location.pathname);
+          audio.playChannelZap(0.4);
+        }
+      }
+    } catch (err) {
+      console.error('Error importing shared channel from URL:', err);
+    }
+  }, []);
 
   // Modals
   const [remoteOpen, setRemoteOpen] = useState(true);

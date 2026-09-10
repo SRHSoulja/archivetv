@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   Radio,
@@ -15,6 +15,9 @@ import {
   Search,
   Loader2,
   CheckCircle,
+  Download,
+  Upload,
+  Share2,
 } from 'lucide-react';
 import {
   getCustomChannels,
@@ -26,6 +29,10 @@ import {
   resolvePlayableItem,
   getChannelLineup,
   searchArchive,
+  exportChannelsToJson,
+  importChannelsFromJson,
+  encodeChannelForShare,
+  sanitizeProgram,
 } from '../services/archiveApi';
 import { audio } from '../services/soundEffects';
 
@@ -36,6 +43,7 @@ export default function ChannelCustomizerModal({
   onTuneChannel,
   initialDroppedUrl = '',
 }) {
+  const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState(initialDroppedUrl ? 'drop' : 'lineup');
   const [customChannels, setCustomChannels] = useState([]);
   const [allChannels, setAllChannels] = useState([]);
@@ -196,22 +204,23 @@ export default function ChannelCustomizerModal({
 
       let programsToAdd = [];
       if (resolved.availableFiles && resolved.availableFiles.length > 1) {
-        programsToAdd = resolved.availableFiles.map((file, idx) => ({
-          identifier: resolved.identifier,
-          title: `${resolved.title}: ${file.displayName}`,
-          seriesTitle: resolved.title,
-          year: resolved.year || 'Vintage',
-          description: `Episode ${idx + 1}: ${file.displayName}. ${resolved.description || ''}`,
-          videoFile: file.name,
-          videoUrl: file.videoUrl,
-          embedUrl: resolved.embedUrl,
-          thumbnailUrl: resolved.thumbnailUrl,
-          duration: file.duration || resolved.duration || 1800,
-          size: file.size || 0,
-          availableFiles: resolved.availableFiles,
-        }));
+        programsToAdd = resolved.availableFiles.map((file, idx) =>
+          sanitizeProgram({
+            identifier: resolved.identifier,
+            title: `${resolved.title}: ${file.displayName}`,
+            seriesTitle: resolved.title,
+            year: resolved.year || 'Vintage',
+            description: `Episode ${idx + 1}: ${file.displayName}. ${resolved.description || ''}`,
+            videoFile: file.name,
+            videoUrl: file.videoUrl,
+            embedUrl: resolved.embedUrl,
+            thumbnailUrl: resolved.thumbnailUrl,
+            duration: file.duration || resolved.duration || 1800,
+            size: file.size || 0,
+          })
+        );
       } else {
-        programsToAdd = [resolved];
+        programsToAdd = [sanitizeProgram(resolved)];
       }
 
       let chanName = '';
@@ -292,22 +301,23 @@ export default function ChannelCustomizerModal({
 
     if (addAllEpisodes && inspectedItem.availableFiles && inspectedItem.availableFiles.length > 1) {
       // Add each file as an episode program
-      programsToAdd = inspectedItem.availableFiles.map((file, idx) => ({
-        identifier: inspectedItem.identifier,
-        title: `${inspectedItem.title}: ${file.displayName}`,
-        seriesTitle: inspectedItem.title,
-        year: inspectedItem.year || 'Vintage',
-        description: `Episode ${idx + 1}: ${file.displayName}. ${inspectedItem.description || ''}`,
-        videoFile: file.name,
-        videoUrl: file.videoUrl,
-        embedUrl: inspectedItem.embedUrl,
-        thumbnailUrl: inspectedItem.thumbnailUrl,
-        duration: file.duration || inspectedItem.duration || 1800,
-        size: file.size || 0,
-        availableFiles: inspectedItem.availableFiles,
-      }));
+      programsToAdd = inspectedItem.availableFiles.map((file, idx) =>
+        sanitizeProgram({
+          identifier: inspectedItem.identifier,
+          title: `${inspectedItem.title}: ${file.displayName}`,
+          seriesTitle: inspectedItem.title,
+          year: inspectedItem.year || 'Vintage',
+          description: `Episode ${idx + 1}: ${file.displayName}. ${inspectedItem.description || ''}`,
+          videoFile: file.name,
+          videoUrl: file.videoUrl,
+          embedUrl: inspectedItem.embedUrl,
+          thumbnailUrl: inspectedItem.thumbnailUrl,
+          duration: file.duration || inspectedItem.duration || 1800,
+          size: file.size || 0,
+        })
+      );
     } else {
-      programsToAdd = [inspectedItem];
+      programsToAdd = [sanitizeProgram(inspectedItem)];
     }
 
     if (targetChannelId === 'NEW_CHANNEL' || customChannels.length === 0) {
@@ -337,6 +347,96 @@ export default function ChannelCustomizerModal({
       setUrlInput('');
       setInspectedItem(null);
     }, 2800);
+  };
+
+  const handleExportLineup = () => {
+    audio.playSwitch(true);
+    const jsonStr = exportChannelsToJson(true);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `archivetv-custom-lineup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    try {
+      navigator.clipboard.writeText(jsonStr);
+    } catch {}
+
+    setDropSuccessMessage('✓ Custom channels JSON downloaded & copied to clipboard!');
+    setTimeout(() => setDropSuccessMessage(null), 4000);
+  };
+
+  const handleExportSingleChannel = (channel) => {
+    audio.playSwitch(true);
+    const jsonStr = JSON.stringify(channel, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `archivetv-ch${channel.number}-${(channel.callsign || 'chan').toLowerCase()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    try {
+      navigator.clipboard.writeText(jsonStr);
+    } catch {}
+
+    setDropSuccessMessage(`✓ Channel ${channel.number} (${channel.name}) exported to JSON!`);
+    setTimeout(() => setDropSuccessMessage(null), 3500);
+  };
+
+  const handleShareChannelLink = (channel) => {
+    audio.playSwitch(true);
+    const encoded = encodeChannelForShare(channel);
+    if (!encoded) {
+      alert('Could not generate share link.');
+      return;
+    }
+    const baseUrl = window.location.origin + window.location.pathname;
+    const shareUrl = `${baseUrl}?shareChannel=${encoded}`;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(shareUrl)
+        .then(() => {
+          setDropSuccessMessage(`✓ 1-Click share link for CH ${channel.number} copied to clipboard!`);
+          setTimeout(() => setDropSuccessMessage(null), 4500);
+        })
+        .catch(() => {
+          prompt('Copy this share URL:', shareUrl);
+        });
+    } else {
+      prompt('Copy this share URL:', shareUrl);
+    }
+  };
+
+  const handleImportFileInput = (e) => {
+    const file = e.target?.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const content = event.target?.result;
+        const updated = importChannelsFromJson(content);
+        setCustomChannels(updated);
+        setAllChannels(getChannelLineup());
+        if (onChannelsUpdated) onChannelsUpdated();
+        audio.playChannelZap(0.3);
+        setDropSuccessMessage(`✓ Successfully imported ${updated.length} custom channels!`);
+        setTimeout(() => setDropSuccessMessage(null), 4000);
+      } catch (err) {
+        alert(`Failed to import channels: ${err.message || 'Invalid JSON format'}`);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   const handleDeleteChannel = (channelId) => {
@@ -483,13 +583,56 @@ export default function ChannelCustomizerModal({
                 </p>
               </div>
 
-              <button
-                onClick={() => setIsCreatingNew((v) => !v)}
-                className="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-black font-pixel text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer shadow transition active:scale-95"
-              >
-                <Plus className="w-4 h-4" />
-                <span>+ CREATE NEW CHANNEL</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImportFileInput}
+                  accept=".json,application/json"
+                  className="hidden"
+                />
+
+                {customChannels.length > 0 && (
+                  <button
+                    onClick={handleExportLineup}
+                    className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-teal-300 border border-teal-600/50 font-pixel text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow transition active:scale-95"
+                    title="Export your custom channels as a JSON backup file"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>EXPORT (JSON)</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-pixel text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow transition active:scale-95"
+                  title="Import channels from a JSON file"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>IMPORT (JSON)</span>
+                </button>
+
+                <button
+                  onClick={() => setIsCreatingNew((v) => !v)}
+                  className="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-black font-pixel text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer shadow transition active:scale-95"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>+ CREATE NEW CHANNEL</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Persistence & Lineup Information Callout */}
+            <div className="bg-teal-950/40 border border-teal-500/30 rounded-xl p-3 text-xs font-mono text-teal-200/90 flex items-start gap-2.5">
+              <span className="text-base leading-none">💡</span>
+              <div className="space-y-1">
+                <p>
+                  <strong>Browser Persistence:</strong> Custom channels you build here are saved locally in your browser so they remain whenever you return to this device.
+                </p>
+                <p className="text-teal-300/80 text-[11px]">
+                  Want everyone visiting ArchiveTV to see your channel, or want to share it with a friend? Click the <strong>Share Link</strong> button on your channel card, or <strong>Export (JSON)</strong> to save a permanent copy!
+                </p>
+              </div>
             </div>
 
             {/* Create Channel Inline Form */}
@@ -660,7 +803,7 @@ export default function ChannelCustomizerModal({
                       </button>
 
                       {isCustom && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
                           <button
                             onClick={() => {
                               setTargetChannelId(ch.id);
@@ -681,6 +824,22 @@ export default function ChannelCustomizerModal({
                             className="py-1.5 px-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-pixel text-xs cursor-pointer"
                           >
                             EDIT ({progCount})
+                          </button>
+
+                          <button
+                            onClick={() => handleShareChannelLink(ch)}
+                            className="p-1.5 rounded-lg bg-zinc-800 hover:bg-teal-950 text-teal-400 hover:text-teal-300 border border-zinc-700 cursor-pointer transition active:scale-95"
+                            title="Copy 1-Click share link for this channel"
+                          >
+                            <Share2 className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={() => handleExportSingleChannel(ch)}
+                            className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700 cursor-pointer transition active:scale-95"
+                            title="Download channel definition as JSON"
+                          >
+                            <Download className="w-4 h-4" />
                           </button>
 
                           <button
