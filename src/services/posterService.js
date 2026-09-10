@@ -2,7 +2,7 @@
 // Fetches authentic posters from Wikimedia Commons / Wikipedia API & Archive.org image files,
 // with persistent localStorage caching to minimize network lookups and avoid rate limits.
 
-const POSTER_CACHE_KEY = 'archivetv_poster_cache_v7';
+const POSTER_CACHE_KEY = 'archivetv_poster_cache_v8';
 const posterMemoryCache = new Map();
 
 // Known authentic posters for classic public domain and archive masterpieces
@@ -89,6 +89,25 @@ function saveLocalPosterCache(key, url) {
 /**
  * Normalizes title strings for encyclopedia search (removes resolution tags, episode numbers, etc.)
  */
+// A Wikipedia hit is only usable if the article really is this programme.
+// Without this, a search for a title with no article of its own returns the
+// lead image of whatever loosely-related page came back -- a portrait, a
+// festival attendee, an unrelated person -- and reports success.
+function normalizeForMatch(value) {
+  return (value || '')
+    .toLowerCase()
+    .replace(/\(.*?\)/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isStrongMatch(articleTitle, cleanTitle) {
+  const a = normalizeForMatch(articleTitle);
+  const c = normalizeForMatch(cleanTitle);
+  return Boolean(a) && a === c;
+}
+
 export function cleanTitleForSearch(title) {
   if (!title) return '';
   return title
@@ -205,7 +224,7 @@ export async function fetchTheatricalPoster(title, year = '', identifier = '') {
             const matched = Object.values(pages).find(
               (p) => p.title && p.title.toLowerCase() === artTitle.toLowerCase()
             );
-            if (matched?.thumbnail?.source) {
+            if (matched?.thumbnail?.source && isStrongMatch(matched.title, clean)) {
               saveLocalPosterCache(cacheKey, matched.thumbnail.source);
               return matched.thumbnail.source;
             }
@@ -243,10 +262,12 @@ export async function fetchTheatricalPoster(title, year = '', identifier = '') {
       const data = await res.json();
       const pages = data?.query?.pages;
       if (pages) {
-        // Find first page that actually contains a valid thumbnail
-        for (const page of Object.values(pages)) {
+        const ranked = Object.values(pages).sort(
+          (a, b) => (a.index ?? 999) - (b.index ?? 999)
+        );
+        for (const page of ranked) {
           const posterUrl = page?.thumbnail?.source;
-          if (posterUrl) {
+          if (posterUrl && isStrongMatch(page.title, clean)) {
             saveLocalPosterCache(cacheKey, posterUrl);
             return posterUrl;
           }
