@@ -132,31 +132,43 @@ export default function App() {
   const currentPrograms = currentChannel?.programs || [];
   const baseProgram = currentPrograms[currentProgramIndex] || currentPrograms[0];
 
+  const [channelEpisodesMap, setChannelEpisodesMap] = useState({});
+
   // Current Program Resolver
   const currentProgram = useMemo(() => {
+    let prog = null;
     if (activeExplicitProgram) {
-      return {
+      prog = {
         ...activeExplicitProgram,
         seekSeconds: 0,
       };
+    } else if (baseProgram) {
+      if (liveTvMode) {
+        const slot = calculateLiveTvSlot(currentChannel);
+        const p = currentPrograms[slot.programIndex] || baseProgram;
+        prog = {
+          ...p,
+          seekSeconds: slot.seekSeconds,
+        };
+      } else {
+        prog = {
+          ...baseProgram,
+          seekSeconds: 0,
+        };
+      }
     }
 
-    if (!baseProgram) return null;
+    if (!prog) return null;
 
-    if (liveTvMode) {
-      const slot = calculateLiveTvSlot(currentChannel);
-      const prog = currentPrograms[slot.programIndex] || baseProgram;
+    if ((!prog.availableFiles || prog.availableFiles.length <= 1) && prog.identifier && channelEpisodesMap[prog.identifier]) {
       return {
         ...prog,
-        seekSeconds: slot.seekSeconds,
+        availableFiles: channelEpisodesMap[prog.identifier],
       };
     }
 
-    return {
-      ...baseProgram,
-      seekSeconds: 0,
-    };
-  }, [activeExplicitProgram, currentChannel, baseProgram, liveTvMode, currentPrograms]);
+    return prog;
+  }, [activeExplicitProgram, currentChannel, baseProgram, liveTvMode, currentPrograms, channelEpisodesMap]);
 
   const displayChannel = useMemo(() => {
     if (activeExplicitProgram) {
@@ -185,22 +197,22 @@ export default function App() {
     }, 350);
   }, []);
 
-  // Dynamic episode discovery: if tuned program has multiple files on Archive.org, resolve them
+  // Dynamic episode discovery: cache multi-files in memory without switching channel to AUX
   useEffect(() => {
-    if (!currentProgram?.identifier) return;
+    const progId = currentProgram?.identifier;
+    if (!progId) return;
     if (currentProgram.availableFiles && currentProgram.availableFiles.length > 1) return;
+    if (channelEpisodesMap[progId]) return;
 
     let isMounted = true;
-    resolvePlayableItem(currentProgram.identifier)
+    resolvePlayableItem(progId)
       .then((resolved) => {
         if (!isMounted) return;
         if (resolved?.availableFiles && resolved.availableFiles.length > 1) {
-          setActiveExplicitProgram((prev) => {
-            if (prev && prev.identifier === currentProgram.identifier) {
-              return { ...prev, availableFiles: resolved.availableFiles };
-            }
-            return { ...currentProgram, availableFiles: resolved.availableFiles };
-          });
+          setChannelEpisodesMap((prev) => ({
+            ...prev,
+            [progId]: resolved.availableFiles,
+          }));
         }
       })
       .catch(() => {});
@@ -208,12 +220,13 @@ export default function App() {
     return () => {
       isMounted = false;
     };
-  }, [currentProgram?.identifier, currentProgram?.availableFiles]);
+  }, [currentProgram?.identifier, currentProgram?.availableFiles, channelEpisodesMap]);
 
   // Channel Navigation Handlers
   const handleNextChannel = useCallback(() => {
     triggerChannelZap();
     setActiveExplicitProgram(null);
+    setActiveEngine('direct');
     setCurrentChannelIndex((prev) => (prev + 1) % channels.length);
     setCurrentProgramIndex(0);
   }, [channels.length, triggerChannelZap]);
@@ -221,6 +234,7 @@ export default function App() {
   const handlePrevChannel = useCallback(() => {
     triggerChannelZap();
     setActiveExplicitProgram(null);
+    setActiveEngine('direct');
     setCurrentChannelIndex((prev) => (prev - 1 + channels.length) % channels.length);
     setCurrentProgramIndex(0);
   }, [channels.length, triggerChannelZap]);
@@ -231,6 +245,7 @@ export default function App() {
       if (idx !== -1) {
         triggerChannelZap();
         setActiveExplicitProgram(null);
+        setActiveEngine('direct');
         setCurrentChannelIndex(idx);
         setCurrentProgramIndex(0);
       }
@@ -246,6 +261,7 @@ export default function App() {
       if (idx !== -1) {
         triggerChannelZap();
         setActiveExplicitProgram(null);
+        setActiveEngine('direct');
         setCurrentChannelIndex(idx);
         setCurrentProgramIndex(0);
       }
@@ -261,6 +277,7 @@ export default function App() {
     }
     triggerChannelZap();
     setActiveExplicitProgram(null);
+    setActiveEngine('direct');
     setCurrentChannelIndex(nextIdx);
     setCurrentProgramIndex(0);
   }, [channels.length, currentChannelIndex, triggerChannelZap]);

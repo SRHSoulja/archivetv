@@ -397,7 +397,29 @@ export function getChannelLineup() {
 export function getCustomChannels() {
   try {
     const raw = localStorage.getItem(CUSTOM_CHANNELS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const list = JSON.parse(raw);
+    if (!Array.isArray(list)) return [];
+    return list.map((c) => {
+      if (!c.programs || c.programs.length === 0) {
+        return {
+          ...c,
+          programs: [
+            {
+              identifier: 'classic_commercials_vol_1',
+              title: `${(c.name || 'CUSTOM BROADCAST').toUpperCase()} - SIGN-ON / TEST PATTERN`,
+              year: 'Vintage',
+              duration: 1800,
+              description: 'Vintage public domain station broadcast and test carrier signal.',
+              videoUrl: 'https://archive.org/download/classic_commercials_vol_1/classic_commercials_vol_1_512kb.mp4',
+              embedUrl: 'https://archive.org/embed/classic_commercials_vol_1',
+              thumbnailUrl: 'https://archive.org/services/img/classic_commercials_vol_1',
+            },
+          ],
+        };
+      }
+      return c;
+    });
   } catch {
     return [];
   }
@@ -405,6 +427,17 @@ export function getCustomChannels() {
 
 export function saveCustomChannel(channel) {
   const current = getCustomChannels();
+  const defaultInitialProgram = {
+    identifier: 'classic_commercials_vol_1',
+    title: `${(channel.name || 'CUSTOM BROADCAST').toUpperCase()} - SIGN-ON / TEST PATTERN`,
+    year: 'Vintage',
+    duration: 1800,
+    description: 'Vintage public domain station broadcast and test carrier signal.',
+    videoUrl: 'https://archive.org/download/classic_commercials_vol_1/classic_commercials_vol_1_512kb.mp4',
+    embedUrl: 'https://archive.org/embed/classic_commercials_vol_1',
+    thumbnailUrl: 'https://archive.org/services/img/classic_commercials_vol_1',
+  };
+
   if (channel.id) {
     const existingIdx = current.findIndex((c) => c.id === channel.id);
     if (existingIdx !== -1) {
@@ -430,7 +463,10 @@ export function saveCustomChannel(channel) {
     badge: channel.badge || 'CUSTOM',
     themeColor: channel.themeColor || '#14b8a6',
     description: channel.description || 'User curated channel from the Internet Archive.',
-    programs: channel.programs || [],
+    programs:
+      channel.programs && channel.programs.length > 0
+        ? channel.programs
+        : [defaultInitialProgram],
     isCustom: true,
   };
 

@@ -276,20 +276,35 @@ const CrtScreen = forwardRef(function CrtScreen(
       )}
 
       {/* 2. Universal Archive.org Tube Embed Player */}
-      {powerOn && (activeEngine === 'embed' || !currentProgram?.videoUrl) && currentProgram?.embedUrl && (
+      {powerOn && (activeEngine === 'embed' || !currentProgram?.videoUrl) && (currentProgram?.embedUrl || currentProgram?.identifier) && (
         <div
           className="absolute inset-0 w-full h-full bg-black flex items-center justify-center z-10"
           style={{ filter: getFilterStyle() }}
         >
           <iframe
             ref={iframeRef}
-            src={currentProgram.embedUrl}
+            src={currentProgram.embedUrl || `https://archive.org/embed/${currentProgram.identifier}`}
             title={currentProgram.title}
             className="w-full h-full border-0"
             allow="autoplay; fullscreen"
             allowFullScreen
             onLoad={() => setVideoLoading(false)}
           />
+        </div>
+      )}
+
+      {/* 2b. Standby Screen when channel has no scheduled programs */}
+      {powerOn && !currentProgram && (
+        <div className="absolute inset-0 bg-[#0c0a10] flex flex-col items-center justify-center text-center p-4 z-10 select-none font-pixel">
+          <div className="text-amber-400 text-lg md:text-xl font-bold tracking-widest animate-pulse mb-1">
+            PLEASE STAND BY
+          </div>
+          <div className="text-zinc-400 text-xs font-mono">
+            {currentChannel?.name || 'STATION SIGN-OFF'} • NO ACTIVE BROADCAST
+          </div>
+          <div className="text-zinc-500 text-[10px] font-mono mt-3 border border-zinc-700/80 px-2.5 py-1 rounded bg-black/80">
+            PRESS &apos;U&apos; TO OPEN CHANNEL STUDIO & DROP SHOWS
+          </div>
         </div>
       )}
 
