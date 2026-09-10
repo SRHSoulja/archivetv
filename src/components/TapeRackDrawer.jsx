@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { getBookmarks, removeBookmark } from '../services/archiveApi';
+import { fetchTheatricalPoster } from '../services/posterService';
 
 export default function TapeRackDrawer({
   isOpen,
@@ -21,11 +22,43 @@ export default function TapeRackDrawer({
   const [customError, setCustomError] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
 
+  const [posterMap, setPosterMap] = useState({});
+
+  const selectedChan = channels.find((c) => c.id === activeChannelId) || currentChannel || channels[0];
+  const tapes = selectedChan?.programs || [];
+
   useEffect(() => {
     if (isOpen) {
       setBookmarks(getBookmarks());
     }
   }, [isOpen]);
+
+  // Asynchronously fetch authentic theatrical posters / VHS box arts for displayed tapes
+  useEffect(() => {
+    if (!isOpen) return;
+    const currentList = activeTab === 'bookmarks' ? bookmarks : tapes;
+    if (!currentList || currentList.length === 0) return;
+
+    let isMounted = true;
+    const loadPosters = async () => {
+      for (const prog of currentList) {
+        if (!prog || !prog.identifier) continue;
+        if (posterMap[prog.identifier]) continue;
+
+        try {
+          const poster = await fetchTheatricalPoster(prog.title, prog.year, prog.identifier);
+          if (poster && isMounted) {
+            setPosterMap((prev) => ({ ...prev, [prog.identifier]: poster }));
+          }
+        } catch {}
+      }
+    };
+
+    loadPosters();
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, activeTab, activeChannelId, bookmarks, tapes]);
 
   const handleRemoveBookmark = (e, id) => {
     e.stopPropagation();
@@ -52,9 +85,6 @@ export default function TapeRackDrawer({
   };
 
   if (!isOpen) return null;
-
-  const selectedChan = channels.find((c) => c.id === activeChannelId) || currentChannel || channels[0];
-  const tapes = selectedChan?.programs || [];
 
   const handleTapeClick = (prog, idx) => {
     audio.playSwitch(true);
@@ -258,11 +288,20 @@ export default function TapeRackDrawer({
                   {/* Vertical Poster Box Art Artwork */}
                   <div className="relative aspect-[2/3] w-full bg-black overflow-hidden flex items-center justify-center">
                     <img
-                      src={prog.thumbnailUrl || `https://archive.org/services/img/${prog.identifier}`}
+                      src={
+                        posterMap[prog.identifier] ||
+                        prog.thumbnailUrl ||
+                        `https://archive.org/services/img/${prog.identifier}`
+                      }
                       alt={prog.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
-                        e.target.style.display = 'none';
+                        // If poster fails, fallback to archive thumbnail
+                        if (e.target.src !== prog.thumbnailUrl && prog.thumbnailUrl) {
+                          e.target.src = prog.thumbnailUrl;
+                        } else {
+                          e.target.style.display = 'none';
+                        }
                       }}
                     />
 
