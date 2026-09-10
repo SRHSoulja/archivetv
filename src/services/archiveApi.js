@@ -666,6 +666,71 @@ export function setCustomTitle(identifier, title) {
   } catch {}
 }
 
+// Local year corrections. Archive.org's year is often the upload date rather
+// than the broadcast/release date, and it is not ours to fix upstream.
+const CUSTOM_YEARS_KEY = 'archivetv_custom_years_v1';
+
+function loadCustomYears() {
+  try {
+    return JSON.parse(localStorage.getItem(CUSTOM_YEARS_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+let customYears = loadCustomYears();
+
+export function getCustomYear(identifier) {
+  return identifier ? customYears[identifier] || '' : '';
+}
+
+export function setCustomYear(identifier, year) {
+  if (!identifier) return;
+  const clean = String(year || '').trim();
+  const next = { ...customYears };
+  if (clean) next[identifier] = clean;
+  else delete next[identifier];
+  customYears = next;
+  try {
+    localStorage.setItem(CUSTOM_YEARS_KEY, JSON.stringify(next));
+  } catch {}
+}
+
+// Hand-arranged shelf order, as a list of identifiers. Anything not listed
+// sorts to the end, so a newly saved tape appears without disturbing the rest.
+const TAPE_ORDER_KEY = 'archivetv_tape_order_v1';
+
+export function getTapeOrder() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(TAPE_ORDER_KEY));
+    return Array.isArray(raw) ? raw : [];
+  } catch {
+    return [];
+  }
+}
+
+export function setTapeOrder(identifiers) {
+  try {
+    localStorage.setItem(TAPE_ORDER_KEY, JSON.stringify(identifiers || []));
+  } catch {}
+}
+
+const TAPE_SORT_KEY = 'archivetv_tape_sort_v1';
+
+export function getTapeSort() {
+  try {
+    return localStorage.getItem(TAPE_SORT_KEY) || 'default';
+  } catch {
+    return 'default';
+  }
+}
+
+export function setTapeSort(mode) {
+  try {
+    localStorage.setItem(TAPE_SORT_KEY, mode || 'default');
+  } catch {}
+}
+
 export function isBookmarked(identifier) {
   const current = getBookmarks();
   return current.some((b) => b.identifier === identifier);

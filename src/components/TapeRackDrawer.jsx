@@ -1,7 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon, Info } from 'lucide-react';
 import { audio } from '../services/soundEffects';
-import { getBookmarks, removeBookmark, getCustomTitle, setCustomTitle } from '../services/archiveApi';
+import {
+  getBookmarks,
+  removeBookmark,
+  getCustomTitle,
+  setCustomTitle,
+  getCustomYear,
+  setCustomYear,
+  getTapeOrder,
+  setTapeOrder,
+  getTapeSort,
+  setTapeSort,
+} from '../services/archiveApi';
 import { fetchTheatricalPoster, getCachedPosterSync } from '../services/posterService';
 import ArtOverridePanel from './ArtOverridePanel';
 
@@ -21,6 +32,9 @@ export default function TapeRackDrawer({
   const [renameDraft, setRenameDraft] = useState('');
   const [artTape, setArtTape] = useState(null);
   const [titleVersion, setTitleVersion] = useState(0);
+  const [sortMode, setSortMode] = useState(() => getTapeSort());
+  const [dragId, setDragId] = useState(null);
+  const [yearDraft, setYearDraft] = useState('');
   const [activeChannelId, setActiveChannelId] = useState(currentChannel?.id || channels[0]?.id || 'toons');
   const [customInput, setCustomInput] = useState('');
   const [customLoading, setCustomLoading] = useState(false);
@@ -48,6 +62,47 @@ export default function TapeRackDrawer({
     null;
 
   const tapes = (selectedChan?.programs || []).filter(Boolean);
+
+  const shownName = (p) => (getCustomTitle(p.identifier) || p.title || '').toLowerCase();
+  const shownYear = (p) => getCustomYear(p.identifier) || p.year || '';
+  const yearOf = (p) => {
+    const n = parseInt(shownYear(p), 10);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const baseList = (activeTab === 'bookmarks' ? bookmarks : tapes).filter(Boolean);
+
+  const sortedList = useMemo(() => {
+    const list = [...baseList];
+    if (sortMode === 'az') return list.sort((a, b) => shownName(a).localeCompare(shownName(b)));
+    if (sortMode === 'za') return list.sort((a, b) => shownName(b).localeCompare(shownName(a)));
+    if (sortMode === 'newest')
+      return list.sort((a, b) => (yearOf(b) ?? -Infinity) - (yearOf(a) ?? -Infinity));
+    if (sortMode === 'oldest')
+      return list.sort((a, b) => (yearOf(a) ?? Infinity) - (yearOf(b) ?? Infinity));
+    if (sortMode === 'custom') {
+      const order = getTapeOrder();
+      const at = (p) => {
+        const i = order.indexOf(p.identifier);
+        return i === -1 ? Number.MAX_SAFE_INTEGER : i;
+      };
+      return list.sort((a, b) => at(a) - at(b));
+    }
+    return list;
+    // titleVersion re-runs this after a rename or year edit changes the keys
+  }, [baseList, sortMode, titleVersion]);
+
+  const handleDropOn = (targetId) => {
+    if (!dragId || dragId === targetId) return;
+    const ids = sortedList.map((p) => p.identifier);
+    const from = ids.indexOf(dragId);
+    const to = ids.indexOf(targetId);
+    if (from === -1 || to === -1) return;
+    ids.splice(to, 0, ids.splice(from, 1)[0]);
+    setTapeOrder(ids);
+    setTitleVersion((v) => v + 1);
+    setDragId(null);
+  };
 
   // Asynchronously fetch authentic theatrical posters / VHS box arts for displayed tapes in batches
   useEffect(() => {
@@ -242,6 +297,30 @@ export default function TapeRackDrawer({
                 <span>CASSETTES</span>
               </button>
             </div>
+            <div className="flex items-center gap-1 bg-black/60 px-2.5 py-1 rounded-lg border border-zinc-700">
+              <span className="text-zinc-500 text-[10px] font-pixel">ORDER:</span>
+              <select
+                value={sortMode}
+                onChange={(e) => {
+                  audio.playKnobClick();
+                  setSortMode(e.target.value);
+                  setTapeSort(e.target.value);
+                }}
+                className="bg-transparent text-amber-300 text-[11px] font-mono focus:outline-none cursor-pointer"
+              >
+                <option value="default">As listed</option>
+                <option value="az">Title A-Z</option>
+                <option value="za">Title Z-A</option>
+                <option value="newest">Year, newest</option>
+                <option value="oldest">Year, oldest</option>
+                <option value="custom">Custom (drag)</option>
+              </select>
+            </div>
+
+            {sortMode === 'custom' && (
+              <span className="font-pixel text-[10px] text-amber-400/90">DRAG TO ARRANGE</span>
+            )}
+
             <div className="font-mono text-zinc-500 text-[11px] hidden md:block">
               {activeTab === 'bookmarks' ? `${bookmarks.length} TAPES SAVED` : 'SELECT TAPE'}
             </div>
@@ -287,7 +366,7 @@ export default function TapeRackDrawer({
               key={`grid_${titleVersion}`}
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
             >
-              {(activeTab === 'bookmarks' ? bookmarks : tapes).map((prog, idx) => {
+              {sortedList.map((prog, idx) => {
                 if (!prog) return null;
                 const posterSrc =
                   posterMap[prog.identifier] ||
@@ -298,6 +377,18 @@ export default function TapeRackDrawer({
                 return (
                   <div
                     key={`boxart_${activeTab}_${selectedChan?.id || 'ch'}_${prog.identifier || 'prog'}_${prog.videoFile || prog.videoUrl || ''}_${idx}`}
+                    draggable={sortMode === 'custom'}
+                    onDragStart={(e) => {
+                      setDragId(prog.identifier);
+                      e.dataTransfer.effectAllowed = 'move';
+                    }}
+                    onDragOver={(e) => {
+                      if (sortMode === 'custom') e.preventDefault();
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      handleDropOn(prog.identifier);
+                    }}
                     onClick={() => {
                       if (activeTab === 'bookmarks') {
                         audio.playSwitch(true);
@@ -369,7 +460,7 @@ export default function TapeRackDrawer({
                           {getCustomTitle(prog.identifier) || prog.title}
                         </div>
                         <div className="flex items-center justify-between mt-1 text-[9px] font-mono text-amber-300/90">
-                          <span>{prog.year || 'VINTAGE'}</span>
+                          <span>{shownYear(prog) || 'VINTAGE'}</span>
                           {prog.duration ? <span>{Math.round(prog.duration / 60)}M</span> : <span>HI-FI</span>}
                         </div>
                       </div>
@@ -381,6 +472,7 @@ export default function TapeRackDrawer({
                             e.stopPropagation();
                             audio.playKnobClick();
                             setRenameDraft(getCustomTitle(prog.identifier));
+                            setYearDraft(getCustomYear(prog.identifier));
                             setInfoTape(prog);
                           }}
                           className="p-1 rounded-full bg-black/80 hover:bg-amber-900 text-amber-300 border border-amber-700/80 cursor-pointer shadow"
@@ -418,7 +510,7 @@ export default function TapeRackDrawer({
           ) : (
             /* Physical VHS Cassette Tape Cartridge View */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(activeTab === 'bookmarks' ? bookmarks : tapes).map((prog, idx) => {
+              {sortedList.map((prog, idx) => {
                 if (!prog) return null;
                 return (
                   <div
@@ -499,7 +591,7 @@ export default function TapeRackDrawer({
                           {getCustomTitle(prog.identifier) || prog.title}
                         </div>
                         <div className="text-[10px] text-zinc-700 flex justify-between mt-0.5">
-                          <span>YEAR: {prog.year || 'VINTAGE'}</span>
+                          <span>YEAR: {shownYear(prog) || 'VINTAGE'}</span>
                           <span className="text-red-700 font-bold">SP MODE</span>
                         </div>
                       </div>
@@ -646,6 +738,47 @@ export default function TapeRackDrawer({
                 <p className="mt-1 text-[10px] leading-relaxed text-zinc-600">
                   Renames this tape for you only. Box art still resolves from the original title.
                 </p>
+
+                <div className="mt-3">
+                  <span className="font-pixel text-[10px] text-zinc-500 tracking-wider">YEAR</span>
+                  <div className="flex gap-2 mt-1">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={yearDraft}
+                      onChange={(e) => setYearDraft(e.target.value)}
+                      placeholder={infoTape.year || 'VINTAGE'}
+                      className="w-28 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1.5 text-xs text-zinc-100 placeholder-zinc-600 outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        audio.playKnobClick();
+                        setCustomYear(infoTape.identifier, yearDraft);
+                        setTitleVersion((v) => v + 1);
+                      }}
+                      className="px-3 rounded font-pixel text-[10px] tracking-wider bg-amber-600 hover:bg-amber-500 text-black font-bold cursor-pointer"
+                    >
+                      SAVE
+                    </button>
+                    {getCustomYear(infoTape.identifier) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCustomYear(infoTape.identifier, '');
+                          setYearDraft('');
+                          setTitleVersion((v) => v + 1);
+                        }}
+                        className="px-2 rounded font-pixel text-[10px] tracking-wider bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-zinc-300 cursor-pointer"
+                      >
+                        RESET
+                      </button>
+                    )}
+                  </div>
+                  <p className="mt-1 text-[10px] leading-relaxed text-zinc-600">
+                    Archive.org often records the upload year rather than the broadcast year.
+                  </p>
+                </div>
               </div>
 
             <div className="mt-3 min-h-0 flex-1 overflow-y-auto retro-scroll pr-1">
