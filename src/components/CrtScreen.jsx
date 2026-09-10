@@ -282,7 +282,12 @@ const CrtScreen = forwardRef(function CrtScreen(
             if (onEngineChange) onEngineChange('embed');
           }}
           onWaiting={() => setVideoLoading(true)}
-          onPlaying={() => setVideoLoading(false)}
+          onPlaying={() => {
+            setVideoLoading(false);
+            handleTimeUpdate();
+          }}
+          onPlay={handleTimeUpdate}
+          onPause={handleTimeUpdate}
         />
       )}
 

@@ -12,6 +12,9 @@ import {
   X,
   Radio,
   RotateCcw,
+  RotateCw,
+  Play,
+  Pause,
   Palette,
   Tv,
   Sliders,
@@ -32,6 +35,9 @@ export default function RemoteControl({
   onVolumeChange,
   muted,
   onToggleMute,
+  isPlaying = true,
+  onTogglePlayPause,
+  onSeekDelta,
   onOpenGuide,
   onOpenSearch,
   onOpenTapeRack,
@@ -118,8 +124,22 @@ export default function RemoteControl({
             <span className="tracking-wider text-zinc-400">RC-TUNER</span>
             <div className="flex items-center gap-1.5">
               {muted && <span className="text-amber-400 font-bold">MUTE</span>}
-              <span className={powerOn ? 'text-phosphor-green animate-pulse' : 'text-zinc-600'}>
-                {powerOn ? (currentChannel?.number === 'AUX' ? '● AUX-IN' : '● ON-AIR') : 'STANDBY'}
+              <span
+                className={
+                  powerOn
+                    ? !isPlaying
+                      ? 'text-amber-400 font-bold animate-pulse'
+                      : 'text-phosphor-green animate-pulse'
+                    : 'text-zinc-600'
+                }
+              >
+                {powerOn
+                  ? !isPlaying
+                    ? '❚❚ PAUSED'
+                    : currentChannel?.number === 'AUX'
+                    ? '● AUX-IN'
+                    : '● ON-AIR'
+                  : 'STANDBY'}
               </span>
             </div>
           </div>
@@ -242,6 +262,51 @@ export default function RemoteControl({
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Playback Transport Controls (Rewind 10s, Play/Pause, Forward 10s) */}
+        <div className="w-full bg-black/50 p-1.5 rounded-2xl border border-zinc-800/90 mb-3 grid grid-cols-3 gap-1.5 shadow-inner">
+          <button
+            onClick={() => {
+              triggerIr();
+              if (onSeekDelta) onSeekDelta(-10);
+            }}
+            title="Rewind 10s (J / ←)"
+            className="h-8 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 flex items-center justify-center cursor-pointer active:scale-95 transition"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            onClick={() => {
+              triggerIr();
+              if (onTogglePlayPause) onTogglePlayPause();
+            }}
+            title={isPlaying ? 'Pause Broadcast (Space / K)' : 'Resume Broadcast (Space / K)'}
+            className={`h-8 rounded-xl font-pixel text-xs font-bold flex items-center justify-center gap-1 cursor-pointer transition active:scale-95 shadow ${
+              isPlaying
+                ? 'bg-amber-500 hover:bg-amber-400 text-black border border-yellow-300 shadow-[0_0_10px_rgba(245,158,11,0.4)]'
+                : 'bg-green-600 hover:bg-green-500 text-white border border-green-400 shadow-[0_0_10px_rgba(34,197,94,0.4)] animate-pulse'
+            }`}
+          >
+            {isPlaying ? (
+              <Pause className="w-3.5 h-3.5 fill-current" />
+            ) : (
+              <Play className="w-3.5 h-3.5 fill-current" />
+            )}
+            <span>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
+          </button>
+
+          <button
+            onClick={() => {
+              triggerIr();
+              if (onSeekDelta) onSeekDelta(10);
+            }}
+            title="Fast Forward 10s (L / →)"
+            className="h-8 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 flex items-center justify-center cursor-pointer active:scale-95 transition"
+          >
+            <RotateCw className="w-3.5 h-3.5" />
+          </button>
         </div>
 
         {/* Number Keypad (1 to 9, 0) */}

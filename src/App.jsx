@@ -21,6 +21,7 @@ export default function App() {
   const [currentProgramIndex, setCurrentProgramIndex] = useState(0);
   const [activeExplicitProgram, setActiveExplicitProgram] = useState(null);
   const [powerOn, setPowerOn] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   const [volume, setVolume] = useState(() => {
     try {
@@ -387,6 +388,16 @@ export default function App() {
     }
   }, [activeExplicitProgram, triggerChannelZap]);
 
+  const handleTogglePlayPause = useCallback(() => {
+    audio.playSwitch(true);
+    cabinetRef.current?.togglePlayPause();
+  }, []);
+
+  const handleSeekDelta = useCallback((delta) => {
+    audio.playSwitch(true);
+    cabinetRef.current?.seekDelta(delta);
+  }, []);
+
   // Cycle color mode
   const handleCycleColorMode = useCallback(() => {
     audio.playSwitch(true);
@@ -571,6 +582,7 @@ export default function App() {
           activeEngine={activeEngine}
           onEngineChange={handleEngineChange}
           onToggleEngine={() => handleEngineChange()}
+          onPlaybackStateChange={setIsPlaying}
         />
       </main>
 
@@ -589,6 +601,9 @@ export default function App() {
         onVolumeChange={setVolume}
         muted={muted}
         onToggleMute={() => setMuted((m) => !m)}
+        isPlaying={isPlaying}
+        onTogglePlayPause={handleTogglePlayPause}
+        onSeekDelta={handleSeekDelta}
         onOpenGuide={() => setGuideOpen(true)}
         onOpenSearch={() => setSearchOpen(true)}
         onOpenTapeRack={() => setTapeRackOpen(true)}

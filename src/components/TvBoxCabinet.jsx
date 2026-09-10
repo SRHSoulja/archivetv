@@ -53,6 +53,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
     activeEngine = 'direct',
     onEngineChange,
     onToggleEngine,
+    onPlaybackStateChange,
   },
   ref
 ) {
@@ -290,6 +291,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                     setCurrentTime(cur);
                     setDuration(dur);
                     setIsPlaying(playing);
+                    if (onPlaybackStateChange) onPlaybackStateChange(playing);
                   }}
                 />
               </div>
