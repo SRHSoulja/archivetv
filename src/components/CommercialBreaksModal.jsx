@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Radio, Plus, Trash2, Check } from 'lucide-react';
 import { audio } from '../services/soundEffects';
-import { resolvePlayableItem } from '../services/archiveApi';
+import { resolvePlayableItem, searchArchive } from '../services/archiveApi';
 import {
   getAdSets,
   createAdSet,
@@ -27,6 +27,10 @@ export default function CommercialBreaksModal({ isOpen, onClose, currentChannel,
   const [expandedSetId, setExpandedSetId] = useState(null);
   const [renamingId, setRenamingId] = useState(null);
   const [renameDraft, setRenameDraft] = useState('');
+  const [query, setQuery] = useState('');
+  const [collection, setCollection] = useState('classic_tv_commercials');
+  const [results, setResults] = useState([]);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -42,8 +46,8 @@ export default function CommercialBreaksModal({ isOpen, onClose, currentChannel,
     onConfigChange?.(next);
   };
 
-  const loadSource = async () => {
-    const id = sourceId.trim();
+  const loadSource = async (explicitId = null) => {
+    const id = (explicitId || sourceId).trim();
     if (!id) return;
     setLoading(true);
     setError(null);
@@ -62,6 +66,22 @@ export default function CommercialBreaksModal({ isOpen, onClose, currentChannel,
       setError('Could not load that identifier.');
     }
     setLoading(false);
+  };
+
+  const runSearch = async () => {
+    if (!query.trim()) return;
+    setSearching(true);
+    setError(null);
+    setResults([]);
+    try {
+      const data = await searchArchive(query.trim(), { rows: 14, collection });
+      const found = data.items || [];
+      setResults(found);
+      if (found.length === 0) setError('Nothing found. Try different words.');
+    } catch {
+      setError('Search failed.');
+    }
+    setSearching(false);
   };
 
   const commitSet = () => {
@@ -316,57 +336,130 @@ export default function CommercialBreaksModal({ isOpen, onClose, currentChannel,
             <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">
               THIS CHANNEL &middot; {currentChannel.callsign || currentChannel.name}
             </span>
-            <div className="flex gap-1.5 mt-1.5">
-              {['inherit', 'on', 'off'].map((mode) => {
-                const active =
-                  mode === 'inherit'
-                    ? !channelOverride
-                    : channelOverride?.enabled === (mode === 'on');
-                return (
-                  <button
-                    key={mode}
-                    type="button"
-                    onClick={() => {
-                      const byChannel = { ...(config.byChannel || {}) };
-                      if (mode === 'inherit') delete byChannel[currentChannel.id];
-                      else byChannel[currentChannel.id] = { enabled: mode === 'on' };
-                      push({ ...config, byChannel });
-                    }}
-                    className={`flex-1 py-1.5 rounded-lg font-pixel text-[10px] tracking-wider border-2 cursor-pointer transition ${
-                      active
-                        ? 'bg-amber-500 text-black border-yellow-300 font-bold'
-                        : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-zinc-200'
-                    }`}
-                  >
-                    {mode.toUpperCase()}
-                  </button>
-                );
-              })}
-            </div>
+            {/* One control, three plain meanings. The old inherit/on/off split
+                was ambiguous: with the master switch on, inherit and on did
+                exactly the same thing. */}
+            <select
+              value={
+                !channelOverride
+                  ? 'inherit'
+                  : channelOverride.enabled === false
+                    ? 'off'
+                    : channelOverride.setId || 'default'
+              }
+              onChange={(e) => {
+                const v = e.target.value;
+                const byChannel = { ...(config.byChannel || {}) };
+                if (v === 'inherit') delete byChannel[currentChannel.id];
+                else if (v === 'off') byChannel[currentChannel.id] = { enabled: false };
+                else if (v === 'default')
+                  byChannel[currentChannel.id] = { enabled: true, setId: null };
+                else byChannel[currentChannel.id] = { enabled: true, setId: v };
+                push({ ...config, byChannel });
+              }}
+              className="w-full mt-1.5 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1.5 text-xs text-zinc-300 outline-none cursor-pointer"
+            >
+              <option value="inherit">
+                Follow the switch above ({config.enabled ? 'breaks on' : 'breaks off'})
+              </option>
+              <option value="off">Never break on this channel</option>
+              <option value="default">Always break, using the default reel</option>
+              {sets.map((s) => (
+                <option key={s.id} value={s.id}>
+                  Always break, using: {s.name} ({s.spots.length})
+                </option>
+              ))}
+            </select>
+
+            <p className="mt-1.5 text-[10px] leading-relaxed text-zinc-600">
+              Pick a reel here to give this channel its own adverts, so a horror
+              channel and a cartoon channel need not share.
+            </p>
           </div>
         )}
 
         {/* builder */}
         <div className="mt-4 pt-3 border-t border-zinc-800">
-          <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">BUILD A REEL</span>
+          <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">FIND COMMERCIALS</span>
+
           <div className="flex gap-2 mt-1.5">
             <input
               type="text"
-              value={sourceId}
-              onChange={(e) => setSourceId(e.target.value)}
-              placeholder="archive.org identifier or URL"
-              spellCheck={false}
-              className="flex-1 min-w-0 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1.5 text-xs text-zinc-100 placeholder-zinc-600 outline-none font-mono"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && runSearch()}
+              placeholder="e.g. cereal, toys, 1980s"
+              className="flex-1 min-w-0 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1.5 text-xs text-zinc-100 placeholder-zinc-600 outline-none"
             />
             <button
               type="button"
-              onClick={loadSource}
-              disabled={loading}
+              onClick={runSearch}
+              disabled={searching}
               className="shrink-0 px-3 rounded font-pixel text-[10px] tracking-wider bg-amber-600 hover:bg-amber-500 text-black font-bold cursor-pointer disabled:opacity-50"
             >
-              {loading ? '...' : 'LOAD'}
+              {searching ? '...' : 'SEARCH'}
             </button>
           </div>
+
+          <select
+            value={collection}
+            onChange={(e) => setCollection(e.target.value)}
+            className="w-full mt-2 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1.5 text-xs text-zinc-300 outline-none cursor-pointer"
+          >
+            <option value="classic_tv_commercials">Retro Commercials collection</option>
+            <option value="ephemera">Ephemeral films</option>
+            <option value="prelinger">Prelinger Archives</option>
+            <option value="">All of archive.org</option>
+          </select>
+
+          {results.length > 0 && !candidate && (
+            <div className="mt-2 max-h-52 overflow-y-auto retro-scroll border border-zinc-800 rounded-lg divide-y divide-zinc-800/70">
+              {results.map((r) => (
+                <button
+                  key={r.identifier}
+                  type="button"
+                  onClick={() => {
+                    setResults([]);
+                    setSourceId(r.identifier);
+                    loadSource(r.identifier);
+                  }}
+                  className="w-full text-left px-2 py-1.5 hover:bg-zinc-900/70 cursor-pointer"
+                >
+                  <span className="block text-[11px] text-zinc-200 truncate">{r.title}</span>
+                  <span className="block text-[10px] text-zinc-500">
+                    {r.year || 'Vintage'} &middot;{' '}
+                    <span className={r.filesCount > 1 ? 'text-amber-400' : ''}>
+                      {r.filesCount > 1 ? `${r.filesCount} spots inside` : 'single item'}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          <details className="mt-2">
+            <summary className="text-[10px] text-zinc-600 cursor-pointer hover:text-zinc-400">
+              or paste an archive.org identifier
+            </summary>
+            <div className="flex gap-2 mt-1.5">
+              <input
+                type="text"
+                value={sourceId}
+                onChange={(e) => setSourceId(e.target.value)}
+                placeholder="archive.org identifier or URL"
+                spellCheck={false}
+                className="flex-1 min-w-0 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1.5 text-xs text-zinc-100 placeholder-zinc-600 outline-none font-mono"
+              />
+              <button
+                type="button"
+                onClick={() => loadSource()}
+                disabled={loading}
+                className="shrink-0 px-3 rounded font-pixel text-[10px] tracking-wider bg-zinc-700 hover:bg-zinc-600 text-zinc-100 cursor-pointer disabled:opacity-50"
+              >
+                {loading ? '...' : 'LOAD'}
+              </button>
+            </div>
+          </details>
           {error && <p className="mt-1.5 text-[11px] text-red-400">{error}</p>}
 
           {candidate && (
