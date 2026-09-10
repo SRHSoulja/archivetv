@@ -870,6 +870,9 @@ export function sanitizeChannel(channel) {
     description: cleanDescription(channel.description || 'User curated channel from the Internet Archive.'),
     programs,
     isCustom: true,
+    // set when this record is an editable copy of a channel that ships with
+    // the app; the original is hidden from the line-up while it exists
+    ...(channel.forkedFrom ? { forkedFrom: channel.forkedFrom } : {}),
   };
 }
 
@@ -909,7 +912,43 @@ export function safeSetCustomChannels(channels) {
  */
 export function getChannelLineup() {
   const custom = getCustomChannels();
-  return [...curatedData, ...custom];
+  const forked = new Set(custom.map((c) => c.forkedFrom).filter(Boolean));
+  // A forked channel replaces the one it came from rather than sitting beside it.
+  return [...curatedData.filter((c) => !forked.has(c.id)), ...custom];
+}
+
+/**
+ * Channels that ship with the app are read-only records in a JSON file. Editing
+ * one copies it into the custom store, and the original drops out of the
+ * line-up. Deleting the copy restores the shipped version, which is what makes
+ * this reversible.
+ */
+export function forkCuratedChannel(channelId) {
+  const existing = getCustomChannels().find((c) => c.forkedFrom === channelId);
+  if (existing) return existing;
+
+  const source = curatedData.find((c) => c.id === channelId);
+  if (!source) return null;
+
+  const clone = sanitizeChannel({
+    ...source,
+    id: `fork_${channelId}_${Date.now()}`,
+    forkedFrom: channelId,
+  });
+  safeSetCustomChannels([...getCustomChannels(), clone]);
+  return clone;
+}
+
+/**
+ * Returns the id edits should be written against, forking first when this is a
+ * channel that ships with the app.
+ */
+export function ensureEditableChannel(channelId) {
+  const custom = getCustomChannels();
+  if (custom.some((c) => c.id === channelId)) return channelId;
+  const already = custom.find((c) => c.forkedFrom === channelId);
+  if (already) return already.id;
+  return forkCuratedChannel(channelId)?.id || channelId;
 }
 
 export function getCustomChannels() {

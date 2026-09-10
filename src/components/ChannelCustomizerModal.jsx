@@ -18,6 +18,7 @@ import {
   Download,
   Upload,
   Share2,
+  Pencil,
 } from 'lucide-react';
 import {
   getCustomChannels,
@@ -28,6 +29,7 @@ import {
   deleteCustomChannel,
   resolvePlayableItem,
   getChannelLineup,
+  ensureEditableChannel,
   searchArchive,
   exportChannelsToJson,
   importChannelsFromJson,
@@ -51,6 +53,7 @@ export default function ChannelCustomizerModal({
 
   // New Channel Form state
   const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [editingChannelId, setEditingChannelId] = useState(null);
   const [newChannelName, setNewChannelName] = useState('');
   const [newChannelCallsign, setNewChannelCallsign] = useState('');
   const [newChannelBadge, setNewChannelBadge] = useState('CUSTOM');
@@ -268,7 +271,7 @@ export default function ChannelCustomizerModal({
           chanName = `CH ${createdChan.number} (${createdChan.name})`;
         }
       } else {
-        const nextList = addProgramToChannel(targetChanId, programsToAdd);
+        const nextList = addProgramToChannel(ensureEditableChannel(targetChanId), programsToAdd);
         setCustomChannels(nextList);
         const chan = nextList.find((c) => c.id === targetChanId);
         chanName = chan ? `CH ${chan.number}` : 'Channel';
@@ -299,25 +302,53 @@ export default function ChannelCustomizerModal({
     handleInspect(item.identifier, searchQuery.trim());
   };
 
+  const handleEditChannel = (ch) => {
+    audio.playKnobClick();
+    const editableId = ensureEditableChannel(ch.id);
+    const list = getCustomChannels();
+    setCustomChannels(list);
+    setAllChannels(getChannelLineup());
+    const target = list.find((c) => c.id === editableId) || ch;
+    setEditingChannelId(editableId);
+    setNewChannelName(target.name || '');
+    setNewChannelCallsign(target.callsign || '');
+    setNewChannelBadge(target.badge || 'CUSTOM');
+    setNewChannelColor(target.themeColor || '#d97706');
+    setIsCreatingNew(true);
+  };
+
+  const handleCancelChannelForm = () => {
+    setIsCreatingNew(false);
+    setEditingChannelId(null);
+    setNewChannelName('');
+    setNewChannelCallsign('');
+  };
+
   const handleCreateChannel = (e) => {
     e?.preventDefault();
     if (!newChannelName.trim()) return;
 
     audio.playSwitch(true);
-    const created = saveCustomChannel({
+    const fields = {
       name: newChannelName.trim().toUpperCase(),
       callsign: newChannelCallsign.trim().toUpperCase() || `K-CUS`,
       badge: newChannelBadge,
       themeColor: newChannelColor,
-      description: `User curated channel from the Internet Archive.`,
-      programs: [],
-    });
+    };
 
-    setCustomChannels(created);
+    // saveCustomChannel merges into the existing record, so an edit must NOT
+    // pass programs or it would wipe the line-up it is renaming.
+    const next = editingChannelId
+      ? saveCustomChannel({ id: editingChannelId, ...fields })
+      : saveCustomChannel({
+          ...fields,
+          description: `User curated channel from the Internet Archive.`,
+          programs: [],
+        });
+
+    setCustomChannels(next);
     setAllChannels(getChannelLineup());
-    setIsCreatingNew(false);
-    setNewChannelName('');
-    setNewChannelCallsign('');
+    handleCancelChannelForm();
     if (onChannelsUpdated) onChannelsUpdated();
   };
 
@@ -394,7 +425,7 @@ export default function ChannelCustomizerModal({
       }
     } else {
       // Add to existing custom channel
-      const nextList = addProgramToChannel(targetChannelId, programsToAdd);
+      const nextList = addProgramToChannel(ensureEditableChannel(targetChannelId), programsToAdd);
       setCustomChannels(nextList);
       const chan = nextList.find((c) => c.id === targetChannelId);
       chanName = chan ? `CH ${chan.number}` : 'Channel';
@@ -518,7 +549,7 @@ export default function ChannelCustomizerModal({
 
   const handleRemoveProgram = (channelId, progIdx) => {
     audio.playSwitch(false);
-    const updated = removeProgramFromChannel(channelId, progIdx);
+    const updated = removeProgramFromChannel(ensureEditableChannel(channelId), progIdx);
     setCustomChannels(updated);
     setAllChannels(getChannelLineup());
     if (onChannelsUpdated) onChannelsUpdated();
@@ -526,7 +557,7 @@ export default function ChannelCustomizerModal({
 
   const handleMoveProgram = (channelId, fromIdx, toIdx) => {
     audio.playKnobClick();
-    const updated = reorderProgramsInChannel(channelId, fromIdx, toIdx);
+    const updated = reorderProgramsInChannel(ensureEditableChannel(channelId), fromIdx, toIdx);
     setCustomChannels(updated);
     setAllChannels(getChannelLineup());
     if (onChannelsUpdated) onChannelsUpdated();
@@ -777,7 +808,7 @@ export default function ChannelCustomizerModal({
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setIsCreatingNew(false)}
+                      onClick={handleCancelChannelForm}
                       className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-pixel text-xs cursor-pointer"
                     >
                       CANCEL
@@ -786,7 +817,7 @@ export default function ChannelCustomizerModal({
                       type="submit"
                       className="px-4 py-1.5 rounded-lg bg-teal-500 hover:bg-teal-400 text-black font-pixel text-xs font-bold cursor-pointer"
                     >
-                      SAVE STATION
+                      {editingChannelId ? 'UPDATE STATION' : 'SAVE STATION'}
                     </button>
                   </div>
                 </div>
@@ -830,7 +861,7 @@ export default function ChannelCustomizerModal({
 
                         {isCustom ? (
                           <span className="px-2 py-0.5 rounded bg-teal-950 border border-teal-500 text-teal-300 font-pixel text-[10px]">
-                            CUSTOM
+                            {ch.forkedFrom ? 'EDITED' : 'CUSTOM'}
                           </span>
                         ) : (
                           <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 font-pixel text-[10px]">
@@ -866,7 +897,7 @@ export default function ChannelCustomizerModal({
                         <span>TUNE IN</span>
                       </button>
 
-                      {isCustom && (
+                      {(
                         <div className="flex flex-wrap items-center gap-1.5">
                           <button
                             onClick={() => {
@@ -907,12 +938,26 @@ export default function ChannelCustomizerModal({
                           </button>
 
                           <button
-                            onClick={() => handleDeleteChannel(ch.id)}
-                            className="p-1.5 rounded-lg bg-zinc-800 hover:bg-red-900 text-zinc-400 hover:text-white border border-zinc-700 cursor-pointer transition"
-                            title="Delete custom channel"
+                            onClick={() => handleEditChannel(ch)}
+                            className="p-1.5 rounded-lg bg-zinc-800 hover:bg-teal-900 text-zinc-300 hover:text-white border border-zinc-700 cursor-pointer transition active:scale-95"
+                            title="Rename this channel / change callsign, badge or colour"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Pencil className="w-4 h-4" />
                           </button>
+
+                          {isCustom && (
+                            <button
+                              onClick={() => handleDeleteChannel(ch.id)}
+                              className="p-1.5 rounded-lg bg-zinc-800 hover:bg-red-900 text-zinc-400 hover:text-white border border-zinc-700 cursor-pointer transition"
+                              title={
+                                ch.forkedFrom
+                                  ? 'Discard your edits and restore the version this app ships with'
+                                  : 'Delete custom channel'
+                              }
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>
