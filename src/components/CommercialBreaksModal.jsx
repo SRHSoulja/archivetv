@@ -14,7 +14,13 @@ import {
   MIN_PROGRAMME_SECONDS,
 } from '../services/commercials';
 
-export default function CommercialBreaksModal({ isOpen, onClose, currentChannel, onConfigChange }) {
+export default function CommercialBreaksModal({
+  isOpen,
+  onClose,
+  currentChannel,
+  onConfigChange,
+  onTestBreak,
+}) {
   const [sets, setSets] = useState([]);
   const [config, setConfig] = useState(() => getAdConfig());
   const [sourceId, setSourceId] = useState('');
@@ -208,6 +214,23 @@ export default function CommercialBreaksModal({ isOpen, onClose, currentChannel,
             />
           </label>
         </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            const fired = onTestBreak?.();
+            if (fired) onClose();
+          }}
+          disabled={sets.length === 0}
+          className="mt-3 w-full py-2 rounded-lg font-pixel text-[10px] tracking-wider border-2 bg-amber-900/60 hover:bg-amber-800/70 border-amber-600/60 text-amber-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          PLAY A BREAK NOW
+        </button>
+        <p className="mt-1.5 text-[10px] leading-relaxed text-zinc-600">
+          Waiting for a real one takes a while: the first break lands roughly{' '}
+          {config.everyMinutes} minutes past the 90 second mark, so on a default setting that is
+          about {Math.round((config.everyMinutes * 60 + 90) / 60)} minutes into a programme.
+        </p>
 
         <p className="mt-2 text-[10px] leading-relaxed text-zinc-600">
           Timing is jittered by up to 20% so breaks do not land like clockwork, and never within 90

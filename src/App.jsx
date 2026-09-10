@@ -283,7 +283,13 @@ export default function App() {
     if (!adBreakRef.current) nextBreakRef.current = null;
   }, [currentProgram?.identifier, currentProgram?.videoUrl]);
 
+  const breakWatchdogRef = useRef(null);
+
   const resumeFromBreak = useCallback(() => {
+    if (breakWatchdogRef.current) {
+      clearTimeout(breakWatchdogRef.current);
+      breakWatchdogRef.current = null;
+    }
     const brk = adBreakRef.current;
     adBreakRef.current = null;
     setAdBreak(null);
@@ -295,6 +301,23 @@ export default function App() {
       });
     }
   }, []);
+
+  // Shared by the timed trigger and the "play one now" test button.
+  const startBreak = useCallback(
+    (spots, resumeProgram, resumeSeconds) => {
+      if (!spots?.length) return;
+      const brk = { queue: spots, index: 0, resumeProgram, resumeSeconds };
+      adBreakRef.current = brk;
+      setAdBreak(brk);
+
+      if (breakWatchdogRef.current) clearTimeout(breakWatchdogRef.current);
+      const budget = spots.reduce((t, s) => t + (s.duration || 30), 0) * 1000 + 45000;
+      breakWatchdogRef.current = setTimeout(() => {
+        if (adBreakRef.current) resumeFromBreak();
+      }, Math.min(budget, 300000));
+    },
+    [resumeFromBreak]
+  );
 
   const handlePlaybackProgress = useCallback(
     (time, duration) => {
@@ -322,17 +345,19 @@ export default function App() {
         return;
       }
 
-      const brk = {
-        queue: spots,
-        index: 0,
-        resumeProgram: currentProgramRef.current,
-        resumeSeconds: time,
-      };
-      adBreakRef.current = brk;
-      setAdBreak(brk);
+      startBreak(spots, currentProgramRef.current, time);
     },
-    [adConfig, currentChannel?.id, activeEngine]
+    [adConfig, currentChannel?.id, activeEngine, startBreak]
   );
+
+  const handleTestBreak = useCallback(() => {
+    const { setId } = resolveChannelAds(adConfig, currentChannel?.id);
+    const set = getAdSets().find((s) => s.id === setId) || getAdSets()[0];
+    const spots = pickSpots(set, adConfig.spotsPerBreak, lastSpotRef.current);
+    if (!spots.length) return false;
+    startBreak(spots, currentProgramRef.current, playheadRef.current.time || 0);
+    return true;
+  }, [adConfig, currentChannel?.id, startBreak]);
 
   const handleSkipBreak = useCallback(() => {
     audio.playSwitch(true);
@@ -857,6 +882,7 @@ export default function App() {
         onClose={() => setBreaksOpen(false)}
         currentChannel={currentChannel}
         onConfigChange={setAdConfigState}
+        onTestBreak={handleTestBreak}
       />
 
       <PictureSettingsModal
