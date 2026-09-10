@@ -12,6 +12,9 @@ import {
   Copy,
   Layers,
   Sparkles,
+  Search,
+  Loader2,
+  CheckCircle,
 } from 'lucide-react';
 import {
   getCustomChannels,
@@ -22,6 +25,7 @@ import {
   deleteCustomChannel,
   resolvePlayableItem,
   getChannelLineup,
+  searchArchive,
 } from '../services/archiveApi';
 import { audio } from '../services/soundEffects';
 
@@ -53,6 +57,42 @@ export default function ChannelCustomizerModal({
   const [addAllEpisodes, setAddAllEpisodes] = useState(true);
   const [dropSuccessMessage, setDropSuccessMessage] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+
+  // Search tab state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState(null);
+  const [searchCollection, setSearchCollection] = useState('');
+  const [addingId, setAddingId] = useState(null);
+  const [addedItemsMap, setAddedItemsMap] = useState({});
+
+  const searchCollectionsList = [
+    { id: '', name: 'All Collections' },
+    { id: 'classic_tv', name: 'Classic Television' },
+    { id: 'animationandcartoons', name: 'Saturday Cartoons' },
+    { id: 'SciFi_Horror', name: 'Sci-Fi & Horror' },
+    { id: 'vhsvault', name: 'VHS Vault' },
+    { id: 'feature_films', name: 'Feature Films' },
+    { id: 'Film_Noir', name: 'Film Noir & Crime' },
+    { id: 'classic_tv_commercials', name: 'Retro Commercials' },
+    { id: 'computerchronicles', name: 'Computer Chronicles' },
+    { id: 'prelinger', name: 'Prelinger Archives' },
+    { id: 'silent_films', name: 'Silent Masterpieces' },
+    { id: 'universal_newsreels', name: 'Universal Newsreels' },
+  ];
+
+  const searchPresets = [
+    'The Lone Ranger',
+    'Saturday Cartoons',
+    'The Twilight Zone',
+    'Classic Sci-Fi',
+    '1980s Commercials',
+    'Drive-In Horror',
+    'Film Noir',
+    'Computer Chronicles',
+    'Three Stooges',
+  ];
 
   // Badge Options
   const badgePresets = [
@@ -123,6 +163,103 @@ export default function ChannelCustomizerModal({
     } finally {
       setInspecting(false);
     }
+  };
+
+  const handleSearchArchive = async (q = searchQuery, coll = searchCollection) => {
+    const term = (q !== undefined ? q : searchQuery).trim();
+    if (!term && !coll) return;
+
+    audio.playSwitch(true);
+    setSearchLoading(true);
+    setSearchError(null);
+    try {
+      const res = await searchArchive(term, { collection: coll, rows: 24 });
+      setSearchResults(res.items || []);
+      if ((res.items || []).length === 0) {
+        setSearchError('No archive broadcasts found matching this search.');
+      }
+    } catch (err) {
+      setSearchError(err.message || 'Error searching the Internet Archive.');
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const handleAddSearchResultToChannel = async (item, targetChanId = targetChannelId) => {
+    audio.playKnobClick();
+    setAddingId(item.identifier);
+    try {
+      const resolved = await resolvePlayableItem(item.identifier);
+      if (!resolved) {
+        throw new Error('Unable to resolve playable video streams.');
+      }
+
+      let programsToAdd = [];
+      if (resolved.availableFiles && resolved.availableFiles.length > 1) {
+        programsToAdd = resolved.availableFiles.map((file, idx) => ({
+          identifier: resolved.identifier,
+          title: `${resolved.title}: ${file.displayName}`,
+          seriesTitle: resolved.title,
+          year: resolved.year || 'Vintage',
+          description: `Episode ${idx + 1}: ${file.displayName}. ${resolved.description || ''}`,
+          videoFile: file.name,
+          videoUrl: file.videoUrl,
+          embedUrl: resolved.embedUrl,
+          thumbnailUrl: resolved.thumbnailUrl,
+          duration: file.duration || resolved.duration || 1800,
+          size: file.size || 0,
+          availableFiles: resolved.availableFiles,
+        }));
+      } else {
+        programsToAdd = [resolved];
+      }
+
+      let chanName = '';
+      if (targetChanId === 'NEW_CHANNEL' || customChannels.length === 0) {
+        const nextList = saveCustomChannel({
+          name: resolved.title.slice(0, 24).toUpperCase(),
+          callsign: `K-${resolved.identifier.slice(0, 4).toUpperCase()}`,
+          badge: 'CUSTOM',
+          description: resolved.description || 'Curated broadcast channel from Archive.org.',
+          programs: programsToAdd,
+        });
+        setCustomChannels(nextList);
+        const createdChan = nextList[nextList.length - 1];
+        if (createdChan) {
+          setTargetChannelId(createdChan.id);
+          setSelectedChannelId(createdChan.id);
+          chanName = `CH ${createdChan.number} (${createdChan.name})`;
+        }
+      } else {
+        const nextList = addProgramToChannel(targetChanId, programsToAdd);
+        setCustomChannels(nextList);
+        const chan = nextList.find((c) => c.id === targetChanId);
+        chanName = chan ? `CH ${chan.number}` : 'Channel';
+      }
+
+      setAllChannels(getChannelLineup());
+      if (onChannelsUpdated) onChannelsUpdated();
+
+      setAddedItemsMap((prev) => ({
+        ...prev,
+        [item.identifier]: `${programsToAdd.length} show${programsToAdd.length > 1 ? 's' : ''}`,
+      }));
+
+      setDropSuccessMessage(
+        `✓ Added ${programsToAdd.length} broadcast item${programsToAdd.length > 1 ? 's' : ''} to ${chanName}!`
+      );
+      setTimeout(() => setDropSuccessMessage(null), 3500);
+    } catch (err) {
+      alert(`Could not add item: ${err.message || 'Stream not found'}`);
+    } finally {
+      setAddingId(null);
+    }
+  };
+
+  const handleInspectSearchResult = (item) => {
+    setUrlInput(item.identifier);
+    setActiveTab('drop');
+    handleInspect(item.identifier);
   };
 
   const handleCreateChannel = (e) => {
@@ -294,6 +431,18 @@ export default function ChannelCustomizerModal({
           >
             <Tv className="w-3.5 h-3.5" />
             <span>CHANNEL LINEUP ({allChannels.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('search')}
+            className={`px-3.5 py-1.5 rounded-lg font-pixel text-xs flex items-center gap-1.5 cursor-pointer transition ${
+              activeTab === 'search'
+                ? 'bg-teal-500 text-black font-bold shadow'
+                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700'
+            }`}
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>SEARCH ARCHIVE & ADD SHOWS</span>
           </button>
 
           <button
@@ -514,12 +663,24 @@ export default function ChannelCustomizerModal({
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => {
+                              setTargetChannelId(ch.id);
+                              setActiveTab('search');
+                            }}
+                            className="py-1.5 px-2.5 rounded-lg bg-teal-950/80 hover:bg-teal-900 text-teal-300 border border-teal-700 font-pixel text-xs flex items-center gap-1 cursor-pointer transition active:scale-95"
+                            title="Search Archive to add shows to this channel"
+                          >
+                            <Search className="w-3 h-3" />
+                            <span>+ SEARCH</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
                               setSelectedChannelId(ch.id);
                               setActiveTab('editor');
                             }}
                             className="py-1.5 px-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-pixel text-xs cursor-pointer"
                           >
-                            EDIT PROGRAMS ({progCount})
+                            EDIT ({progCount})
                           </button>
 
                           <button
@@ -539,7 +700,222 @@ export default function ChannelCustomizerModal({
           </div>
         )}
 
-        {/* TAB 2: Drop Archive.org URL / Identifier */}
+        {/* TAB 2: Search Internet Archive & Add Directly */}
+        {activeTab === 'search' && (
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 retro-scroll bg-[#0e0d14] space-y-5">
+            {/* Header & Target Channel Selector */}
+            <div className="bg-[#181622] p-4 rounded-2xl border-2 border-zinc-800 space-y-4 shadow-lg">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-zinc-800/80">
+                <div>
+                  <h3 className="font-pixel text-teal-400 text-lg md:text-xl font-bold flex items-center gap-2">
+                    <Search className="w-5 h-5" />
+                    <span>SEARCH ARCHIVE & ADD SHOWS DIRECTLY</span>
+                  </h3>
+                  <p className="font-mono text-xs text-zinc-400 mt-0.5">
+                    SEARCH MILLIONS OF ARCHIVE.ORG BROADCASTS AND ADD THEM TO ANY CHANNEL WITH ONE CLICK
+                  </p>
+                </div>
+
+                {/* Target Channel Selector */}
+                <div className="flex items-center gap-2 bg-black/60 p-2 rounded-xl border border-teal-500/50">
+                  <span className="font-pixel text-[11px] text-teal-300 whitespace-nowrap">
+                    TARGET DIAL:
+                  </span>
+                  <select
+                    value={targetChannelId || 'NEW_CHANNEL'}
+                    onChange={(e) => setTargetChannelId(e.target.value)}
+                    className="bg-[#14121a] text-amber-400 font-pixel text-xs rounded-lg px-2.5 py-1.5 border border-zinc-700 focus:outline-none focus:border-teal-400 cursor-pointer"
+                  >
+                    <option value="NEW_CHANNEL">+ CREATE NEW CHANNEL</option>
+                    {customChannels.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        CH {c.number}: {c.name} ({c.programs?.length || 0} shows)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Search Form */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSearchArchive();
+                }}
+                className="flex flex-col sm:flex-row items-center gap-2"
+              >
+                <div className="relative flex-1 w-full">
+                  <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search shows, cartoons, films, or series (e.g. Lone Ranger, Popeye)..."
+                    className="w-full bg-black/70 border border-zinc-700 focus:border-teal-400 rounded-xl pl-9 pr-3 py-2 text-sm text-white font-mono placeholder-zinc-500"
+                  />
+                </div>
+
+                <select
+                  value={searchCollection}
+                  onChange={(e) => {
+                    setSearchCollection(e.target.value);
+                    handleSearchArchive(searchQuery, e.target.value);
+                  }}
+                  className="w-full sm:w-auto bg-black/70 border border-zinc-700 focus:border-teal-400 rounded-xl px-3 py-2 text-xs text-zinc-300 font-mono cursor-pointer"
+                >
+                  {searchCollectionsList.map((col) => (
+                    <option key={col.id} value={col.id}>
+                      {col.name}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="submit"
+                  disabled={searchLoading}
+                  className="w-full sm:w-auto px-5 py-2 bg-teal-500 hover:bg-teal-400 disabled:bg-zinc-800 text-black disabled:text-zinc-500 font-pixel text-xs font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow transition active:scale-95"
+                >
+                  {searchLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                  <span>{searchLoading ? 'SEARCHING...' : 'SEARCH'}</span>
+                </button>
+              </form>
+
+              {/* Quick Preset Signals */}
+              <div className="flex items-center gap-1.5 overflow-x-auto retro-scroll pb-1">
+                <span className="text-[10px] font-pixel text-zinc-500 shrink-0">SIGNALS:</span>
+                {searchPresets.map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery(preset);
+                      handleSearchArchive(preset, searchCollection);
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-zinc-800/80 hover:bg-teal-950 text-zinc-300 hover:text-teal-300 border border-zinc-700/80 hover:border-teal-500 text-[11px] font-mono whitespace-nowrap cursor-pointer transition"
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Drop Success Message Banner */}
+            {dropSuccessMessage && (
+              <div className="bg-emerald-950/90 border-2 border-emerald-500 text-emerald-300 px-4 py-3 rounded-xl flex items-center justify-between font-pixel text-xs shadow-lg animate-in fade-in">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{dropSuccessMessage}</span>
+                </div>
+                <button
+                  onClick={() => setActiveTab('editor')}
+                  className="px-3 py-1 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-lg cursor-pointer transition"
+                >
+                  VIEW SCHEDULE →
+                </button>
+              </div>
+            )}
+
+            {/* Loading Indicator */}
+            {searchLoading && (
+              <div className="flex flex-col items-center justify-center py-16 gap-3 text-zinc-400">
+                <Radio className="w-10 h-10 text-teal-400 animate-spin" />
+                <div className="font-pixel text-xs text-teal-300 animate-pulse">
+                  SEARCHING INTERNET ARCHIVE DATABASE...
+                </div>
+              </div>
+            )}
+
+            {/* Empty or Error State */}
+            {searchError && !searchLoading && (
+              <div className="text-center py-12 text-zinc-500 font-pixel text-xs">
+                {searchError}
+              </div>
+            )}
+
+            {/* Results Grid */}
+            {!searchLoading && searchResults.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {searchResults.map((item) => {
+                  const isAdding = addingId === item.identifier;
+                  const addedNote = addedItemsMap[item.identifier];
+
+                  return (
+                    <div
+                      key={item.identifier}
+                      className="bg-[#14121c] border border-zinc-800 hover:border-teal-500/70 rounded-xl p-3 flex flex-col justify-between shadow-md transition-all group"
+                    >
+                      <div>
+                        {/* Thumbnail */}
+                        <div className="relative aspect-video rounded-lg overflow-hidden bg-black border border-zinc-800 mb-2.5">
+                          <img
+                            src={item.thumbnailUrl}
+                            alt=""
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                          <div className="absolute top-2 right-2 bg-black/80 px-2 py-0.5 rounded text-[10px] font-mono text-zinc-300 border border-zinc-700">
+                            {item.year || 'Vintage'}
+                          </div>
+                        </div>
+
+                        {/* Info */}
+                        <h4 className="font-pixel text-sm font-bold text-white group-hover:text-teal-300 line-clamp-1">
+                          {item.title}
+                        </h4>
+                        <p className="text-[11px] font-mono text-zinc-400 line-clamp-2 mt-1">
+                          {item.description || 'Archive.org broadcast media item.'}
+                        </p>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="mt-3 pt-2.5 border-t border-zinc-800/80 flex items-center justify-between gap-2">
+                        <button
+                          onClick={() => handleInspectSearchResult(item)}
+                          className="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded-lg font-pixel text-[10px] cursor-pointer transition"
+                          title="Inspect episodes and details"
+                        >
+                          EPISODES
+                        </button>
+
+                        <button
+                          onClick={() => handleAddSearchResultToChannel(item)}
+                          disabled={isAdding}
+                          className={`flex-1 py-1.5 px-3 rounded-lg font-pixel text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow transition active:scale-95 ${
+                            addedNote
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-teal-500 hover:bg-teal-400 text-black'
+                          }`}
+                        >
+                          {isAdding ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              <span>ADDING...</span>
+                            </>
+                          ) : addedNote ? (
+                            <>
+                              <Check className="w-3.5 h-3.5" />
+                              <span>ADDED ({addedNote})</span>
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>+ ADD TO CHANNEL</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 3: Drop Archive.org URL / Identifier */}
         {activeTab === 'drop' && (
           <div className="flex-1 overflow-y-auto p-4 md:p-6 retro-scroll bg-[#0e0d14] space-y-6">
             <div>
@@ -742,18 +1118,31 @@ export default function ChannelCustomizerModal({
                     </select>
                   </div>
 
-                  <button
-                    onClick={() => {
-                      setUrlInput('');
-                      setInspectedItem(null);
-                      setTargetChannelId(selectedCustomChannel?.id || '');
-                      setActiveTab('drop');
-                    }}
-                    className="px-3.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-teal-300 font-pixel text-xs rounded-lg flex items-center gap-1.5 cursor-pointer shadow"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>ADD VIDEO BY URL</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setTargetChannelId(selectedCustomChannel?.id || '');
+                        setActiveTab('search');
+                      }}
+                      className="px-3.5 py-1.5 bg-teal-500 hover:bg-teal-400 text-black font-pixel text-xs font-bold rounded-lg flex items-center gap-1.5 cursor-pointer shadow transition active:scale-95"
+                    >
+                      <Search className="w-3.5 h-3.5" />
+                      <span>SEARCH SHOWS</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setUrlInput('');
+                        setInspectedItem(null);
+                        setTargetChannelId(selectedCustomChannel?.id || '');
+                        setActiveTab('drop');
+                      }}
+                      className="px-3.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-teal-300 font-pixel text-xs rounded-lg flex items-center gap-1.5 cursor-pointer shadow"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>ADD BY URL</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Programs Sequence List */}
