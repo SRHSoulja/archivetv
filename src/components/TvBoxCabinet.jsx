@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import {
   Power,
   List,
@@ -65,6 +65,17 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+
+  // Stable report handler to prevent downstream re-renders
+  const handleTimeUpdateReport = useCallback(
+    (cur, dur, playing) => {
+      setCurrentTime(cur);
+      setDuration(dur);
+      setIsPlaying(playing);
+      if (onPlaybackStateChange) onPlaybackStateChange(playing);
+    },
+    [onPlaybackStateChange]
+  );
 
   // Reset timestamps immediately when program or channel changes so previous values do not linger
   useEffect(() => {
@@ -298,12 +309,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                   contrast={contrast}
                   activeEngine={activeEngine}
                   onEngineChange={onEngineChange || onToggleEngine}
-                  onTimeUpdateReport={(cur, dur, playing) => {
-                    setCurrentTime(cur);
-                    setDuration(dur);
-                    setIsPlaying(playing);
-                    if (onPlaybackStateChange) onPlaybackStateChange(playing);
-                  }}
+                  onTimeUpdateReport={handleTimeUpdateReport}
                 />
               </div>
             </div>

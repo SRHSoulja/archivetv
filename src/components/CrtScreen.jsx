@@ -41,6 +41,12 @@ const CrtScreen = forwardRef(function CrtScreen(
   const videoRef = useRef(null);
   const iframeRef = useRef(null);
   const canvasRef = useRef(null);
+  const loadedVideoUrlRef = useRef(null);
+  const onTimeUpdateReportRef = useRef(onTimeUpdateReport);
+
+  useEffect(() => {
+    onTimeUpdateReportRef.current = onTimeUpdateReport;
+  }, [onTimeUpdateReport]);
 
   const [videoLoading, setVideoLoading] = useState(true);
   const [videoError, setVideoError] = useState(null);
@@ -346,11 +352,15 @@ const CrtScreen = forwardRef(function CrtScreen(
     const video = videoRef.current;
     if (!video) return;
 
-    if (video.src !== activeVideoUrl) {
-      setVideoLoading(true);
-      video.src = activeVideoUrl;
-      video.load();
+    // Never reload or reset currentTime if the active video URL is already active
+    if (loadedVideoUrlRef.current === activeVideoUrl && video.src === activeVideoUrl) {
+      return;
     }
+
+    loadedVideoUrlRef.current = activeVideoUrl;
+    setVideoLoading(true);
+    video.src = activeVideoUrl;
+    video.load();
 
     const handleLoadedMetadata = () => {
       setVideoLoading(false);
@@ -365,9 +375,7 @@ const CrtScreen = forwardRef(function CrtScreen(
         video.currentTime = 0;
       }
 
-      if (onTimeUpdateReport) {
-        onTimeUpdateReport(video.currentTime, dur, !video.paused);
-      }
+      onTimeUpdateReportRef.current?.(video.currentTime, dur, !video.paused);
 
       const playPromise = video.play();
       if (playPromise !== undefined) {
@@ -382,14 +390,9 @@ const CrtScreen = forwardRef(function CrtScreen(
       }
     };
 
-    if (video.readyState >= 1) {
-      handleLoadedMetadata();
-    } else {
-      video.addEventListener('loadedmetadata', handleLoadedMetadata);
-    }
-
+    video.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true });
     return () => video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-  }, [activeVideoUrl, canPlayDirect, powerOn, liveTvMode, currentProgram?.seekSeconds, onTimeUpdateReport]);
+  }, [activeVideoUrl, canPlayDirect, powerOn]);
 
   const handleVideoError = () => {
     console.warn(`Direct stream error on candidate #${candidateIndex}: ${activeVideoUrl}`);
