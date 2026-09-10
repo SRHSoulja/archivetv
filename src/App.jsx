@@ -253,11 +253,15 @@ export default function App() {
     return currentChannel;
   }, [activeExplicitProgram, currentChannel]);
 
+  // Reception is the antenna's job alone. Fine tune used to feed this as well,
+  // which meant the dial produced snow through this path AND added its own on
+  // top -- degrading twice, and drowning out the aerial it was competing with.
+  // On a real set the aerial governed reception and the vertical hold governed
+  // picture lock; they were unrelated systems.
   const signalQuality = useMemo(() => {
     const antennaDist = Math.abs(antennaAngle % 60);
-    const trackingPenalty = Math.abs(trackingOffset) * 0.7;
-    return Math.max(15, Math.min(100, 100 - antennaDist * 0.4 - trackingPenalty));
-  }, [antennaAngle, trackingOffset]);
+    return Math.max(15, Math.min(100, 100 - antennaDist * 1.35));
+  }, [antennaAngle]);
 
   const triggerChannelZap = useCallback(() => {
     setChannelZap(true);

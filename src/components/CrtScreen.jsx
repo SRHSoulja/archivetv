@@ -387,9 +387,7 @@ const CrtScreen = forwardRef(function CrtScreen(
   const calculatedStatic = isOffAir
     ? Math.min(
         1,
-        (channelZap ? 0.95 : 0) +
-          Math.abs(trackingOffset) / 70 +
-          ((100 - signalQuality) / 100) * 0.7
+        (channelZap ? 0.95 : 0) + ((100 - signalQuality) / 100) * 0.7
       )
     : Math.min(
         1,
@@ -399,7 +397,6 @@ const CrtScreen = forwardRef(function CrtScreen(
             ? 0.35
             : 0) +
           (videoError && activeEngine === 'direct' ? 0.85 : 0) +
-          Math.abs(trackingOffset) / 70 +
           ((100 - signalQuality) / 100) * 0.7
       );
 
@@ -828,8 +825,8 @@ const CrtScreen = forwardRef(function CrtScreen(
         <div
           className="crt-roll-bar z-20"
           style={{
-            opacity: Math.max(0.12, Math.abs(trackingOffset) / 40),
-            animationDuration: `${Math.max(2, 12 - Math.abs(trackingOffset) / 5)}s`,
+            opacity: Math.max(0.1, Math.abs(trackingOffset) / 28),
+            animationDuration: `${Math.max(1.2, 12 - Math.abs(trackingOffset) / 3.5)}s`,
           }}
         />
       )}
