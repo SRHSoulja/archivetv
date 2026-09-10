@@ -61,6 +61,13 @@ const CURATED_POSTERS = {
   // licensed and durably hosted, where the US poster copies in circulation are
   // hotlinks to commercial CDNs whose paths rotate.
   'charlie_chaplin_film_fest': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Le_festival_Charlie_Chaplin_affiche%2C_non_identifi%C3%A9.jpg/500px-Le_festival_Charlie_Chaplin_affiche%2C_non_identifi%C3%A9.jpg',
+  // Both public domain on Wikimedia Commons. Curated by hand rather than found
+  // automatically: Commons file titles carry qualifiers the programme title does
+  // not ("1920 Poster") or drop words it has ("The Pawnshop" vs "Charlie
+  // Chaplin's The Pawnshop"), so no single subset rule catches both without
+  // letting topical junk back in -- which is the bug the strict gate just fixed.
+  'DasKabinettdesDoktorCaligariTheCabinetofDrCaligari': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Das_Kabinett_des_Doktor_Caligari_1920_Poster.jpg/500px-Das_Kabinett_des_Doktor_Caligari_1920_Poster.jpg',
+  'CC_1916_10_02_ThePawnshop': 'https://upload.wikimedia.org/wikipedia/commons/3/3c/The_Pawnshop.jpg',
   'Charade': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Charade_%281963%29_poster.jpg/500px-Charade_%281963%29_poster.jpg',
   'A_Star_Is_Born': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/A_Star_Is_Born_%281937_poster%29.jpg/500px-A_Star_Is_Born_%281937_poster%29.jpg',
 };
