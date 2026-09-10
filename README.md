@@ -1,7 +1,12 @@
 # ArchiveTV 📺📼
 
 <p align="center">
-  <img src="https://img.shields.io/badge/License-MIT-amber.svg?style=flat-square" alt="License: MIT" />
+  <a href="https://srhsoulja.github.io/archivetv/"><strong>📺 Launch Live TV Set (GitHub Pages) »</strong></a>
+</p>
+
+<p align="center">
+  <a href="https://srhsoulja.github.io/archivetv/"><img src="https://img.shields.io/badge/Live_Demo-srhsoulja.github.io%2Farchivetv-amber.svg?style=flat-square&logo=github" alt="Live Demo" /></a>
+  <img src="https://img.shields.io/badge/License-MIT-green.svg?style=flat-square" alt="License: MIT" />
   <img src="https://img.shields.io/badge/React-19-blue.svg?style=flat-square" alt="React 19" />
   <img src="https://img.shields.io/badge/Vite-6-purple.svg?style=flat-square" alt="Vite 6" />
   <img src="https://img.shields.io/badge/Tailwind-CSS-teal.svg?style=flat-square" alt="Tailwind CSS" />
