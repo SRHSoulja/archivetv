@@ -852,7 +852,7 @@ export default function ChannelCustomizerModal({
                             <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-400">
                               <span className="text-teal-400 font-bold">{ch.callsign}</span>
                               <span>•</span>
-                              <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-300 font-pixel">
+                              <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-pixel">
                                 {ch.badge}
                               </span>
                             </div>

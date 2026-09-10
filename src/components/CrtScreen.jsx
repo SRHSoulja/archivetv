@@ -780,7 +780,7 @@ const CrtScreen = forwardRef(function CrtScreen(
 
           {/* Center Retro Station Standby Card */}
           <div className="absolute inset-0 flex items-center justify-center p-3">
-            <div className="bg-[#0e0c12]/95 border-3 border-amber-500 rounded-2xl p-4 md:p-5 shadow-[0_0_35px_rgba(0,0,0,0.95)] max-w-sm w-full text-center flex flex-col items-center">
+            <div className="bg-[#0e0c12]/95 border-2 border-amber-500 rounded-2xl p-4 md:p-5 shadow-[0_0_35px_rgba(0,0,0,0.95)] max-w-sm w-full text-center flex flex-col items-center">
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_#ef4444]" />
                 <span className="font-pixel text-yellow-400 text-base md:text-lg font-bold tracking-widest">

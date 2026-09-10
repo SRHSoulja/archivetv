@@ -56,7 +56,7 @@ export default function NavbarHeader({
             <span className="font-pixel text-amber-400 text-base md:text-lg font-bold tracking-wider">
               ARCHIVE<span className="text-white">TV</span>
             </span>
-            <span className="bg-red-950/80 text-red-400 border border-red-800/60 font-pixel text-[10px] px-1.5 py-0.2 rounded">
+            <span className="bg-red-950/80 text-red-400 border border-red-800/60 font-pixel text-[10px] px-1.5 py-0.5 rounded">
               ANALOG
             </span>
           </div>

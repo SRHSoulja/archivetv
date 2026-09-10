@@ -34,7 +34,7 @@ export default function EpisodePickerModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 select-none animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-[#141217] border-3 border-blue-600/70 rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden text-zinc-200">
+      <div className="relative w-full max-w-2xl bg-[#141217] border-2 border-blue-600/70 rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden text-zinc-200">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-950 via-[#19223d] to-blue-950 p-4 border-b-2 border-blue-600/50 flex items-center justify-between">
           <div className="flex items-center gap-3">

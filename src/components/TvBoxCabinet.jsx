@@ -227,11 +227,11 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
       <div
         className={`relative w-full rounded-3xl p-3 md:p-6 transition-all duration-300 ${
           cabinetStyle === 'woodgrain'
-            ? 'woodgrain-pattern border-6 md:border-12 border-[#2b170c] shadow-wood-cabinet rounded-3xl'
+            ? 'woodgrain-pattern border-4 md:border-8 border-[#2b170c] shadow-wood-cabinet rounded-3xl'
             : cabinetStyle === 'trinitron'
-            ? 'bg-[#18181c] border-6 md:border-12 border-[#282830] shadow-[0_20px_60px_rgba(0,0,0,0.95)] rounded-2xl'
+            ? 'bg-[#18181c] border-4 md:border-8 border-[#282830] shadow-[0_20px_60px_rgba(0,0,0,0.95)] rounded-2xl'
             : cabinetStyle === 'portable'
-            ? 'bg-[#4a4950] border-6 md:border-12 border-[#38373d] shadow-[0_15px_40px_rgba(0,0,0,0.85)] rounded-4xl'
+            ? 'bg-[#4a4950] border-4 md:border-8 border-[#38373d] shadow-[0_15px_40px_rgba(0,0,0,0.85)] rounded-3xl'
             : 'bg-black border-2 border-zinc-900 p-0 shadow-2xl'
         }`}
       >
@@ -306,13 +306,13 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
           {/* CRT Screen Frame Bezel */}
           <div className="flex-1 flex flex-col">
             <div
-              className={`relative rounded-2xl md:rounded-3xl p-2.5 md:p-5 border-3 md:border-6 transition-all duration-300 ${
+              className={`relative rounded-2xl md:rounded-3xl p-2.5 md:p-5 border-2 md:border-4 transition-all duration-300 ${
                 cabinetStyle === 'woodgrain'
                   ? 'bg-[#150e09] border-[#20130b] shadow-[inset_0_4px_16px_rgba(0,0,0,0.9)]'
                   : cabinetStyle === 'trinitron'
                   ? 'bg-[#0f0f12] border-[#1d1d24] shadow-[inset_0_4px_12px_rgba(0,0,0,0.95)]'
                   : cabinetStyle === 'portable'
-                  ? 'bg-[#2b2a2e] border-[#3a3940] shadow-[inset_0_3px_10px_rgba(0,0,0,0.85)] rounded-4xl'
+                  ? 'bg-[#2b2a2e] border-[#3a3940] shadow-[inset_0_3px_10px_rgba(0,0,0,0.85)] rounded-3xl'
                   : 'bg-black border-0 p-0 shadow-none'
               }`}
             >
