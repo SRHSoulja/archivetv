@@ -8,6 +8,31 @@ const REPO = 'https://github.com/SRHSoulja/archivetv';
 // archive.org thumbnail service returns, and why those fallbacks look weak.
 const MIN_WIDTH = 200;
 
+// Hosts whose URLs are stable enough to live in the repo. Wikimedia and
+// Archive.org keep durable paths and are how every existing curated entry is
+// sourced; a commercial CDN path (IMDb, TMDB, a storefront) generally rotates,
+// and hotlinks somebody else's asset. Anything is fine for a local override --
+// this only gates the advice shown before suggesting one upstream.
+const STABLE_HOSTS = [
+  'upload.wikimedia.org',
+  'thumb.wikimedia.org',
+  'commons.wikimedia.org',
+  'archive.org',
+];
+
+function hostOf(url) {
+  try {
+    return new URL(url).host;
+  } catch {
+    return '';
+  }
+}
+
+function isStableHost(url) {
+  const host = hostOf(url);
+  return STABLE_HOSTS.some((h) => host === h || host.endsWith(`.${h}`));
+}
+
 export default function ArtOverridePanel({ identifier, title, year, onClose, onApplied }) {
   const [url, setUrl] = useState('');
   const [status, setStatus] = useState(null);
@@ -43,6 +68,7 @@ export default function ArtOverridePanel({ identifier, title, year, onClose, onA
   }, [url]);
 
   const usable = status?.state === 'ok' || status?.state === 'small';
+  const stable = isStableHost(url.trim());
   const snippet = `  '${identifier}': '${url.trim()}',`;
 
   const issueUrl = () => {
@@ -50,7 +76,11 @@ export default function ArtOverridePanel({ identifier, title, year, onClose, onA
       `**Programme:** ${title}${year ? ` (${year})` : ''}`,
       `**Identifier:** \`${identifier}\``,
       `**Proposed art:** ${url.trim()}`,
+      `**Host:** ${hostOf(url.trim())}`,
       status?.w ? `**Dimensions:** ${status.w}x${status.h}` : '',
+      stable
+        ? ''
+        : '> Note: this is not a Wikimedia or Archive.org URL, so the path may rotate over time. A Commons-hosted copy of the same artwork would be more durable.',
       '',
       'Line for `CURATED_POSTERS` in `src/services/posterService.js`:',
       '```js',
@@ -121,6 +151,20 @@ export default function ArtOverridePanel({ identifier, title, year, onClose, onA
           Paste an image URL to preview it here. It is checked by loading it, so the verdict is
           what the sleeve will really do.
         </p>
+        <p className="mt-2 text-[11px] leading-relaxed text-zinc-500">
+          Best sources are{' '}
+          <a
+            href="https://commons.wikimedia.org/w/index.php?search=film+poster&title=Special:MediaSearch&type=image"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-amber-400/90 hover:text-amber-300 underline"
+          >
+            Wikimedia Commons
+          </a>{' '}
+          or an image file on the Archive.org item itself &mdash; those paths last. A poster you
+          found on IMDb or a storefront will preview fine here, but is a poor thing to put in the
+          repo.
+        </p>
 
         <input
           type="url"
@@ -150,6 +194,18 @@ export default function ArtOverridePanel({ identifier, title, year, onClose, onA
               </span>
             )}
           </div>
+        )}
+
+        {usable && (
+          <p
+            className={`mt-2 font-pixel text-[9px] leading-relaxed ${
+              stable ? 'text-zinc-500' : 'text-amber-400/90'
+            }`}
+          >
+            {stable
+              ? `STABLE SOURCE (${hostOf(url.trim())}) - GOOD FOR THE REPO`
+              : `${hostOf(url.trim())} - FINE HERE, BUT PATHS LIKE THIS ROTATE. PREFER A COMMONS COPY IF SUGGESTING UPSTREAM.`}
+          </p>
         )}
 
         <div className="mt-4 flex gap-4">

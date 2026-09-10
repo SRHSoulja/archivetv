@@ -56,6 +56,11 @@ const CURATED_POSTERS = {
   'impact': 'https://upload.wikimedia.org/wikipedia/en/9/91/Impact_1949_poster.jpg',
   'AngelAndTheBadman': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/Angel_badman.jpg/500px-Angel_badman.jpg',
   'his_girl_friday': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/His_Girl_Friday_%281940_poster%29_crop.jpg/500px-His_Girl_Friday_%281940_poster%29_crop.jpg',
+  // CC0 on Wikimedia Commons. This is the 1946 French printing ("Le festival
+  // Charlie Chaplin"), not the 1938 US one-sheet -- chosen because it is freely
+  // licensed and durably hosted, where the US poster copies in circulation are
+  // hotlinks to commercial CDNs whose paths rotate.
+  'charlie_chaplin_film_fest': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Le_festival_Charlie_Chaplin_affiche%2C_non_identifi%C3%A9.jpg/500px-Le_festival_Charlie_Chaplin_affiche%2C_non_identifi%C3%A9.jpg',
   'Charade': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Charade_%281963%29_poster.jpg/500px-Charade_%281963%29_poster.jpg',
   'A_Star_Is_Born': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/A_Star_Is_Born_%281937_poster%29.jpg/500px-A_Star_Is_Born_%281937_poster%29.jpg',
 };
