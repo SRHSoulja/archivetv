@@ -412,6 +412,19 @@ export default function ArchiveSearchModal({
                 {selectedUploader && (
                   <span className="bg-emerald-950 text-emerald-300 px-2 py-1 rounded border border-emerald-700 flex items-center gap-1 max-w-[260px]">
                     <span className="truncate">UPLOADER: {selectedUploader}</span>
+                    {query && (
+                      <button
+                        type="button"
+                        title="Drop the search words and show everything from this uploader"
+                        onClick={() => {
+                          setQuery('');
+                          doSearch('', 1, false, { uploader: selectedUploader, creator: '' });
+                        }}
+                        className="shrink-0 px-1 rounded border border-emerald-600/70 hover:bg-emerald-800/70 hover:text-white text-[9px] tracking-wider cursor-pointer transition"
+                      >
+                        ALL
+                      </button>
+                    )}
                     <X
                       className="w-3 h-3 shrink-0 cursor-pointer hover:text-white"
                       onClick={() => {
@@ -425,6 +438,19 @@ export default function ArchiveSearchModal({
                 {selectedCreator && (
                   <span className="bg-cyan-950 text-cyan-300 px-2 py-1 rounded border border-cyan-700 flex items-center gap-1 max-w-[260px]">
                     <span className="truncate">CREATOR: {selectedCreator}</span>
+                    {query && (
+                      <button
+                        type="button"
+                        title="Drop the search words and show everything from this creator"
+                        onClick={() => {
+                          setQuery('');
+                          doSearch('', 1, false, { creator: selectedCreator, uploader: '' });
+                        }}
+                        className="shrink-0 px-1 rounded border border-cyan-600/70 hover:bg-cyan-800/70 hover:text-white text-[9px] tracking-wider cursor-pointer transition"
+                      >
+                        ALL
+                      </button>
+                    )}
                     <X
                       className="w-3 h-3 shrink-0 cursor-pointer hover:text-white"
                       onClick={() => {
