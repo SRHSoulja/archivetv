@@ -105,6 +105,9 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
       crtRef.current?.restart();
       if (onRestartProgram) onRestartProgram();
     },
+    toggleFullscreen: () => {
+      crtRef.current?.toggleFullscreen();
+    },
   }));
 
   const handlePowerClick = () => {

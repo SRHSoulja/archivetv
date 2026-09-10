@@ -330,3 +330,15 @@
 }
 
 
+
+/* Fullscreen the CRT picture: fill the viewport and drop the fixed aspect box so
+   the video (object-contain) letterboxes against black instead of the page. */
+.crt-screen-root:fullscreen,
+.crt-screen-root:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: auto !important;
+  background: #000;
+}

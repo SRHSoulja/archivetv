@@ -471,16 +471,32 @@ export default function App() {
     });
   }, []);
 
-  // Fullscreen
+  // Fullscreen the CRT picture rather than the whole document.
   const handleToggleFullscreen = () => {
+    if (cabinetRef.current?.toggleFullscreen) {
+      cabinetRef.current.toggleFullscreen();
+      return;
+    }
+    // Fallback if the screen element is not mounted yet.
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
-      setIsFullscreen(true);
     } else {
       document.exitFullscreen().catch(() => {});
-      setIsFullscreen(false);
     }
   };
+
+  // Track real fullscreen state. Toggling a boolean by hand desynced whenever the
+  // viewer left fullscreen with Esc, leaving the navbar button showing the wrong icon.
+  useEffect(() => {
+    const sync = () =>
+      setIsFullscreen(Boolean(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', sync);
+    document.addEventListener('webkitfullscreenchange', sync);
+    return () => {
+      document.removeEventListener('fullscreenchange', sync);
+      document.removeEventListener('webkitfullscreenchange', sync);
+    };
+  }, []);
 
   // Keyboard Navigation & Scrubbing Listener
   useEffect(() => {

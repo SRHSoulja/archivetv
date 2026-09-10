@@ -41,6 +41,7 @@ const CrtScreen = forwardRef(function CrtScreen(
 ) {
   const videoRef = useRef(null);
   const iframeRef = useRef(null);
+  const screenRef = useRef(null);
   const canvasRef = useRef(null);
   const loadedVideoUrlRef = useRef(null);
   const onTimeUpdateReportRef = useRef(onTimeUpdateReport);
@@ -205,6 +206,23 @@ const CrtScreen = forwardRef(function CrtScreen(
           next
         );
       }
+    },
+    // Fullscreen the picture itself. Fullscreening documentElement (what this
+    // used to do, up in App) just scaled up the page furniture -- navbar, cabinet
+    // and VCR deck included -- which is why the Tube embed's own fullscreen
+    // button looked better than ours.
+    toggleFullscreen: () => {
+      const doc = document;
+      const active = doc.fullscreenElement || doc.webkitFullscreenElement;
+      if (active) {
+        const exit = doc.exitFullscreen || doc.webkitExitFullscreen;
+        try { Promise.resolve(exit?.call(doc)).catch(() => {}); } catch {}
+        return;
+      }
+      const el = screenRef.current;
+      if (!el) return;
+      const req = el.requestFullscreen || el.webkitRequestFullscreen;
+      try { Promise.resolve(req?.call(el)).catch(() => {}); } catch {}
     },
     restart: () => {
       if (canPlayDirect && videoRef.current) {
@@ -638,8 +656,9 @@ const CrtScreen = forwardRef(function CrtScreen(
 
   return (
     <div
+      ref={screenRef}
       onClick={handleScreenClick}
-      className={`relative w-full h-full bg-[#050706] overflow-hidden flex items-center justify-center select-none ${eraCurvatureClass}`}
+      className={`crt-screen-root relative w-full h-full bg-[#050706] overflow-hidden flex items-center justify-center select-none ${eraCurvatureClass}`}
       style={{
         aspectRatio: effectiveAspectRatio === '4:3' ? '4/3' : '16/9',
       }}
