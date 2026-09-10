@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon } from 'lucide-react';
+import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon, Info } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { getBookmarks, removeBookmark } from '../services/archiveApi';
 import { fetchTheatricalPoster, getCachedPosterSync } from '../services/posterService';
@@ -16,6 +16,7 @@ export default function TapeRackDrawer({
   const [activeTab, setActiveTab] = useState('channels'); // 'channels' | 'bookmarks'
   const [viewMode, setViewMode] = useState('boxart'); // 'boxart' | 'cassette'
   const [bookmarks, setBookmarks] = useState([]);
+  const [infoTape, setInfoTape] = useState(null);
   const [activeChannelId, setActiveChannelId] = useState(currentChannel?.id || channels[0]?.id || 'toons');
   const [customInput, setCustomInput] = useState('');
   const [customLoading, setCustomLoading] = useState(false);
@@ -354,7 +355,10 @@ export default function TapeRackDrawer({
 
                       {/* Title overlay at the bottom of the box */}
                       <div className="absolute bottom-2 left-3 right-2 z-30">
-                        <div className="font-pixel text-xs font-bold text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,1)] line-clamp-2">
+                        <div
+                          title={prog.title}
+                          className="font-pixel text-xs font-bold text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,1)] line-clamp-2"
+                        >
                           {prog.title}
                         </div>
                         <div className="flex items-center justify-between mt-1 text-[9px] font-mono text-amber-300/90">
@@ -365,6 +369,18 @@ export default function TapeRackDrawer({
 
                       {/* Bookmark Badge or Remove Button */}
                       <div className="absolute top-2 right-2 z-30 flex items-center gap-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            audio.playKnobClick();
+                            setInfoTape(prog);
+                          }}
+                          className="p-1 rounded-full bg-black/80 hover:bg-amber-900 text-amber-300 border border-amber-700/80 cursor-pointer shadow"
+                          title="Tape details"
+                          aria-label="Tape details"
+                        >
+                          <Info className="w-3.5 h-3.5" />
+                        </button>
                         {activeTab === 'bookmarks' && (
                           <button
                             onClick={(e) => handleRemoveBookmark(e, prog.identifier)}
@@ -523,6 +539,63 @@ export default function TapeRackDrawer({
           )}
         </div>
       </div>
+
+      {infoTape && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setInfoTape(null)}
+        >
+          <div
+            className="relative w-full max-w-lg max-h-[85vh] flex flex-col bg-[#141211] border-2 border-amber-600/70 rounded-2xl p-5 shadow-2xl text-zinc-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3 shrink-0 pb-3 border-b border-zinc-800">
+              <h3 className="font-pixel text-amber-400 text-sm font-bold tracking-wide leading-snug">
+                {infoTape.title}
+              </h3>
+              <button
+                onClick={() => setInfoTape(null)}
+                className="text-zinc-500 hover:text-white cursor-pointer p-1 shrink-0"
+                aria-label="Close tape details"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="mt-3 shrink-0 flex flex-wrap gap-x-4 gap-y-1 font-pixel text-[10px] text-zinc-500">
+              <span>YEAR: <span className="text-amber-300">{infoTape.year || 'VINTAGE'}</span></span>
+              {infoTape.duration ? (
+                <span>RUNTIME: <span className="text-amber-300">{Math.round(infoTape.duration / 60)} MIN</span></span>
+              ) : null}
+              {infoTape.addedAt ? (
+                <span>
+                  SAVED: <span className="text-amber-300">{new Date(infoTape.addedAt).toLocaleDateString()}</span>
+                </span>
+              ) : null}
+            </div>
+
+            <p className="mt-2 shrink-0 font-mono text-[10px] text-zinc-500 break-all">
+              {infoTape.identifier}
+            </p>
+
+            <div className="mt-3 min-h-0 flex-1 overflow-y-auto retro-scroll pr-1">
+              <p className="text-xs leading-relaxed text-zinc-400 whitespace-pre-line">
+                {(infoTape.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() ||
+                  'No description recorded for this tape.'}
+              </p>
+            </div>
+
+            <a
+              href={`https://archive.org/details/${infoTape.identifier}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 shrink-0 self-start font-pixel text-[10px] text-amber-400 hover:text-amber-300 underline cursor-pointer"
+            >
+              VIEW ON ARCHIVE.ORG
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
