@@ -461,20 +461,36 @@ const CrtScreen = forwardRef(function CrtScreen(
   // Derive the content era from the program year or title for era-aware visual styling
   const contentEra = useMemo(() => {
     let year = null;
-    const yearStr = currentProgram?.year;
-    if (yearStr && yearStr !== 'Vintage') {
-      const parsed = parseInt(String(yearStr).slice(0, 4), 10);
-      if (!isNaN(parsed) && parsed >= 1900 && parsed <= 2035) {
-        year = parsed;
+    const textToScan = `${currentProgram?.title || ''} ${currentProgram?.identifier || ''}`;
+
+    // 1. Prioritize explicit vintage release years in title/identifier (e.g. 1987)
+    // because Archive.org metadata year frequently reflects upload/rip dates (e.g. 2023).
+    const vintageMatch = textToScan.match(/\b(19\d\d)\b/);
+    if (vintageMatch) {
+      year = parseInt(vintageMatch[1], 10);
+    }
+
+    // 2. Recognize known classic franchises if no year specified
+    if (!year && /\b(teenage\s+mutant\s+ninja\s+turtles|tmnt)\b/i.test(textToScan)) {
+      year = 1987; // Classic 1987 VHS cartoon era
+    }
+
+    // 3. Fallback to program metadata year
+    if (!year) {
+      const yearStr = currentProgram?.year;
+      if (yearStr && yearStr !== 'Vintage') {
+        const parsed = parseInt(String(yearStr).slice(0, 4), 10);
+        if (!isNaN(parsed) && parsed >= 1900 && parsed <= 2035) {
+          year = parsed;
+        }
       }
     }
 
+    // 4. Modern year match from text if still none
     if (!year) {
-      // Scan title and identifier for explicit year (e.g. "1987", "1993", "1959")
-      const textToScan = `${currentProgram?.title || ''} ${currentProgram?.identifier || ''}`;
-      const match = textToScan.match(/\b(19\d\d|20[0-2]\d)\b/);
-      if (match) {
-        year = parseInt(match[1], 10);
+      const modernMatch = textToScan.match(/\b(20[0-2]\d)\b/);
+      if (modernMatch) {
+        year = parseInt(modernMatch[1], 10);
       }
     }
 

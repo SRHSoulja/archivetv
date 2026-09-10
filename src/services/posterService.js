@@ -2,19 +2,24 @@
 // Fetches authentic posters from Wikimedia Commons / Wikipedia API & Archive.org image files,
 // with persistent localStorage caching to minimize network lookups and avoid rate limits.
 
-const POSTER_CACHE_KEY = 'archivetv_poster_cache_v4';
+const POSTER_CACHE_KEY = 'archivetv_poster_cache_v5';
 const posterMemoryCache = new Map();
 
 // Known authentic posters for classic public domain and archive masterpieces
 const CURATED_POSTERS = {
   // Teenage Mutant Ninja Turtles (1987 Classic Animated Series)
   'tmnt-season-1-2': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
+  'Teenage_Mutant_Ninja_Turtles_1987_TV_series': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
   'Teenage_Mutant_Ninja_Turtles_1987': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
   'Teenage_Mutant_Ninja_Turtles': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
+  'tmnt_1987': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
+  'tmnt': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
 
   // The Lone Ranger (1949 TV Series starring Clayton Moore & Jay Silverheels)
   'theloneranger_201705': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Lone_ranger_silver_1965.JPG/500px-Lone_ranger_silver_1965.JPG',
+  'The_Lone_Ranger_1949_TV_series': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Lone_ranger_silver_1965.JPG/500px-Lone_ranger_silver_1965.JPG',
   'The_Lone_Ranger': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Lone_ranger_silver_1965.JPG/500px-Lone_ranger_silver_1965.JPG',
+  'Lone_Ranger': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Lone_ranger_silver_1965.JPG/500px-Lone_ranger_silver_1965.JPG',
   'The_Lone_Ranger__Enter_the_Lone_Ranger': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Lone_ranger_silver_1965.JPG/500px-Lone_ranger_silver_1965.JPG',
 
   // Curated Animations & Open Cinema
@@ -90,8 +95,8 @@ export function cleanTitleForSearch(title) {
   if (!title) return '';
   return title
     .replace(/[_]/g, ' ')
-    .replace(/^the\s+lone\s+ranger\s*[:\-].*$/i, 'The Lone Ranger 1949 TV series')
-    .replace(/\bteenage\s+mutant\s+ninja\s+turtles\b.*$/i, 'Teenage Mutant Ninja Turtles 1987 TV series')
+    .replace(/^(the\s+)?lone\s+ranger\b.*$/i, 'The Lone Ranger 1949 TV series')
+    .replace(/.*(teenage\s+mutant\s+ninja\s+turtles|tmnt)\b.*$/i, 'Teenage Mutant Ninja Turtles 1987 TV series')
     .replace(/\s*\([^)]*\)/g, '')
     .replace(/\s*\[[^\]]*\]/g, '')
     .replace(/\b(1080p|720p|480p|dvd|bluray|vhs|remastered|restored|rip|complete|full movie|hd|season\s*\d+|upscale)\b/gi, '')
@@ -116,6 +121,30 @@ export async function fetchTheatricalPoster(title, year = '', identifier = '') {
     return CURATED_POSTERS[identifier];
   }
 
+  // 3. Direct substring checks for known series to guarantee authentic artwork
+  const lowerTitle = (title || '').toLowerCase();
+  const lowerId = (identifier || '').toLowerCase();
+  if (lowerTitle.includes('lone ranger') || lowerId.includes('lone_ranger') || lowerId.includes('theloneranger')) {
+    const lrPoster = CURATED_POSTERS['The_Lone_Ranger'];
+    saveLocalPosterCache(cacheKey, lrPoster);
+    return lrPoster;
+  }
+  if (lowerTitle.includes('teenage mutant ninja turtles') || lowerTitle.includes('tmnt') || lowerId.includes('tmnt') || lowerId.includes('teenage-mutant-ninja-turtles')) {
+    const tmntPoster = CURATED_POSTERS['Teenage_Mutant_Ninja_Turtles_1987'];
+    saveLocalPosterCache(cacheKey, tmntPoster);
+    return tmntPoster;
+  }
+  if (lowerTitle.includes('elephants dream') || lowerId.includes('elephantsdream')) {
+    const edPoster = CURATED_POSTERS['ElephantsDream'];
+    saveLocalPosterCache(cacheKey, edPoster);
+    return edPoster;
+  }
+  if (lowerTitle === 'sintel' || lowerTitle.startsWith('sintel') || lowerId === 'sintel') {
+    const sintelPoster = CURATED_POSTERS['Sintel'];
+    saveLocalPosterCache(cacheKey, sintelPoster);
+    return sintelPoster;
+  }
+
   const clean = cleanTitleForSearch(title);
   const normalizedKey = clean.replace(/[^a-zA-Z0-9]/g, '_');
   if (CURATED_POSTERS[normalizedKey]) {
@@ -132,7 +161,7 @@ export async function fetchTheatricalPoster(title, year = '', identifier = '') {
 
   if (!clean || clean.length < 3) return null;
 
-  // 3a. Try opensearch to find exact Wikipedia article title first
+  // 4a. Try opensearch to find exact Wikipedia article title first
   try {
     const openSearchUrl = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(
       clean
@@ -151,11 +180,14 @@ export async function fetchTheatricalPoster(title, year = '', identifier = '') {
         if (imgRes.ok) {
           const imgData = await imgRes.json();
           const pages = imgData?.query?.pages || {};
-          for (const page of Object.values(pages)) {
-            const thumb = page?.thumbnail?.source;
-            if (thumb) {
-              saveLocalPosterCache(cacheKey, thumb);
-              return thumb;
+          // Preserve the original order of articleTitles from the search results
+          for (const artTitle of articleTitles) {
+            const matched = Object.values(pages).find(
+              (p) => p.title && p.title.toLowerCase() === artTitle.toLowerCase()
+            );
+            if (matched?.thumbnail?.source) {
+              saveLocalPosterCache(cacheKey, matched.thumbnail.source);
+              return matched.thumbnail.source;
             }
           }
         }

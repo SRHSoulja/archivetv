@@ -633,6 +633,20 @@ export function cleanDescription(desc) {
 }
 
 export function extractYearFromMetadata(rawYear, title = '', identifier = '') {
+  // If title or identifier has an explicit vintage release year (e.g. "1987" in "TMNT 1987"),
+  // that represents the original production/broadcast era, whereas Archive.org's rawYear
+  // often records the year the VHS/DVD was ripped and uploaded (e.g. 2023, 2025).
+  for (const text of [title, identifier]) {
+    if (!text) continue;
+    const match = text.match(/\b(19\d\d)\b/);
+    if (match) {
+      const y = parseInt(match[1], 10);
+      if (y >= 1900 && y <= 2035) {
+        return String(y);
+      }
+    }
+  }
+
   if (rawYear && String(rawYear).trim() !== 'Vintage') {
     const parsed = parseInt(String(rawYear).slice(0, 4), 10);
     if (!isNaN(parsed) && parsed >= 1900 && parsed <= 2035) {
@@ -640,10 +654,10 @@ export function extractYearFromMetadata(rawYear, title = '', identifier = '') {
     }
   }
 
-  // Scan title and identifier for explicit release year (e.g. "1987", "1993", "1959")
+  // Fallback scan for modern 2000s years
   for (const text of [title, identifier]) {
     if (!text) continue;
-    const match = text.match(/\b(19\d\d|20[0-2]\d)\b/);
+    const match = text.match(/\b(20[0-2]\d)\b/);
     if (match) {
       const y = parseInt(match[1], 10);
       if (y >= 1900 && y <= 2035) {
