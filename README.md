@@ -29,7 +29,20 @@ Designed to look, feel, and sound like an authentic analog TV set and hi-fi VCR 
   - [5. Reordering & Managing Program Schedules](#5-reordering--managing-program-schedules)
   - [6. 1-Click "Copy URL" & Quick-Add from Search](#6-1-click-copy-url--quick-add-from-search)
 - [✨ Key Features](#-key-features)
+  - [1. 📼 VCR Transport Deck & Precision Scrub Bar](#1--vcr-transport-deck--precision-scrub-bar)
+  - [2. 🔍 Deep Archive Explorer & Search Matrix](#2--deep-archive-explorer--search-matrix)
+  - [3. 📺 Authentic CRT Shaders & Picture Modes](#3--authentic-crt-shaders--picture-modes)
+  - [4. 📻 Interactive Antennas & RF Reception](#4--interactive-antennas--rf-reception)
+  - [5. 🎮 Handheld Infrared Remote Control](#5--handheld-infrared-remote-control)
+  - [6. 📜 Prevue TV Guide & VHS Tape Shelf](#6--prevue-tv-guide--vhs-tape-shelf)
+- [🔬 Under the Hood & Technical Architecture](#-under-the-hood--technical-architecture)
+  - [Zero Backend Streaming Architecture](#zero-backend-streaming-architecture)
+  - [Procedural Web Audio Synthesizer](#procedural-web-audio-synthesizer)
+  - [Synchronized Wall-Clock Broadcast Algorithm](#synchronized-wall-clock-broadcast-algorithm)
+  - [Dual-Engine Playback System](#dual-engine-playback-system)
+  - [Persistent LocalStorage Schema](#persistent-localstorage-schema)
 - [⌨️ Keyboard Shortcuts](#️-keyboard-shortcuts)
+- [❓ Frequently Asked Questions (FAQ)](#-frequently-asked-questions-faq)
 - [🚀 Quick Start / Local Setup](#-quick-start--local-setup)
 - [🌐 Deploying Your Own Personal Instance](#-deploying-your-own-personal-instance)
 - [🤝 Contributing & Adding Default Channels](#-contributing--adding-default-channels)
@@ -145,8 +158,65 @@ Once a channel has multiple programs or episodes:
   - `B&W`: Authentic 1950s grayscale.
   - `AMBER`: Warm amber phosphor monitor.
   - `GREEN`: Classic monochrome terminal phosphor.
-- **Interactive Rabbit Ear Antennas**: Drag or swivel antennas to adjust reception; off-angle tuning synthesizes analog TV static snow and audio noise.
-- **Universal Dual-Engine Playback**: Switch between direct HTML5 CRT rendering (with full shaders) and official Archive.org iframe Tube Embed for 100% media compatibility.
+
+### 4. 📻 Interactive Antennas & RF Reception
+- **Draggable Antennas**: Click and swivel the dual rabbit-ear antennas on the television chassis to alter the analog tuning angle.
+- **RF Signal Math**: Off-angle tuning calculates signal degredation, triggering an animated canvas noise layer with procedural white static snow and analog audio crackle.
+
+### 5. 🎮 Handheld Infrared Remote Control
+- **Interactive Remote**: Floating 1980s infrared remote control with top red transmitter LED that pulses when buttons are pressed.
+- **Keypad Entry**: Number pad with a 2-digit buffer to dial channels directly (e.g. pressing `0` then `4` tunes to Channel 04).
+- **Quick Controls**: Volume rocker, mute, power, random channel shuffle, aspect ratio (4:3 / 16:9), and instant shortcuts to TV Guide, Search, Tapes, and Channel Studio.
+
+### 6. 📜 Prevue TV Guide & VHS Tape Shelf
+- **Vintage Satellite Matrix**: 1990s Prevue-style blue cable guide listing all broadcast channels, station callsigns, genres, and current programs with live search and category pills.
+- **VHS Cassette Shelf**: Pull-out tape rack displaying your bookmarked video cassettes with realistic tape spine labels, runtimes, and direct eject/play levers.
+
+---
+
+## 🔬 Under the Hood & Technical Architecture
+
+### Zero Backend Streaming Architecture
+ArchiveTV operates **entirely client-side in the user's browser**:
+```
+User Browser
+    │
+    ├─► Queries Internet Archive API (https://archive.org/advancedsearch.php)
+    ├─► Resolves item metadata & file lists (https://archive.org/metadata/{id})
+    └─► Streams video chunk-by-chunk directly (https://archive.org/download/{id}/{file})
+```
+No proxy servers, no media transcoders, and no backend databases are used.
+
+### Procedural Web Audio Synthesizer
+ArchiveTV generates **100% of its analog audio effects procedurally** using the Web Audio API (`AudioContext`):
+- **Knob Clicks & Switches**: Micro-second decaying sine waves passed through band-pass filters to create realistic physical plastic and metallic click transients.
+- **Channel Zap**: High-frequency frequency-modulation chirps that simulate analog tuner heterodyne whistle when changing frequencies.
+- **VCR Motor Whir**: Filtered pink-noise oscillators modulated with LFOs to create the sound of tape transport rollers spinning up.
+- **Antenna Static Hiss**: Dynamic white-noise buffer generated mathematically with volume scaled inversely to the antenna signal quality.
+
+### Synchronized Wall-Clock Broadcast Algorithm
+When **LIVE AIR** mode is enabled, ArchiveTV calculates what show is currently playing and at what exact second by synchronizing to the user's local wall-clock time:
+$$\text{Day Seconds} = \text{Hours} \times 3600 + \text{Minutes} \times 60 + \text{Seconds}$$
+$$\text{Channel Runtime} = \sum \text{Program Durations}$$
+$$\text{Current Offset} = \text{Day Seconds} \pmod{\text{Channel Runtime}}$$
+This creates an authentic broadcast experience where tuning into a channel joins a movie or episode in progress, exactly like real analog television! If you prefer watching from the beginning, simply toggle off `LIVE AIR` or press `Home` / `Backspace` to restart at `00:00`.
+
+### Dual-Engine Playback System
+To achieve 100% media compatibility across the Internet Archive:
+1. **Direct CRT Engine (Default)**: Plays direct `.mp4`, `.webm`, and `.ogv` files inside an HTML5 video element with custom WebGL/CSS CRT shaders, hardware scanlines, and instant timeline scrubbing.
+2. **Tube Embed Engine (Fallback)**: If an item uses an esoteric or proprietary format, switching to the Tube Embed engine renders the official Archive.org player inside the retro CRT frame.
+
+### Persistent LocalStorage Schema
+All user customizations are saved locally in the browser and persist indefinitely across reloads:
+| LocalStorage Key | Data Stored |
+|---|---|
+| `archivetv_custom_channels` | Array of custom channels, callsigns, badges, and program lineups |
+| `archivetv_bookmarks` | Array of bookmarked VHS tapes |
+| `archivetv_volume` | Volume level (0.0 to 1.0) |
+| `archivetv_muted` | Boolean mute status |
+| `archivetv_cabinet_style` | Active cabinet finish (`woodgrain`, `aluminum`, `charcoal`) |
+| `archivetv_color_mode` | Active picture mode (`color`, `bw`, `amber`, `green`) |
+| `archivetv_aspect_ratio` | Video aspect ratio (`4:3`, `16:9`) |
 
 ---
 
@@ -174,6 +244,22 @@ Once a channel has multiple programs or episodes:
 | `A` | Toggle Aspect Ratio (4:3 / 16:9) |
 | `F` | Toggle Fullscreen |
 | `?` | Show Shortcuts Helper |
+
+---
+
+## ❓ Frequently Asked Questions (FAQ)
+
+#### Q: Why does a video occasionally take a few seconds to start playing?
+**A:** Because ArchiveTV streams directly from the Internet Archive, videos are loaded from the Archive's global non-profit servers. Older or less frequently requested archival reels may take 2–4 seconds to spin up on their CDN before streaming.
+
+#### Q: Are my custom channels and bookmarked tapes private?
+**A:** Yes, 100%. All custom stations, program schedules, and bookmarks live solely in your browser's `localStorage`. No data is ever sent to any remote server.
+
+#### Q: Can I run ArchiveTV completely offline?
+**A:** The application interface and CRT shaders can run offline, but streaming video playback requires an active internet connection to communicate with Archive.org's servers.
+
+#### Q: Can I share a custom channel with a friend?
+**A:** You can copy any Archive.org URL using the 1-click `[COPY]` button and send the link to your friend. They can paste it directly into their Channel Studio to add the exact same show or multi-episode series.
 
 ---
 
