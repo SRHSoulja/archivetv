@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import NavbarHeader from './components/NavbarHeader';
 import TvBoxCabinet from './components/TvBoxCabinet';
 import RemoteControl from './components/RemoteControl';
+import NowPlayingSleeve from './components/NowPlayingSleeve';
 import TvGuideModal from './components/TvGuideModal';
 import TapeRackDrawer from './components/TapeRackDrawer';
 import ArchiveSearchModal from './components/ArchiveSearchModal';
@@ -686,6 +687,12 @@ export default function App() {
       </main>
 
       {/* 3. Floating Remote Control */}
+      <NowPlayingSleeve
+        currentProgram={currentProgram}
+        currentChannel={displayChannel}
+        powerOn={powerOn}
+      />
+
       <RemoteControl
         isOpen={remoteOpen}
         onClose={() => setRemoteOpen(false)}

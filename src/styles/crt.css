@@ -356,22 +356,26 @@
 @media (max-height: 1020px) {
   :root { --cab-w: calc(72rem * 0.93); }
   .tv-stage { zoom: 0.93; }
-  .remote-stage > div { zoom: 1; }
+  .remote-stage > div,
+  .sleeve-stage > div { zoom: 1; }
 }
 @media (max-height: 900px) {
   :root { --cab-w: calc(72rem * 0.83); }
   .tv-stage { zoom: 0.83; }
-  .remote-stage > div { zoom: 0.92; }
+  .remote-stage > div,
+  .sleeve-stage > div { zoom: 0.92; }
 }
 @media (max-height: 820px) {
   :root { --cab-w: calc(72rem * 0.72); }
   .tv-stage { zoom: 0.72; }
-  .remote-stage > div { zoom: 0.82; }
+  .remote-stage > div,
+  .sleeve-stage > div { zoom: 0.82; }
 }
 @media (max-height: 700px) {
   :root { --cab-w: calc(72rem * 0.58); }
   .tv-stage { zoom: 0.58; }
-  .remote-stage > div { zoom: 0.66; }
+  .remote-stage > div,
+  .sleeve-stage > div { zoom: 0.66; }
 }
 
 /* The header is a single non-wrapping row ~1443px wide, so it overflowed on
@@ -407,4 +411,21 @@
 .crt-screen-root:fullscreen,
 .crt-screen-root:-webkit-full-screen {
   zoom: 1 !important;
+}
+
+/* Now-playing sleeve: the left-gutter counterpart to the remote. Same gutter
+   maths mirrored, and hidden outright when the gutter cannot hold it -- unlike
+   the remote it has no corner fallback, since it is informational and must
+   never sit over the picture. */
+.sleeve-stage { display: none; }
+
+@media (min-width: 1600px) {
+  .sleeve-stage {
+    display: block;
+    position: fixed;
+    z-index: 40;
+    top: 50%;
+    left: calc((100vw - var(--cab-w)) / 4);
+    transform: translate(-50%, -50%);
+  }
 }
