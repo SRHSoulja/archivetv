@@ -286,7 +286,20 @@ export default function TapeRackDrawer({
                   </div>
 
                   {/* Vertical Poster Box Art Artwork */}
-                  <div className="relative aspect-[2/3] w-full bg-black overflow-hidden flex items-center justify-center">
+                  <div className="relative aspect-[2/3] w-full bg-[#0a0806] overflow-hidden flex items-center justify-center">
+                    {/* Atmospheric Blurred Backdrop Fill */}
+                    <img
+                      src={
+                        posterMap[prog.identifier] ||
+                        prog.thumbnailUrl ||
+                        `https://archive.org/services/img/${prog.identifier}`
+                      }
+                      alt=""
+                      aria-hidden="true"
+                      className="absolute inset-0 w-full h-full object-cover blur-md scale-110 opacity-40 pointer-events-none"
+                    />
+
+                    {/* Main Theatrical Poster Artwork (Preserves True Proportions) */}
                     <img
                       src={
                         posterMap[prog.identifier] ||
@@ -294,7 +307,7 @@ export default function TapeRackDrawer({
                         `https://archive.org/services/img/${prog.identifier}`
                       }
                       alt={prog.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="relative z-10 max-w-full max-h-full w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-md"
                       onError={(e) => {
                         // If poster fails, fallback to archive thumbnail
                         if (e.target.src !== prog.thumbnailUrl && prog.thumbnailUrl) {
