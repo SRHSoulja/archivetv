@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Film, Radio } from 'lucide-react';
 import { fetchTheatricalPoster, getCachedPosterSync } from '../services/posterService';
+import { fetchFullDescription } from '../services/archiveApi';
 
 function formatRuntime(seconds) {
   const total = Math.round(Number(seconds) || 0);
@@ -33,6 +34,7 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
   const year = currentProgram?.year || '';
 
   const [poster, setPoster] = useState(null);
+  const [fullBlurb, setFullBlurb] = useState('');
 
   // Same two-step the tape rack uses: cached/curated art paints instantly, the
   // network lookup only runs when there is nothing on hand.
@@ -64,6 +66,23 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
     if (w && Math.abs(w - panelWidth) > 1) setPanelWidth(w);
   });
 
+  useEffect(() => {
+    setFullBlurb('');
+    const short = stripHtml(currentProgram?.description);
+    if (!identifier || !short.endsWith('...')) return undefined;
+
+    let alive = true;
+    fetchFullDescription(identifier)
+      .then((full) => {
+        if (alive && full && full.length > short.length) setFullBlurb(full);
+      })
+      .catch(() => {});
+
+    return () => {
+      alive = false;
+    };
+  }, [identifier, currentProgram?.description]);
+
   if (!powerOn || !currentProgram) return null;
 
   const fits = Boolean(gutters?.ready) && panelWidth > 0 && gutters.width >= panelWidth + 24;
@@ -81,7 +100,7 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
     seriesTitle && fullTitle.startsWith(`${seriesTitle} - `)
       ? fullTitle.slice(seriesTitle.length + 3)
       : null;
-  const blurb = stripHtml(currentProgram.description);
+  const blurb = fullBlurb || stripHtml(currentProgram.description);
   const episodeCount = currentProgram.availableFiles?.length || 0;
   const runtime = formatRuntime(currentProgram.duration);
 

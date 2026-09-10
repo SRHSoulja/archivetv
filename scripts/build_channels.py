@@ -166,7 +166,7 @@ def get_item_video(identifier):
             # clean html tags
             clean_desc = raw_desc.replace('<p>', '').replace('</p>', ' ').replace('<br>', ' ').replace('<br/>', ' ').strip()
             if len(clean_desc) > 280:
-                clean_desc = clean_desc[:277] + '...'
+                clean_desc = clean_desc[:1197] + '...'
 
             return {
                 'identifier': identifier,

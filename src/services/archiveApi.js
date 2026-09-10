@@ -632,6 +632,32 @@ export function cleanDescription(desc) {
   return clean.length > 300 ? clean.slice(0, 297) + '...' : clean;
 }
 
+// cleanDescription() caps at 300 chars, and build_channels.py bakes an even
+// tighter 280-char cap into curatedChannels.json -- 25 of 60 curated synopses
+// arrive already ending in "...". The rest of the text is simply not in the
+// app, so recover it from the item's metadata on demand.
+const fullDescriptionCache = new Map();
+
+export async function fetchFullDescription(identifier) {
+  if (!identifier) return '';
+  if (fullDescriptionCache.has(identifier)) return fullDescriptionCache.get(identifier);
+  try {
+    const res = await fetch(`https://archive.org/metadata/${identifier}`);
+    if (!res.ok) return '';
+    const data = await res.json();
+    let desc = data?.metadata?.description || '';
+    if (Array.isArray(desc)) desc = desc.join(' ');
+    const clean = String(desc)
+      .replace(/<[^>]*>?/gm, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    fullDescriptionCache.set(identifier, clean);
+    return clean;
+  } catch {
+    return '';
+  }
+}
+
 export function extractYearFromMetadata(rawYear, title = '', identifier = '') {
   // If title or identifier has an explicit vintage release year (e.g. "1987" in "TMNT 1987"),
   // that represents the original production/broadcast era, whereas Archive.org's rawYear
