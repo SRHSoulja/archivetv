@@ -2,7 +2,7 @@
 // Fetches authentic posters from Wikimedia Commons / Wikipedia API & Archive.org image files,
 // with persistent localStorage caching to minimize network lookups and avoid rate limits.
 
-const POSTER_CACHE_KEY = 'archivetv_poster_cache_v2';
+const POSTER_CACHE_KEY = 'archivetv_poster_cache_v3';
 const posterMemoryCache = new Map();
 
 // Known authentic posters for classic public domain and archive masterpieces
@@ -11,6 +11,13 @@ const CURATED_POSTERS = {
   'theloneranger_201705': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Lone_ranger_silver_1965.JPG/500px-Lone_ranger_silver_1965.JPG',
   'The_Lone_Ranger': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Lone_ranger_silver_1965.JPG/500px-Lone_ranger_silver_1965.JPG',
   'The_Lone_Ranger__Enter_the_Lone_Ranger': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Lone_ranger_silver_1965.JPG/500px-Lone_ranger_silver_1965.JPG',
+
+  // Curated Animations & Open Cinema
+  'ElephantsDream': 'https://archive.org/services/img/ElephantsDream',
+  'Elephants_Dream': 'https://archive.org/services/img/ElephantsDream',
+  'Sintel': 'https://archive.org/services/img/Sintel',
+  'Popeye_forPresident': 'https://archive.org/services/img/Popeye_forPresident',
+  'popeye_patriotic_popeye': 'https://archive.org/services/img/popeye_patriotic_popeye',
 
   // Horror & Sci-Fi Masterpieces
   'Night_of_the_Living_Dead': 'https://upload.wikimedia.org/wikipedia/en/9/91/Night_of_the_Living_Dead_%281968%29_poster.jpg',
@@ -121,7 +128,6 @@ export async function fetchTheatricalPoster(title, year = '', identifier = '') {
   if (!clean || clean.length < 3) return null;
 
   // 3. Query Wikipedia API with search + pageimages
-  // Prioritize year if present to avoid modern remakes (e.g. 2013 Lone Ranger)
   const isYearValid = year && year !== 'Vintage' && parseInt(year, 10) > 1900;
   const searchQueries = isYearValid
     ? [
