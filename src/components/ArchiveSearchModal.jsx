@@ -751,7 +751,8 @@ export default function ArchiveSearchModal({
                                   if (!up) return;
                                   setSelectedCreator('');
                                   setSelectedUploader(up);
-                                  doSearch(query, 1, false, { uploader: up, creator: '' });
+                                  setQuery('');
+                                  doSearch('', 1, false, { uploader: up, creator: '' });
                                 }}
                                 className="shrink-0 px-1.5 py-0.5 rounded border border-emerald-700/70 bg-emerald-950/60 text-emerald-300 hover:text-white hover:border-emerald-500 text-[9px] tracking-wider cursor-pointer transition disabled:opacity-50"
                               >
@@ -764,7 +765,8 @@ export default function ArchiveSearchModal({
                                   e.stopPropagation();
                                   setSelectedUploader('');
                                   setSelectedCreator(item.creator);
-                                  doSearch(query, 1, false, { creator: item.creator, uploader: '' });
+                                  setQuery('');
+                                  doSearch('', 1, false, { creator: item.creator, uploader: '' });
                                 }}
                                 className="truncate max-w-[120px] text-zinc-400 font-mono hover:text-amber-300 cursor-pointer transition"
                               >
