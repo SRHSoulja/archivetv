@@ -30,6 +30,7 @@ export default function NavbarHeader({
   onSelectCabinetStyle,
   scanlinesEnabled,
   onToggleScanlines,
+  onOpenPicture,
   remoteOpen,
   onToggleRemote,
   onOpenGuide,
@@ -163,18 +164,14 @@ export default function NavbarHeader({
           <span className="hidden lg:inline">REMOTE</span>
         </button>
 
-        {/* Scanlines Toggle */}
+        {/* Picture Settings */}
         <button
           onClick={() => {
-            audio.playSwitch(!scanlinesEnabled);
-            onToggleScanlines();
+            audio.playKnobClick();
+            onOpenPicture();
           }}
-          className={`p-1.5 rounded-lg border text-xs cursor-pointer transition ${
-            scanlinesEnabled
-              ? 'bg-zinc-700 text-green-400 border-green-500/50'
-              : 'bg-zinc-800/80 text-zinc-500 border-zinc-700'
-          }`}
-          title="Toggle CRT Scanlines"
+          className="p-1.5 rounded-lg border text-xs cursor-pointer transition bg-zinc-800/80 text-teal-300 border-zinc-700 hover:border-teal-500/60 hover:text-teal-200"
+          title="Picture settings - scanlines, curvature, brightness, tinting"
         >
           <Sliders className="w-4 h-4" />
         </button>

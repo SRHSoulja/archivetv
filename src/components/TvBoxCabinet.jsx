@@ -50,6 +50,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
     onCycleColorMode,
     brightness = 100,
     contrast = 100,
+    eraTintEnabled = true,
     playbackRate = 1,
     onChangePlaybackRate,
     activeEngine = 'direct',
@@ -338,6 +339,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                   colorMode={colorMode}
                   brightness={brightness}
                   contrast={contrast}
+                  eraTintEnabled={eraTintEnabled}
                   activeEngine={activeEngine}
                   onEngineChange={onEngineChange || onToggleEngine}
                   onTimeUpdateReport={handleTimeUpdateReport}

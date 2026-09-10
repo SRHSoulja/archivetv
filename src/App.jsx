@@ -3,6 +3,7 @@ import NavbarHeader from './components/NavbarHeader';
 import TvBoxCabinet from './components/TvBoxCabinet';
 import RemoteControl from './components/RemoteControl';
 import NowPlayingSleeve from './components/NowPlayingSleeve';
+import PictureSettingsModal from './components/PictureSettingsModal';
 import { useGutters } from './hooks/useGutters';
 import TvGuideModal from './components/TvGuideModal';
 import TapeRackDrawer from './components/TapeRackDrawer';
@@ -49,8 +50,20 @@ export default function App() {
     }
   });
 
-  const [scanlinesEnabled, setScanlinesEnabled] = useState(true);
-  const [curvatureEnabled, setCurvatureEnabled] = useState(true);
+  // Picture effects, remembered between visits.
+  const savedPicture = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('archivetv_picture_v1')) || {};
+    } catch {
+      return {};
+    }
+  })();
+  const [pictureOpen, setPictureOpen] = useState(false);
+  const [scanlinesEnabled, setScanlinesEnabled] = useState(savedPicture.scanlines ?? true);
+  const [curvatureEnabled, setCurvatureEnabled] = useState(savedPicture.curvature ?? true);
+  const [eraTintEnabled, setEraTintEnabled] = useState(savedPicture.eraTint ?? true);
+  const [brightness, setBrightness] = useState(savedPicture.brightness ?? 100);
+  const [contrast, setContrast] = useState(savedPicture.contrast ?? 100);
 
   const [aspectRatio, setAspectRatio] = useState(() => {
     try {
@@ -113,6 +126,21 @@ export default function App() {
       localStorage.setItem('archivetv_color_mode', colorMode);
     } catch {}
   }, [colorMode]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        'archivetv_picture_v1',
+        JSON.stringify({
+          scanlines: scanlinesEnabled,
+          curvature: curvatureEnabled,
+          eraTint: eraTintEnabled,
+          brightness,
+          contrast,
+        })
+      );
+    } catch {}
+  }, [scanlinesEnabled, curvatureEnabled, eraTintEnabled, brightness, contrast]);
 
   useEffect(() => {
     try {
@@ -635,6 +663,7 @@ export default function App() {
         currentChannel={displayChannel}
         isFullscreen={isFullscreen}
         onToggleFullscreen={handleToggleSiteFullscreen}
+        onOpenPicture={() => setPictureOpen(true)}
       />
 
       {/* 2. Television Stage Area */}
@@ -657,6 +686,9 @@ export default function App() {
           onToggleMute={() => setMuted((m) => !m)}
           scanlinesEnabled={scanlinesEnabled}
           onToggleScanlines={() => setScanlinesEnabled((s) => !s)}
+          brightness={brightness}
+          contrast={contrast}
+          eraTintEnabled={eraTintEnabled}
           curvatureEnabled={curvatureEnabled}
           onToggleCurvature={() => setCurvatureEnabled((c) => !c)}
           aspectRatio={aspectRatio}
@@ -689,6 +721,23 @@ export default function App() {
       </main>
 
       {/* 3. Floating Remote Control */}
+      <PictureSettingsModal
+        isOpen={pictureOpen}
+        onClose={() => setPictureOpen(false)}
+        scanlinesEnabled={scanlinesEnabled}
+        onToggleScanlines={(v) => setScanlinesEnabled(typeof v === 'boolean' ? v : !scanlinesEnabled)}
+        curvatureEnabled={curvatureEnabled}
+        onToggleCurvature={(v) => setCurvatureEnabled(typeof v === 'boolean' ? v : !curvatureEnabled)}
+        eraTintEnabled={eraTintEnabled}
+        onToggleEraTint={(v) => setEraTintEnabled(typeof v === 'boolean' ? v : !eraTintEnabled)}
+        brightness={brightness}
+        onBrightnessChange={setBrightness}
+        contrast={contrast}
+        onContrastChange={setContrast}
+        colorMode={colorMode}
+        onColorModeChange={setColorMode}
+      />
+
       <NowPlayingSleeve
         currentProgram={currentProgram}
         currentChannel={displayChannel}

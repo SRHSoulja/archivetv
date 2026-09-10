@@ -32,6 +32,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     colorMode = 'color',
     brightness = 100,
     contrast = 100,
+    eraTintEnabled = true,
     activeEngine = 'direct',
     _onEngineChange,
     onTimeUpdateReport,
@@ -618,8 +619,9 @@ const CrtScreen = forwardRef(function CrtScreen(
       f += ' sepia(100%) hue-rotate(10deg) saturate(320%)';
     } else if (colorMode === 'green') {
       f += ' sepia(100%) hue-rotate(80deg) saturate(320%)';
-    } else {
-      // Auto era-aware tinting (only in default 'color' mode)
+    } else if (eraTintEnabled) {
+      // Auto era-aware tinting (only in default 'color' mode, and only when the
+      // viewer wants it -- some people would rather see the source untouched)
       switch (contentEra) {
         case 'silent':
           f += ' grayscale(100%) contrast(130%) brightness(90%)';
