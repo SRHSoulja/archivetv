@@ -92,7 +92,7 @@ export default function RemoteControl({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 select-none animate-in fade-in slide-in-from-bottom-5 duration-300">
+    <div className="remote-stage fixed bottom-6 right-6 z-40 select-none animate-in fade-in slide-in-from-bottom-5 duration-300">
       <div className="w-56 bg-gradient-to-b from-[#2a292e] via-[#1c1b20] to-[#121115] rounded-3xl p-4 shadow-2xl border-2 border-zinc-700/80 flex flex-col items-center">
         {/* Top IR Blaster & Header */}
         <div className="w-full flex items-center justify-between pb-3 border-b border-zinc-700/60">

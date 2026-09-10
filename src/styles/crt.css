@@ -342,3 +342,31 @@
   aspect-ratio: auto !important;
   background: #000;
 }
+
+/* Fit the whole set on short viewports.
+   The cabinet needs ~1010px of height; a 1366x768 laptop has 768, which is why
+   the set had to be browser-zoomed to ~75% to be fully visible. zoom (rather than
+   transform) is used deliberately: it reflows, so the page height shrinks with the
+   content instead of leaving a scrollable gap below it. */
+@media (max-height: 1020px) {
+  .tv-stage,
+  .remote-stage { zoom: 0.93; }
+}
+@media (max-height: 900px) {
+  .tv-stage,
+  .remote-stage { zoom: 0.83; }
+}
+@media (max-height: 820px) {
+  .tv-stage,
+  .remote-stage { zoom: 0.72; }
+}
+@media (max-height: 700px) {
+  .tv-stage,
+  .remote-stage { zoom: 0.58; }
+}
+
+/* The fullscreen picture must never inherit the fit-to-viewport shrink. */
+.crt-screen-root:fullscreen,
+.crt-screen-root:-webkit-full-screen {
+  zoom: 1 !important;
+}

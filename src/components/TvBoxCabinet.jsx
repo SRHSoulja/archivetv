@@ -186,7 +186,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
   const fineTuneRotation = (trackingOffset / 50) * 120;
 
   return (
-    <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center select-none">
+    <div className="tv-stage relative w-full max-w-6xl mx-auto flex flex-col items-center select-none">
       {/* 1. Rabbit Ear Antennas */}
       {cabinetStyle !== 'pure' && (
         <div className="relative w-64 h-24 flex justify-center items-end select-none pointer-events-auto z-10 -mb-2">

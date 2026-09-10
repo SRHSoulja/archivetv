@@ -485,6 +485,16 @@ export default function App() {
     }
   };
 
+  // Fullscreen the whole site -- the original behaviour, kept on the navbar
+  // button and Shift+F so nothing that worked before stopped working.
+  const handleToggleSiteFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
   // Track real fullscreen state. Toggling a boolean by hand desynced whenever the
   // viewer left fullscreen with Esc, leaving the navbar button showing the wrong icon.
   useEffect(() => {
@@ -571,7 +581,9 @@ export default function App() {
         handleCycleAspectRatio();
       } else if (key.toLowerCase() === 'f') {
         e.preventDefault();
-        handleToggleFullscreen();
+        // F fills the screen with the picture; Shift+F fills it with the whole set.
+        if (e.shiftKey) handleToggleSiteFullscreen();
+        else handleToggleFullscreen();
       } else if (key.toLowerCase() === 'h') {
         e.preventDefault();
         setControlsHidden((c) => !c);
@@ -619,7 +631,7 @@ export default function App() {
         onOpenAbout={() => setAboutOpen(true)}
         currentChannel={displayChannel}
         isFullscreen={isFullscreen}
-        onToggleFullscreen={handleToggleFullscreen}
+        onToggleFullscreen={handleToggleSiteFullscreen}
       />
 
       {/* 2. Television Stage Area */}
