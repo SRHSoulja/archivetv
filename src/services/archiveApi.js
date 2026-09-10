@@ -50,12 +50,14 @@ export async function searchArchive(query, options = {}) {
     collection = '',
     decade = '',
     durationCategory = '',
+    uploader = '',
+    creator = '',
   } = options;
 
   const raw = (query || '').trim();
 
   // 1. Check if user pasted a direct URL or bare identifier
-  if (raw && page === 1 && !collection && !decade) {
+  if (raw && page === 1 && !collection && !decade && !uploader && !creator) {
     const cleanId = extractIdentifier(raw);
     const isDirectIdCandidate = cleanId && !cleanId.includes(' ') && cleanId.length > 2;
 
@@ -91,6 +93,17 @@ export async function searchArchive(query, options = {}) {
 
   if (collection) {
     queryParts.push(`collection:(${collection})`);
+  }
+
+  // archive.org indexes both: uploader is the account that put the item up
+  // (usually an email), creator is who made the work. "A contributor who has
+  // more of what we want" is nearly always the former.
+  if (uploader) {
+    queryParts.push(`uploader:("${uploader.replace(/"/g, '')}")`);
+  }
+
+  if (creator) {
+    queryParts.push(`creator:("${creator.replace(/"/g, '')}")`);
   }
 
   if (decade) {
@@ -430,6 +443,7 @@ export async function resolvePlayableItem(inputIdentifier) {
         lower.endsWith('.mp4') ||
         lower.endsWith('.m4v') ||
         lower.endsWith('.webm') ||
+        lower.endsWith('.ogv') ||
         lower.endsWith('.ia.mp4')
       );
     });
@@ -630,6 +644,27 @@ export function cleanDescription(desc) {
     .replace(/\s+/g, ' ')
     .trim();
   return clean.length > 300 ? clean.slice(0, 297) + '...' : clean;
+}
+
+// uploader is queryable but never returned by advancedsearch -- it is an email
+// address, and only the item metadata endpoint exposes it. So resolve it on
+// demand for the one item someone clicked, and cache it.
+const uploaderCache = new Map();
+
+export async function fetchUploader(identifier) {
+  if (!identifier) return '';
+  if (uploaderCache.has(identifier)) return uploaderCache.get(identifier);
+  try {
+    const res = await fetch(`https://archive.org/metadata/${identifier}`);
+    if (!res.ok) return '';
+    const data = await res.json();
+    let up = data?.metadata?.uploader || '';
+    if (Array.isArray(up)) up = up[0] || '';
+    uploaderCache.set(identifier, up);
+    return up;
+  } catch {
+    return '';
+  }
 }
 
 // cleanDescription() caps at 300 chars, and build_channels.py bakes an even

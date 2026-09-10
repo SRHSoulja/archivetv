@@ -25,6 +25,7 @@ import {
   saveBookmark,
   removeBookmark,
   isBookmarked,
+  fetchUploader,
 } from '../services/archiveApi';
 import { audio } from '../services/soundEffects';
 
@@ -49,6 +50,9 @@ export default function ArchiveSearchModal({
   const [selectedCollection, setSelectedCollection] = useState('');
   const [selectedDecade, setSelectedDecade] = useState('');
   const [durationCategory, setDurationCategory] = useState('all');
+  const [selectedUploader, setSelectedUploader] = useState('');
+  const [selectedCreator, setSelectedCreator] = useState('');
+  const [uploaderLookupId, setUploaderLookupId] = useState(null);
   const [page, setPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
 
@@ -122,6 +126,8 @@ export default function ArchiveSearchModal({
         collection: selectedCollection,
         decade: selectedDecade,
         durationCategory,
+        uploader: selectedUploader,
+        creator: selectedCreator,
       });
 
       if (append) {
@@ -397,6 +403,32 @@ export default function ArchiveSearchModal({
                       className="w-3 h-3 cursor-pointer hover:text-white"
                       onClick={() => {
                         setSelectedCollection('');
+                        setTimeout(() => doSearch(query, 1, false), 50);
+                      }}
+                    />
+                  </span>
+                )}
+
+                {selectedUploader && (
+                  <span className="bg-emerald-950 text-emerald-300 px-2 py-1 rounded border border-emerald-700 flex items-center gap-1 max-w-[260px]">
+                    <span className="truncate">UPLOADER: {selectedUploader}</span>
+                    <X
+                      className="w-3 h-3 shrink-0 cursor-pointer hover:text-white"
+                      onClick={() => {
+                        setSelectedUploader('');
+                        setTimeout(() => doSearch(query, 1, false), 50);
+                      }}
+                    />
+                  </span>
+                )}
+
+                {selectedCreator && (
+                  <span className="bg-cyan-950 text-cyan-300 px-2 py-1 rounded border border-cyan-700 flex items-center gap-1 max-w-[260px]">
+                    <span className="truncate">CREATOR: {selectedCreator}</span>
+                    <X
+                      className="w-3 h-3 shrink-0 cursor-pointer hover:text-white"
+                      onClick={() => {
+                        setSelectedCreator('');
                         setTimeout(() => doSearch(query, 1, false), 50);
                       }}
                     />
@@ -704,10 +736,40 @@ export default function ArchiveSearchModal({
                             )}
                           </div>
 
-                          <div className="flex items-center justify-between text-[11px] font-pixel text-amber-500 mb-1">
-                            <span>YEAR: {item.year}</span>
-                            <span className="truncate max-w-[120px] text-zinc-400 font-mono">
-                              {item.creator}
+                          <div className="flex items-center justify-between gap-2 text-[11px] font-pixel text-amber-500 mb-1">
+                            <span className="shrink-0">YEAR: {item.year}</span>
+                            <span className="flex items-center gap-1.5 min-w-0">
+                              <button
+                                type="button"
+                                title="Show everything this contributor uploaded"
+                                disabled={uploaderLookupId === item.identifier}
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  setUploaderLookupId(item.identifier);
+                                  const up = await fetchUploader(item.identifier);
+                                  setUploaderLookupId(null);
+                                  if (!up) return;
+                                  setSelectedCreator('');
+                                  setSelectedUploader(up);
+                                  setTimeout(() => doSearch(query, 1, false), 50);
+                                }}
+                                className="shrink-0 px-1.5 py-0.5 rounded border border-emerald-700/70 bg-emerald-950/60 text-emerald-300 hover:text-white hover:border-emerald-500 text-[9px] tracking-wider cursor-pointer transition disabled:opacity-50"
+                              >
+                                {uploaderLookupId === item.identifier ? '...' : 'UPLOADER'}
+                              </button>
+                              <button
+                                type="button"
+                                title={`Show only items credited to ${item.creator}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedUploader('');
+                                  setSelectedCreator(item.creator);
+                                  setTimeout(() => doSearch(query, 1, false), 50);
+                                }}
+                                className="truncate max-w-[120px] text-zinc-400 font-mono hover:text-amber-300 cursor-pointer transition"
+                              >
+                                {item.creator}
+                              </button>
                             </span>
                           </div>
 
