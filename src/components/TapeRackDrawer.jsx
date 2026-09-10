@@ -34,6 +34,7 @@ export default function TapeRackDrawer({
   const [titleVersion, setTitleVersion] = useState(0);
   const [sortMode, setSortMode] = useState(() => getTapeSort());
   const [dragId, setDragId] = useState(null);
+  const [orderIds, setOrderIds] = useState(() => getTapeOrder());
   const [yearDraft, setYearDraft] = useState('');
   const [activeChannelId, setActiveChannelId] = useState(currentChannel?.id || channels[0]?.id || 'toons');
   const [customInput, setCustomInput] = useState('');
@@ -81,26 +82,30 @@ export default function TapeRackDrawer({
     if (sortMode === 'oldest')
       return list.sort((a, b) => (yearOf(a) ?? Infinity) - (yearOf(b) ?? Infinity));
     if (sortMode === 'custom') {
-      const order = getTapeOrder();
       const at = (p) => {
-        const i = order.indexOf(p.identifier);
+        const i = orderIds.indexOf(p.identifier);
         return i === -1 ? Number.MAX_SAFE_INTEGER : i;
       };
       return list.sort((a, b) => at(a) - at(b));
     }
     return list;
     // titleVersion re-runs this after a rename or year edit changes the keys
-  }, [baseList, sortMode, titleVersion]);
+  }, [baseList, sortMode, titleVersion, orderIds]);
 
-  const handleDropOn = (targetId) => {
+  // Rearrange as the cursor passes over a neighbour, rather than computing the
+  // result on release -- you can see where it will land before letting go.
+  const previewMove = (targetId) => {
     if (!dragId || dragId === targetId) return;
     const ids = sortedList.map((p) => p.identifier);
     const from = ids.indexOf(dragId);
     const to = ids.indexOf(targetId);
     if (from === -1 || to === -1) return;
     ids.splice(to, 0, ids.splice(from, 1)[0]);
-    setTapeOrder(ids);
-    setTitleVersion((v) => v + 1);
+    setOrderIds(ids);
+  };
+
+  const commitOrder = () => {
+    if (dragId) setTapeOrder(sortedList.map((p) => p.identifier));
     setDragId(null);
   };
 
@@ -363,7 +368,6 @@ export default function TapeRackDrawer({
           ) : viewMode === 'boxart' ? (
             /* Authentic VHS Box Art / Movie Poster Slipcovers Grid */
             <div
-              key={`grid_${titleVersion}`}
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
             >
               {sortedList.map((prog, idx) => {
@@ -376,19 +380,28 @@ export default function TapeRackDrawer({
 
                 return (
                   <div
-                    key={`boxart_${activeTab}_${selectedChan?.id || 'ch'}_${prog.identifier || 'prog'}_${prog.videoFile || prog.videoUrl || ''}_${idx}`}
+                    key={`boxart_${activeTab}_${selectedChan?.id || 'ch'}_${prog.identifier || 'prog'}_${prog.videoFile || prog.videoUrl || ''}`}
                     draggable={sortMode === 'custom'}
                     onDragStart={(e) => {
                       setDragId(prog.identifier);
                       e.dataTransfer.effectAllowed = 'move';
+                      try {
+                        e.dataTransfer.setData('text/plain', prog.identifier);
+                      } catch {}
+                    }}
+                    onDragEnter={() => {
+                      if (sortMode === 'custom') previewMove(prog.identifier);
                     }}
                     onDragOver={(e) => {
-                      if (sortMode === 'custom') e.preventDefault();
+                      if (sortMode !== 'custom') return;
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = 'move';
                     }}
                     onDrop={(e) => {
                       e.preventDefault();
-                      handleDropOn(prog.identifier);
+                      commitOrder();
                     }}
+                    onDragEnd={commitOrder}
                     onClick={() => {
                       if (activeTab === 'bookmarks') {
                         audio.playSwitch(true);
@@ -402,7 +415,13 @@ export default function TapeRackDrawer({
                         handleTapeClick(prog, idx);
                       }
                     }}
-                    className="group relative bg-[#181614] border-2 border-[#45372b] hover:border-amber-400 rounded-xl vhs-box-shadow hover:-translate-y-1 transition-all duration-200 cursor-pointer flex flex-col overflow-hidden select-none"
+                    className={`group relative bg-[#181614] border-2 rounded-xl vhs-box-shadow transition-all duration-200 flex flex-col overflow-hidden select-none ${
+                      sortMode === 'custom' ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
+                    } ${
+                      dragId === prog.identifier
+                        ? 'opacity-40 scale-95 border-amber-400'
+                        : 'border-[#45372b] hover:border-amber-400 hover:-translate-y-1'
+                    }`}
                   >
                     {/* VHS Worn Cardboard Spine Effect (Left Edge) */}
                     <div className="absolute left-0 top-0 bottom-0 w-2.5 vhs-spine z-20 pointer-events-none border-r border-black/40" />
