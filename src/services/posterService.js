@@ -48,8 +48,6 @@ const CURATED_POSTERS = {
   'Dementia_13': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Dementia_13_theatrical_poster.jpg/500px-Dementia_13_theatrical_poster.jpg',
   'The_Cabinet_of_Dr__Caligari': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/Das_Cabinet_des_Dr._Caligari.JPG/500px-Das_Cabinet_des_Dr._Caligari.JPG',
   'Santa_Claus_Conquers_the_Martians': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/Santa_Claus_Conquers_the_Martians_1.jpg/500px-Santa_Claus_Conquers_the_Martians_1.jpg',
-  'teenagers_from_outerspace': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Teenagers_from_Outer_Space_poster.jpg/500px-Teenagers_from_Outer_Space_poster.jpg',
-  'horror_express_ipod': 'https://upload.wikimedia.org/wikipedia/en/a/a2/Horror_Express.jpg',
 
   // Film Noir & Westerns
   'suddenly': 'https://upload.wikimedia.org/wikipedia/en/8/82/Suddenly_%281954_movie_poster%29.jpg',
@@ -58,8 +56,6 @@ const CURATED_POSTERS = {
   'impact': 'https://upload.wikimedia.org/wikipedia/en/9/91/Impact_1949_poster.jpg',
   'AngelAndTheBadman': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/Angel_badman.jpg/500px-Angel_badman.jpg',
   'his_girl_friday': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/His_Girl_Friday_%281940_poster%29_crop.jpg/500px-His_Girl_Friday_%281940_poster%29_crop.jpg',
-  'mclintok_widescreen': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/be/McLintock%21_theatrical_poster.jpg/500px-McLintock%21_theatrical_poster.jpg',
-  'Santa_Fe_Trail_movie': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/Santa_Fe_Trail_poster.jpg/500px-Santa_Fe_Trail_poster.jpg',
   'Charade': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Charade_%281963%29_poster.jpg/500px-Charade_%281963%29_poster.jpg',
   'A_Star_Is_Born': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/A_Star_Is_Born_%281937_poster%29.jpg/500px-A_Star_Is_Born_%281937_poster%29.jpg',
 };
@@ -154,6 +150,36 @@ export async function fetchTheatricalPoster(title, year = '', identifier = '') {
 
   const clean = cleanTitleForSearch(title);
   if (!clean || clean.length < 3) return null;
+
+  // 4a0. Wikipedia disambiguates film and TV articles as "Title (1940 film)".
+  // Asking for those explicitly first stops a same-named topic article winning:
+  // a plain search for "Santa Fe Trail" returns the historic trail (and its
+  // map) rather than the 1940 film, and reports success while doing it.
+  const yearNum = parseInt(year, 10);
+  const disambiguated = [];
+  if (yearNum > 1900) {
+    disambiguated.push(`${clean} (${yearNum} film)`, `${clean} (${yearNum} TV series)`);
+  }
+  disambiguated.push(`${clean} (film)`, `${clean} (TV series)`);
+  try {
+    const disUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(
+      disambiguated.join('|')
+    )}&prop=pageimages&pilicense=any&pithumbsize=500&format=json&origin=*`;
+    const disRes = await fetch(disUrl);
+    if (disRes.ok) {
+      const disData = await disRes.json();
+      const pages = disData?.query?.pages || {};
+      for (const cand of disambiguated) {
+        const hit = Object.values(pages).find(
+          (p) => p.title && p.title.toLowerCase() === cand.toLowerCase() && p.thumbnail?.source
+        );
+        if (hit) {
+          saveLocalPosterCache(cacheKey, hit.thumbnail.source);
+          return hit.thumbnail.source;
+        }
+      }
+    }
+  } catch {}
 
   // 4a. Try opensearch to find exact Wikipedia article title first
   try {
