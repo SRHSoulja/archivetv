@@ -167,17 +167,7 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
                 {currentChannel.callsign}
               </span>
             )}
-            {identifier && (
-              <button
-                type="button"
-                onClick={() => setArtToolOpen(true)}
-                title="Suggest better box art"
-                aria-label="Suggest better box art"
-                className="text-zinc-600 hover:text-amber-400 transition-colors cursor-pointer"
-              >
-                <ImagePlus className="w-3.5 h-3.5" />
-              </button>
-            )}
+
           </div>
         </div>
 
@@ -218,6 +208,18 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
                 </span>
               </div>
             )}
+            {identifier && (
+              <button
+                type="button"
+                onClick={() => setArtToolOpen(true)}
+                title="Suggest better box art"
+                aria-label="Suggest better box art"
+                className="absolute bottom-2 right-2 z-20 flex items-center gap-1 px-2 py-1 rounded-md bg-black/75 border border-zinc-500/70 text-zinc-300 font-pixel text-[9px] tracking-wider opacity-60 hover:opacity-100 hover:text-amber-300 hover:border-amber-400/70 transition-all cursor-pointer"
+              >
+                <ImagePlus className="w-3 h-3" /> ART
+              </button>
+            )}
+
             {/* Sleeve gloss */}
             <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/10 via-transparent to-transparent" />
           </div>
