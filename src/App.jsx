@@ -707,6 +707,7 @@ export default function App() {
         channels={channels}
         onSelectChannel={handleSelectChannel}
         onCustomTapePlay={handleCustomTapePlay}
+        onPlayDirectItem={handlePlayDirectItem}
       />
 
       {/* 6. Internet Archive Deep Antenna Explorer Modal */}
