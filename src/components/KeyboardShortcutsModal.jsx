@@ -25,6 +25,7 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }) {
     { key: 'R', desc: 'Toggle Handheld Infrared Remote' },
     { key: 'A', desc: 'Cycle Aspect Ratio (Auto / 4:3 / 16:9)' },
     { key: 'F', desc: 'Toggle Fullscreen Mode' },
+    { key: 'H', desc: 'Toggle Immersive Mode (Hide/Show Controls)' },
   ];
 
   return (

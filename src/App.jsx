@@ -82,6 +82,7 @@ export default function App() {
   });
   const [playbackRate, setPlaybackRate] = useState(1);
   const [activeEngine, setActiveEngine] = useState('direct'); // 'direct' | 'embed'
+  const [controlsHidden, setControlsHidden] = useState(false); // Immersive mode: hide VCR deck
 
   // Persist user settings
   useEffect(() => {
@@ -555,6 +556,9 @@ export default function App() {
       } else if (key.toLowerCase() === 'f') {
         e.preventDefault();
         handleToggleFullscreen();
+      } else if (key.toLowerCase() === 'h') {
+        e.preventDefault();
+        setControlsHidden((c) => !c);
       } else if (key === '?') {
         e.preventDefault();
         setShortcutsOpen(true);
@@ -648,6 +652,8 @@ export default function App() {
           onEngineChange={handleEngineChange}
           onToggleEngine={() => handleEngineChange()}
           onPlaybackStateChange={setIsPlaying}
+          controlsHidden={controlsHidden}
+          onToggleControls={() => setControlsHidden((c) => !c)}
         />
       </main>
 

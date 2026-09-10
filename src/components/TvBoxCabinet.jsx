@@ -56,6 +56,8 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
     onEngineChange,
     onToggleEngine,
     onPlaybackStateChange,
+    controlsHidden = false,
+    onToggleControls,
   },
   ref
 ) {
@@ -316,21 +318,41 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
 
             {/* VCR TRANSPORT CONTROL DECK & SCRUBBER */}
             {powerOn && (
-              <VcrControlDeck
-                currentProgram={currentProgram}
-                currentTime={currentTime}
-                duration={duration}
-                isPlaying={isPlaying}
-                onTogglePlayPause={handleTogglePlayPause}
-                onSeek={handleSeek}
-                onRestart={handleRestart}
-                playbackRate={playbackRate}
-                onChangePlaybackRate={onChangePlaybackRate}
-                activeEngine={activeEngine}
-                onToggleEngine={onToggleEngine}
-                onOpenEpisodes={onOpenEpisodes}
-                episodesCount={currentProgram?.availableFiles?.length || 0}
-              />
+              <div className={`transition-all duration-300 overflow-hidden ${controlsHidden ? 'max-h-0 opacity-0' : 'max-h-96 opacity-100'}`}>
+                <VcrControlDeck
+                  currentProgram={currentProgram}
+                  currentTime={currentTime}
+                  duration={duration}
+                  isPlaying={isPlaying}
+                  onTogglePlayPause={handleTogglePlayPause}
+                  onSeek={handleSeek}
+                  onRestart={handleRestart}
+                  playbackRate={playbackRate}
+                  onChangePlaybackRate={onChangePlaybackRate}
+                  activeEngine={activeEngine}
+                  onToggleEngine={onToggleEngine}
+                  onOpenEpisodes={onOpenEpisodes}
+                  episodesCount={currentProgram?.availableFiles?.length || 0}
+                />
+              </div>
+            )}
+
+            {/* Immersive Mode Toggle (always visible) */}
+            {powerOn && onToggleControls && (
+              <button
+                onClick={() => {
+                  audio.playKnobClick();
+                  onToggleControls();
+                }}
+                title={controlsHidden ? 'Show Controls (H)' : 'Hide Controls for Immersive Mode (H)'}
+                className={`w-full py-1 mt-1 rounded-lg font-pixel text-[10px] cursor-pointer transition-all flex items-center justify-center gap-1 ${
+                  controlsHidden
+                    ? 'bg-amber-950/60 hover:bg-amber-900/80 border border-amber-500/40 text-amber-300'
+                    : 'bg-zinc-900/60 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                {controlsHidden ? '▲ SHOW CONTROLS [H]' : '▼ IMMERSIVE MODE [H]'}
+              </button>
             )}
           </div>
 

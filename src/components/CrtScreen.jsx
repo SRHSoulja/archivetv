@@ -43,6 +43,8 @@ const CrtScreen = forwardRef(function CrtScreen(
   const canvasRef = useRef(null);
   const loadedVideoUrlRef = useRef(null);
   const onTimeUpdateReportRef = useRef(onTimeUpdateReport);
+  const lastPlaybackTimeRef = useRef(0);
+  const prevEngineRef = useRef(activeEngine);
 
   useEffect(() => {
     onTimeUpdateReportRef.current = onTimeUpdateReport;
@@ -94,6 +96,7 @@ const CrtScreen = forwardRef(function CrtScreen(
       const cur = videoRef.current.currentTime;
       const dur = videoRef.current.duration || duration || currentProgram?.duration || 0;
       if (cur > 0) setVideoLoading(false);
+      lastPlaybackTimeRef.current = cur;
       onTimeUpdateReport(cur, dur, !videoRef.current.paused);
     }
   }, [duration, currentProgram?.duration, onTimeUpdateReport]);
@@ -172,6 +175,31 @@ const CrtScreen = forwardRef(function CrtScreen(
     }
   }, [playbackRate]);
 
+  // Bidirectional timestamp handoff: capture time from outgoing engine when switching
+  useEffect(() => {
+    if (prevEngineRef.current === activeEngine) return;
+
+    // Capture position from the engine we're leaving
+    if (prevEngineRef.current === 'direct' && videoRef.current) {
+      lastPlaybackTimeRef.current = videoRef.current.currentTime || 0;
+    } else if (prevEngineRef.current === 'embed') {
+      lastPlaybackTimeRef.current = embedTime || 0;
+    }
+
+    // When arriving at direct mode, force-clear loadedVideoUrlRef so the
+    // video setup effect re-runs and seeks to lastPlaybackTimeRef
+    if (activeEngine === 'direct') {
+      loadedVideoUrlRef.current = null;
+    }
+
+    // When arriving at embed mode, seed embedTime from the saved position
+    if (activeEngine === 'embed') {
+      setEmbedTime(lastPlaybackTimeRef.current);
+    }
+
+    prevEngineRef.current = activeEngine;
+  }, [activeEngine, embedTime]);
+
   // Reset timestamps and stream index on program/channel change
   useEffect(() => {
     setCandidateIndex(0);
@@ -183,6 +211,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     setDuration(initialDur);
     setEmbedTime(initialSeek);
     setEmbedPlaying(true);
+    lastPlaybackTimeRef.current = initialSeek;
     if (onTimeUpdateReport) {
       onTimeUpdateReport(initialSeek, initialDur, true);
     }
@@ -371,6 +400,10 @@ const CrtScreen = forwardRef(function CrtScreen(
         video.currentTime = currentProgram.seekSeconds % video.duration;
       } else if (currentProgram?.seekSeconds) {
         video.currentTime = currentProgram.seekSeconds;
+      } else if (lastPlaybackTimeRef.current > 0) {
+        // Resume from saved position (e.g. returning from embed mode)
+        video.currentTime = lastPlaybackTimeRef.current;
+        lastPlaybackTimeRef.current = 0;
       } else {
         video.currentTime = 0;
       }
@@ -424,15 +457,52 @@ const CrtScreen = forwardRef(function CrtScreen(
     return () => clearTimeout(t);
   }, [currentChannel?.number, currentProgram?.identifier, aspectRatio]);
 
-  // Build filter style for color modes and brightness
+  // Derive the content era from the program year for era-aware visual styling
+  const contentEra = useMemo(() => {
+    const yearStr = currentProgram?.year;
+    if (!yearStr || yearStr === 'Vintage') return 'modern';
+    const year = parseInt(yearStr, 10);
+    if (isNaN(year)) return 'modern';
+    if (year < 1930) return 'silent';      // Silent Era: heavy B&W grain
+    if (year < 1950) return 'golden';      // Golden Age: warm sepia, slight flicker
+    if (year < 1965) return 'early-color'; // Early Color TV: desaturated, soft
+    if (year < 1980) return 'broadcast';   // Classic Broadcast: vivid but warm
+    if (year < 2000) return 'vhs';         // VHS Era: slightly washed, warm
+    return 'modern';                        // Digital era: clean
+  }, [currentProgram?.year]);
+
+  // Build filter style for color modes, brightness, AND era-aware automatic tinting
   const getFilterStyle = () => {
     let f = `brightness(${brightness}%) contrast(${contrast}%)`;
+
+    // Manual color mode overrides era styling
     if (colorMode === 'bw') {
       f += ' grayscale(100%)';
     } else if (colorMode === 'amber') {
       f += ' sepia(100%) hue-rotate(10deg) saturate(320%)';
     } else if (colorMode === 'green') {
       f += ' sepia(100%) hue-rotate(80deg) saturate(320%)';
+    } else {
+      // Auto era-aware tinting (only in default 'color' mode)
+      switch (contentEra) {
+        case 'silent':
+          f += ' grayscale(100%) contrast(130%) brightness(90%)';
+          break;
+        case 'golden':
+          f += ' sepia(35%) saturate(80%) contrast(105%)';
+          break;
+        case 'early-color':
+          f += ' saturate(75%) sepia(10%) contrast(105%)';
+          break;
+        case 'broadcast':
+          f += ' saturate(110%) sepia(5%)';
+          break;
+        case 'vhs':
+          f += ' saturate(90%) sepia(8%) brightness(102%)';
+          break;
+        default:
+          break;
+      }
     }
     return f;
   };
@@ -495,22 +565,31 @@ const CrtScreen = forwardRef(function CrtScreen(
       )}
 
       {/* 2. Universal Archive.org Tube Embed Player */}
-      {powerOn && !canPlayDirect && (currentProgram?.embedUrl || currentProgram?.identifier) && (
-        <div
-          className="absolute inset-0 w-full h-full bg-black flex items-center justify-center z-10"
-          style={{ filter: getFilterStyle() }}
-        >
-          <iframe
-            ref={iframeRef}
-            src={currentProgram.embedUrl || `https://archive.org/embed/${currentProgram.identifier}?autoplay=1`}
-            title={currentProgram.title}
-            className="w-full h-full border-0"
-            allow="autoplay; fullscreen"
-            allowFullScreen
-            onLoad={() => setVideoLoading(false)}
-          />
-        </div>
-      )}
+      {powerOn && !canPlayDirect && (currentProgram?.embedUrl || currentProgram?.identifier) && (() => {
+        // Build embed URL with &start= for seamless timestamp handoff
+        const startSec = Math.max(0, Math.floor(embedTime || lastPlaybackTimeRef.current || 0));
+        const baseUrl = currentProgram.embedUrl || `https://archive.org/embed/${currentProgram.identifier}`;
+        const sep = baseUrl.includes('?') ? '&' : '?';
+        const embedSrc = startSec > 0
+          ? `${baseUrl}${sep}autoplay=1&start=${startSec}`
+          : `${baseUrl}${sep}autoplay=1`;
+        return (
+          <div
+            className="absolute inset-0 w-full h-full bg-black flex items-center justify-center z-10"
+            style={{ filter: getFilterStyle() }}
+          >
+            <iframe
+              ref={iframeRef}
+              src={embedSrc}
+              title={currentProgram.title}
+              className="w-full h-full border-0"
+              allow="autoplay; fullscreen"
+              allowFullScreen
+              onLoad={() => setVideoLoading(false)}
+            />
+          </div>
+        );
+      })()}
 
       {/* 2b. Retro SMPTE Color Bars Standby / Off-Air Screen */}
       {powerOn && isOffAir && (
@@ -634,6 +713,24 @@ const CrtScreen = forwardRef(function CrtScreen(
           </div>
 
           <div className="flex items-center gap-2 text-xs font-pixel bg-black/80 px-2.5 py-1 rounded border border-green-500/40 text-green-300">
+            {contentEra !== 'modern' && (
+              <>
+                <span className={`px-1.5 py-0.5 rounded text-[10px] ${
+                  contentEra === 'silent' ? 'bg-zinc-800 text-zinc-300 border border-zinc-600' :
+                  contentEra === 'golden' ? 'bg-amber-950 text-amber-300 border border-amber-600/50' :
+                  contentEra === 'early-color' ? 'bg-teal-950 text-teal-300 border border-teal-600/50' :
+                  contentEra === 'broadcast' ? 'bg-blue-950 text-blue-300 border border-blue-600/50' :
+                  'bg-purple-950 text-purple-300 border border-purple-600/50'
+                }`}>
+                  {contentEra === 'silent' ? 'SILENT ERA' :
+                   contentEra === 'golden' ? 'GOLDEN AGE' :
+                   contentEra === 'early-color' ? 'EARLY COLOR' :
+                   contentEra === 'broadcast' ? '70s BROADCAST' :
+                   'VHS ERA'}
+                </span>
+                <span>•</span>
+              </>
+            )}
             <span>{colorMode.toUpperCase()} MODE</span>
             <span>•</span>
             <span>{aspectRatio === 'auto' ? `AUTO (${effectiveAspectRatio})` : aspectRatio}</span>
