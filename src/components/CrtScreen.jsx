@@ -33,6 +33,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     brightness = 100,
     contrast = 100,
     eraTintEnabled = true,
+    interstitial = null,
     activeEngine = 'direct',
     _onEngineChange,
     onTimeUpdateReport,
@@ -863,6 +864,27 @@ const CrtScreen = forwardRef(function CrtScreen(
       {/* 7. Curved Glass Vignette & Reflection */}
       <div className={`absolute inset-0 crt-bezel-shadow pointer-events-none z-20 ${cabinetStyle === 'pure' ? 'opacity-40' : 'opacity-100'}`} />
       <div className={`absolute inset-0 crt-glass-reflection pointer-events-none z-20 ${cabinetStyle === 'trinitron' ? 'opacity-60' : 'opacity-100'}`} />
+
+      {powerOn && interstitial && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2">
+          <div className="px-3 py-1.5 rounded bg-black/80 border border-amber-500/70 font-vcr text-amber-300 text-sm tracking-widest uppercase drop-shadow">
+            WE&apos;LL BE RIGHT BACK
+          </div>
+          <div className="font-pixel text-[9px] text-amber-200/80 tracking-widest">
+            SPOT {interstitial.index} OF {interstitial.count}
+          </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              interstitial.onSkip?.();
+            }}
+            className="mt-1 px-3 py-1 rounded bg-black/70 border border-zinc-500/70 text-zinc-300 hover:text-white hover:border-amber-400/80 font-pixel text-[9px] tracking-widest cursor-pointer transition"
+          >
+            &#9654; BACK TO PROGRAM
+          </button>
+        </div>
+      )}
 
       {powerOn && (
         <button

@@ -4,6 +4,16 @@ import TvBoxCabinet from './components/TvBoxCabinet';
 import RemoteControl from './components/RemoteControl';
 import NowPlayingSleeve from './components/NowPlayingSleeve';
 import PictureSettingsModal from './components/PictureSettingsModal';
+import CommercialBreaksModal from './components/CommercialBreaksModal';
+import {
+  getAdSets,
+  getAdConfig,
+  resolveChannelAds,
+  scheduleNextBreak,
+  pickSpots,
+  MIN_PROGRAMME_SECONDS,
+  EDGE_GUARD_SECONDS,
+} from './services/commercials';
 import { useGutters } from './hooks/useGutters';
 import TvGuideModal from './components/TvGuideModal';
 import TapeRackDrawer from './components/TapeRackDrawer';
@@ -30,6 +40,13 @@ export default function App() {
   const [currentChannelIndex, setCurrentChannelIndex] = useState(0);
   const [currentProgramIndex, setCurrentProgramIndex] = useState(0);
   const [activeExplicitProgram, setActiveExplicitProgram] = useState(null);
+  const [adConfig, setAdConfigState] = useState(() => getAdConfig());
+  const [adBreak, setAdBreak] = useState(null);
+  const adBreakRef = useRef(null);
+  const playheadRef = useRef({ time: 0, duration: 0 });
+  const nextBreakRef = useRef(null);
+  const lastSpotRef = useRef(null);
+  const currentProgramRef = useRef(null);
   const [powerOn, setPowerOn] = useState(true);
   const [isPlaying, setIsPlaying] = useState(true);
 
@@ -59,6 +76,7 @@ export default function App() {
     }
   })();
   const [pictureOpen, setPictureOpen] = useState(false);
+  const [breaksOpen, setBreaksOpen] = useState(false);
   const [scanlinesEnabled, setScanlinesEnabled] = useState(savedPicture.scanlines ?? true);
   const [curvatureEnabled, setCurvatureEnabled] = useState(savedPicture.curvature ?? true);
   const [eraTintEnabled, setEraTintEnabled] = useState(savedPicture.eraTint ?? true);
@@ -204,11 +222,29 @@ export default function App() {
 
   // Current Program Resolver
   const currentProgram = useMemo(() => {
+    if (adBreak) {
+      const spot = adBreak.queue[adBreak.index];
+      if (spot) {
+        return {
+          identifier: spot.identifier,
+          title: spot.title,
+          videoFile: spot.videoFile,
+          videoUrl: spot.videoUrl,
+          candidateStreamUrls: spot.candidateStreamUrls || [spot.videoUrl],
+          duration: spot.duration || 30,
+          year: spot.year || '',
+          description: '',
+          seekSeconds: 0,
+          isInterstitial: true,
+        };
+      }
+    }
+
     let prog = null;
     if (activeExplicitProgram) {
       prog = {
         ...activeExplicitProgram,
-        seekSeconds: 0,
+        seekSeconds: activeExplicitProgram.seekSeconds || 0,
       };
     } else if (baseProgram) {
       if (liveTvMode) {
@@ -236,7 +272,72 @@ export default function App() {
     }
 
     return prog;
-  }, [activeExplicitProgram, currentChannel, baseProgram, liveTvMode, currentPrograms, channelEpisodesMap]);
+  }, [adBreak, activeExplicitProgram, currentChannel, baseProgram, liveTvMode, currentPrograms, channelEpisodesMap]);
+
+  useEffect(() => {
+    currentProgramRef.current = currentProgram;
+  }, [currentProgram]);
+
+  // A fresh programme gets a fresh break schedule.
+  useEffect(() => {
+    if (!adBreakRef.current) nextBreakRef.current = null;
+  }, [currentProgram?.identifier, currentProgram?.videoUrl]);
+
+  const resumeFromBreak = useCallback(() => {
+    const brk = adBreakRef.current;
+    adBreakRef.current = null;
+    setAdBreak(null);
+    nextBreakRef.current = null;
+    if (brk?.resumeProgram) {
+      setActiveExplicitProgram({
+        ...brk.resumeProgram,
+        seekSeconds: brk.resumeSeconds,
+      });
+    }
+  }, []);
+
+  const handlePlaybackProgress = useCallback(
+    (time, duration) => {
+      playheadRef.current = { time, duration };
+      if (adBreakRef.current) return;
+
+      const { enabled, setId } = resolveChannelAds(adConfig, currentChannel?.id);
+      if (!enabled || !setId) return;
+      // The embed's position cannot be read across the origin boundary, so a
+      // programme interrupted there could never be resumed where it left off.
+      if (activeEngine !== 'direct') return;
+      if (!duration || duration < MIN_PROGRAMME_SECONDS) return;
+
+      if (nextBreakRef.current == null) {
+        nextBreakRef.current = scheduleNextBreak(time, duration, adConfig.everyMinutes);
+        return;
+      }
+      if (time < nextBreakRef.current) return;
+      if (time > duration - EDGE_GUARD_SECONDS) return;
+
+      const set = getAdSets().find((s) => s.id === setId);
+      const spots = pickSpots(set, adConfig.spotsPerBreak, lastSpotRef.current);
+      if (!spots.length) {
+        nextBreakRef.current = null;
+        return;
+      }
+
+      const brk = {
+        queue: spots,
+        index: 0,
+        resumeProgram: currentProgramRef.current,
+        resumeSeconds: time,
+      };
+      adBreakRef.current = brk;
+      setAdBreak(brk);
+    },
+    [adConfig, currentChannel?.id, activeEngine]
+  );
+
+  const handleSkipBreak = useCallback(() => {
+    audio.playSwitch(true);
+    resumeFromBreak();
+  }, [resumeFromBreak]);
 
   const displayChannel = useMemo(() => {
     if (activeExplicitProgram?.isAuxiliary) {
@@ -360,6 +461,20 @@ export default function App() {
 
   // Program advancement (loop to next program or episode)
   const handleProgramEnded = useCallback(() => {
+    const brk = adBreakRef.current;
+    if (brk) {
+      lastSpotRef.current = brk.queue[brk.index]?.videoFile || null;
+      const nextIndex = brk.index + 1;
+      if (nextIndex < brk.queue.length) {
+        const updated = { ...brk, index: nextIndex };
+        adBreakRef.current = updated;
+        setAdBreak(updated);
+      } else {
+        resumeFromBreak();
+      }
+      return;
+    }
+
     if (currentProgram?.availableFiles && currentProgram.availableFiles.length > 1) {
       // Find current file index and advance to next distinct episode
       const curFile = currentProgram.videoUrl;
@@ -668,6 +783,7 @@ export default function App() {
         isFullscreen={isFullscreen}
         onToggleFullscreen={handleToggleSiteFullscreen}
         onOpenPicture={() => setPictureOpen(true)}
+        onOpenBreaks={() => setBreaksOpen(true)}
       />
 
       {/* 2. Television Stage Area */}
@@ -719,12 +835,30 @@ export default function App() {
           onEngineChange={handleEngineChange}
           onToggleEngine={() => handleEngineChange()}
           onPlaybackStateChange={setIsPlaying}
+          onPlaybackProgress={handlePlaybackProgress}
+          interstitial={
+            adBreak
+              ? {
+                  index: adBreak.index + 1,
+                  count: adBreak.queue.length,
+                  title: adBreak.queue[adBreak.index]?.title || 'COMMERCIAL',
+                  onSkip: handleSkipBreak,
+                }
+              : null
+          }
           controlsHidden={controlsHidden}
           onToggleControls={() => setControlsHidden((c) => !c)}
         />
       </main>
 
       {/* 3. Floating Remote Control */}
+      <CommercialBreaksModal
+        isOpen={breaksOpen}
+        onClose={() => setBreaksOpen(false)}
+        currentChannel={currentChannel}
+        onConfigChange={setAdConfigState}
+      />
+
       <PictureSettingsModal
         isOpen={pictureOpen}
         onClose={() => setPictureOpen(false)}

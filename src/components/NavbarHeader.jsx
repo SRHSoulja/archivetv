@@ -31,6 +31,7 @@ export default function NavbarHeader({
   scanlinesEnabled,
   onToggleScanlines,
   onOpenPicture,
+  onOpenBreaks,
   remoteOpen,
   onToggleRemote,
   onOpenGuide,
@@ -162,6 +163,18 @@ export default function NavbarHeader({
         >
           <Radio className="w-4 h-4" />
           <span className="hidden lg:inline">REMOTE</span>
+        </button>
+
+        {/* Commercial Breaks */}
+        <button
+          onClick={() => {
+            audio.playKnobClick();
+            onOpenBreaks();
+          }}
+          className="p-1.5 rounded-lg border text-xs cursor-pointer transition bg-zinc-800/80 text-amber-300 border-zinc-700 hover:border-amber-500/60 hover:text-amber-200"
+          title="Commercial breaks - build a reel and set how often it interrupts"
+        >
+          <Radio className="w-4 h-4" />
         </button>
 
         {/* Picture Settings */}

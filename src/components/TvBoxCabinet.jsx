@@ -57,6 +57,8 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
     onEngineChange,
     onToggleEngine,
     onPlaybackStateChange,
+    onPlaybackProgress,
+    interstitial,
     controlsHidden = false,
     onToggleControls,
   },
@@ -76,8 +78,9 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
       setDuration(dur);
       setIsPlaying(playing);
       if (onPlaybackStateChange) onPlaybackStateChange(playing);
+      if (onPlaybackProgress) onPlaybackProgress(cur, dur);
     },
-    [onPlaybackStateChange]
+    [onPlaybackStateChange, onPlaybackProgress]
   );
 
   // Reset timestamps immediately when program or channel changes so previous values do not linger
@@ -340,6 +343,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                   brightness={brightness}
                   contrast={contrast}
                   eraTintEnabled={eraTintEnabled}
+                  interstitial={interstitial}
                   activeEngine={activeEngine}
                   onEngineChange={onEngineChange || onToggleEngine}
                   onTimeUpdateReport={handleTimeUpdateReport}
