@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { getBookmarks, removeBookmark } from '../services/archiveApi';
-import { fetchTheatricalPoster } from '../services/posterService';
+import { fetchTheatricalPoster, getCachedPosterSync } from '../services/posterService';
 
 export default function TapeRackDrawer({
   isOpen,
@@ -16,7 +16,7 @@ export default function TapeRackDrawer({
   const [activeTab, setActiveTab] = useState('channels'); // 'channels' | 'bookmarks'
   const [viewMode, setViewMode] = useState('boxart'); // 'boxart' | 'cassette'
   const [bookmarks, setBookmarks] = useState([]);
-  const [activeChannelId, setActiveChannelId] = useState(currentChannel?.id || channels[0]?.id);
+  const [activeChannelId, setActiveChannelId] = useState(currentChannel?.id || channels[0]?.id || 'toons');
   const [customInput, setCustomInput] = useState('');
   const [customLoading, setCustomLoading] = useState(false);
   const [customError, setCustomError] = useState(null);
@@ -24,41 +24,66 @@ export default function TapeRackDrawer({
 
   const [posterMap, setPosterMap] = useState({});
 
-  const selectedChan = channels.find((c) => c.id === activeChannelId) || currentChannel || channels[0];
-  const tapes = selectedChan?.programs || [];
-
+  // When drawer opens or TV channel changes, synchronize active channel and reload bookmarks
   useEffect(() => {
     if (isOpen) {
-      setBookmarks(getBookmarks());
+      setBookmarks(getBookmarks().filter(Boolean));
+      if (currentChannel?.id) {
+        setActiveChannelId(currentChannel.id);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, currentChannel?.id]);
 
-  // Asynchronously fetch authentic theatrical posters / VHS box arts for displayed tapes
+  const selectedChan =
+    channels.find(
+      (c) => c.id === activeChannelId || String(c.number) === String(activeChannelId)
+    ) ||
+    currentChannel ||
+    channels[0] ||
+    null;
+
+  const tapes = (selectedChan?.programs || []).filter(Boolean);
+
+  // Asynchronously fetch authentic theatrical posters / VHS box arts for displayed tapes in batches
   useEffect(() => {
     if (!isOpen) return;
-    const currentList = activeTab === 'bookmarks' ? bookmarks : tapes;
-    if (!currentList || currentList.length === 0) return;
+    const currentList = (activeTab === 'bookmarks' ? bookmarks : tapes).filter(Boolean);
+    if (currentList.length === 0) return;
 
     let isMounted = true;
-    const loadPosters = async () => {
-      for (const prog of currentList) {
-        if (!prog || !prog.identifier) continue;
-        if (posterMap[prog.identifier]) continue;
 
-        try {
-          const poster = await fetchTheatricalPoster(prog.title, prog.year, prog.identifier);
-          if (poster && isMounted) {
-            setPosterMap((prev) => ({ ...prev, [prog.identifier]: poster }));
-          }
-        } catch {}
+    // Filter to items that need a network fetch (not already in memory/curated)
+    const unCached = currentList.filter((prog) => {
+      if (!prog || !prog.identifier) return false;
+      if (posterMap[prog.identifier]) return false;
+      if (getCachedPosterSync(prog.title, prog.year, prog.identifier)) return false;
+      return true;
+    });
+
+    if (unCached.length === 0) return;
+
+    const batchLoad = async () => {
+      const updates = {};
+      await Promise.all(
+        unCached.slice(0, 8).map(async (prog) => {
+          try {
+            const p = await fetchTheatricalPoster(prog.title, prog.year, prog.identifier);
+            if (p) updates[prog.identifier] = p;
+          } catch {}
+        })
+      );
+
+      if (isMounted && Object.keys(updates).length > 0) {
+        setPosterMap((prev) => ({ ...prev, ...updates }));
       }
     };
 
-    loadPosters();
+    batchLoad();
+
     return () => {
       isMounted = false;
     };
-  }, [isOpen, activeTab, activeChannelId, bookmarks, tapes]);
+  }, [isOpen, activeTab, activeChannelId, bookmarks.length, tapes.length]);
 
   const handleRemoveBookmark = (e, id) => {
     e.stopPropagation();
@@ -254,156 +279,88 @@ export default function TapeRackDrawer({
           ) : viewMode === 'boxart' ? (
             /* Authentic VHS Box Art / Movie Poster Slipcovers Grid */
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {(activeTab === 'bookmarks' ? bookmarks : tapes).map((prog, idx) => (
-                <div
-                  key={prog.identifier || idx}
-                  onClick={() => {
-                    if (activeTab === 'bookmarks') {
-                      audio.playSwitch(true);
-                      if (onPlayDirectItem) {
-                        onPlayDirectItem(prog);
-                      } else {
-                        onCustomTapePlay(prog.identifier);
-                      }
-                      onClose();
-                    } else {
-                      handleTapeClick(prog, idx);
-                    }
-                  }}
-                  className="group relative bg-[#181614] border-2 border-[#45372b] hover:border-amber-400 rounded-xl vhs-box-shadow hover:-translate-y-1 transition-all duration-200 cursor-pointer flex flex-col overflow-hidden select-none"
-                >
-                  {/* VHS Worn Cardboard Spine Effect (Left Edge) */}
-                  <div className="absolute left-0 top-0 bottom-0 w-2.5 vhs-spine z-20 pointer-events-none border-r border-black/40" />
+              {(activeTab === 'bookmarks' ? bookmarks : tapes).map((prog, idx) => {
+                if (!prog) return null;
+                const posterSrc =
+                  posterMap[prog.identifier] ||
+                  getCachedPosterSync(prog.title, prog.year, prog.identifier) ||
+                  prog.thumbnailUrl ||
+                  `https://archive.org/services/img/${prog.identifier}`;
 
-                  {/* Top Vintage Video Studio Header Banner */}
-                  <div className="bg-gradient-to-r from-red-950 via-red-900 to-amber-950 px-2 py-1 flex items-center justify-between border-b border-black/60 z-10">
-                    <span className="font-pixel text-[9px] text-amber-300 font-bold tracking-widest truncate">
-                      ★ ARCHIVE VIDEO
-                    </span>
-                    <span className="font-mono text-[9px] text-red-300 px-1 bg-black/60 rounded">
-                      VHS
-                    </span>
-                  </div>
-
-                  {/* Vertical Poster Box Art Artwork */}
-                  <div className="relative aspect-[2/3] w-full bg-[#0a0806] overflow-hidden flex items-center justify-center">
-                    <img
-                      src={
-                        posterMap[prog.identifier] ||
-                        prog.thumbnailUrl ||
-                        `https://archive.org/services/img/${prog.identifier}`
-                      }
-                      alt={prog.title}
-                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
-                      onError={(e) => {
-                        // If poster fails, fallback to archive thumbnail
-                        if (e.target.src !== prog.thumbnailUrl && prog.thumbnailUrl) {
-                          e.target.src = prog.thumbnailUrl;
+                return (
+                  <div
+                    key={`boxart_${activeTab}_${selectedChan?.id || 'ch'}_${prog.identifier || 'prog'}_${prog.videoFile || prog.videoUrl || ''}_${idx}`}
+                    onClick={() => {
+                      if (activeTab === 'bookmarks') {
+                        audio.playSwitch(true);
+                        if (onPlayDirectItem) {
+                          onPlayDirectItem(prog);
                         } else {
-                          e.target.style.display = 'none';
+                          onCustomTapePlay(prog.identifier);
                         }
-                      }}
-                    />
-
-                    {/* Plastic Slipcover Light Sheen */}
-                    <div className="absolute inset-0 vhs-box-sheen" />
-
-                    {/* Age / Cardboard Wear Texture */}
-                    <div className="absolute inset-0 vhs-cardboard-wear pointer-events-none" />
-
-                    {/* Bottom Vignette for Title legibility */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
-
-                    {/* Title overlay at the bottom of the box */}
-                    <div className="absolute bottom-2 left-3 right-2 z-10">
-                      <div className="font-pixel text-xs font-bold text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,1)] line-clamp-2">
-                        {prog.title}
-                      </div>
-                      <div className="flex items-center justify-between mt-1 text-[9px] font-mono text-amber-300/90">
-                        <span>{prog.year || 'VINTAGE'}</span>
-                        {prog.duration ? <span>{Math.round(prog.duration / 60)}M</span> : <span>HI-FI</span>}
-                      </div>
-                    </div>
-
-                    {/* Bookmark Badge or Remove Button */}
-                    <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
-                      {activeTab === 'bookmarks' && (
-                        <button
-                          onClick={(e) => handleRemoveBookmark(e, prog.identifier)}
-                          className="p-1 rounded-full bg-black/80 hover:bg-red-900 text-red-400 border border-red-800/80 cursor-pointer shadow"
-                          title="Remove from bookmarks"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Bottom Spine & Play Bar */}
-                  <div className="bg-[#12100e] p-2 border-t border-zinc-800 flex items-center justify-between gap-1 z-10">
-                    <span className="font-pixel text-[9px] text-zinc-400 truncate">
-                      {activeTab === 'bookmarks' ? 'SAVED TAPE' : `CH ${selectedChan?.number || '02'}`}
-                    </span>
-                    <span className="px-2 py-0.5 rounded bg-amber-500/20 group-hover:bg-amber-500 text-amber-300 group-hover:text-black font-pixel text-[9px] font-bold transition flex items-center gap-1">
-                      <Play className="w-2.5 h-2.5 fill-current" />
-                      PLAY
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            /* Physical VHS Cassette Tape Cartridge View */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(activeTab === 'bookmarks' ? bookmarks : tapes).map((prog, idx) => (
-                <div
-                  key={prog.identifier || idx}
-                  onClick={() => {
-                    if (activeTab === 'bookmarks') {
-                      audio.playSwitch(true);
-                      if (onPlayDirectItem) {
-                        onPlayDirectItem(prog);
+                        onClose();
                       } else {
-                        onCustomTapePlay(prog.identifier);
+                        handleTapeClick(prog, idx);
                       }
-                      onClose();
-                    } else {
-                      handleTapeClick(prog, idx);
-                    }
-                  }}
-                  className="group relative bg-[#0d0c0a] border-2 border-zinc-700 hover:border-amber-400 rounded-xl p-3 shadow-lg hover:shadow-amber-500/20 transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden"
-                >
-                  <div>
-                    <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-2">
-                      <span className="font-pixel text-[10px] text-amber-500 flex items-center gap-1">
-                        {activeTab === 'bookmarks' && <Bookmark className="w-3 h-3 fill-current text-amber-400" />}
-                        {activeTab === 'bookmarks' ? `SAVED TAPE #${String(idx + 1).padStart(2, '0')}` : `TAPE #${String(idx + 1).padStart(2, '0')}`}
+                    }}
+                    className="group relative bg-[#181614] border-2 border-[#45372b] hover:border-amber-400 rounded-xl vhs-box-shadow hover:-translate-y-1 transition-all duration-200 cursor-pointer flex flex-col overflow-hidden select-none"
+                  >
+                    {/* VHS Worn Cardboard Spine Effect (Left Edge) */}
+                    <div className="absolute left-0 top-0 bottom-0 w-2.5 vhs-spine z-20 pointer-events-none border-r border-black/40" />
+
+                    {/* Top Vintage Video Studio Header Banner */}
+                    <div className="bg-gradient-to-r from-red-950 via-red-900 to-amber-950 px-2 py-1 flex items-center justify-between border-b border-black/60 z-10">
+                      <span className="font-pixel text-[9px] text-amber-300 font-bold tracking-widest truncate">
+                        ★ ARCHIVE VIDEO
                       </span>
-                      <div className="flex items-center gap-2">
-                        {prog.duration ? (
-                          <span className="text-[10px] font-mono text-zinc-400">
-                            {Math.round(prog.duration / 60)} MINS
-                          </span>
-                        ) : null}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCopyUrl(prog.identifier);
-                          }}
-                          className="p-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700 cursor-pointer"
-                          title="Copy Archive URL"
-                        >
-                          {copiedId === prog.identifier ? (
-                            <Check className="w-3 h-3 text-green-400" />
-                          ) : (
-                            <Copy className="w-3 h-3" />
-                          )}
-                        </button>
+                      <span className="font-mono text-[9px] text-red-300 px-1 bg-black/60 rounded">
+                        VHS
+                      </span>
+                    </div>
+
+                    {/* Vertical Poster Box Art Artwork */}
+                    <div className="relative aspect-[2/3] w-full bg-[#0a0806] overflow-hidden flex items-center justify-center">
+                      <img
+                        src={posterSrc}
+                        alt={prog.title}
+                        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          // If poster fails, fallback to archive thumbnail
+                          if (e.target.src !== prog.thumbnailUrl && prog.thumbnailUrl) {
+                            e.target.src = prog.thumbnailUrl;
+                          } else {
+                            e.target.style.display = 'none';
+                          }
+                        }}
+                      />
+
+                      {/* Plastic Slipcover Light Sheen */}
+                      <div className="absolute inset-0 vhs-box-sheen" />
+
+                      {/* Age / Cardboard Wear Texture */}
+                      <div className="absolute inset-0 vhs-cardboard-wear pointer-events-none" />
+
+                      {/* Bottom Vignette for Title legibility */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
+
+                      {/* Title overlay at the bottom of the box */}
+                      <div className="absolute bottom-2 left-3 right-2 z-10">
+                        <div className="font-pixel text-xs font-bold text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,1)] line-clamp-2">
+                          {prog.title}
+                        </div>
+                        <div className="flex items-center justify-between mt-1 text-[9px] font-mono text-amber-300/90">
+                          <span>{prog.year || 'VINTAGE'}</span>
+                          {prog.duration ? <span>{Math.round(prog.duration / 60)}M</span> : <span>HI-FI</span>}
+                        </div>
+                      </div>
+
+                      {/* Bookmark Badge or Remove Button */}
+                      <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
                         {activeTab === 'bookmarks' && (
                           <button
                             onClick={(e) => handleRemoveBookmark(e, prog.identifier)}
-                            className="p-1 rounded bg-red-950/60 hover:bg-red-900 text-red-400 border border-red-800/60 cursor-pointer"
-                            title="Remove from Bookmarks"
+                            className="p-1 rounded-full bg-black/80 hover:bg-red-900 text-red-400 border border-red-800/80 cursor-pointer shadow"
+                            title="Remove from bookmarks"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
@@ -411,42 +368,118 @@ export default function TapeRackDrawer({
                       </div>
                     </div>
 
-                    <div className="relative aspect-video rounded-lg overflow-hidden bg-black border border-zinc-800 mb-2.5">
-                      <img
-                        src={prog.thumbnailUrl || `https://archive.org/services/img/${prog.identifier}`}
-                        alt=""
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                      <div className="absolute bottom-2 left-2 right-2 font-pixel text-[11px] text-white font-bold truncate drop-shadow">
-                        {prog.title}
-                      </div>
+                    {/* Bottom Spine & Play Bar */}
+                    <div className="bg-[#12100e] p-2 border-t border-zinc-800 flex items-center justify-between gap-1 z-10">
+                      <span className="font-pixel text-[9px] text-zinc-400 truncate">
+                        {activeTab === 'bookmarks' ? 'SAVED TAPE' : `CH ${selectedChan?.number || '02'}`}
+                      </span>
+                      <span className="px-2 py-0.5 rounded bg-amber-500/20 group-hover:bg-amber-500 text-amber-300 group-hover:text-black font-pixel text-[9px] font-bold transition flex items-center gap-1">
+                        <Play className="w-2.5 h-2.5 fill-current" />
+                        PLAY
+                      </span>
                     </div>
-
-                    <div className="bg-[#f0ede6] text-[#1c1a17] p-2 rounded border border-zinc-400 font-mono text-xs shadow-inner">
-                      <div className="font-bold truncate text-black">{prog.title}</div>
-                      <div className="text-[10px] text-zinc-700 flex justify-between mt-0.5">
-                        <span>YEAR: {prog.year || 'VINTAGE'}</span>
-                        <span className="text-red-700 font-bold">SP MODE</span>
-                      </div>
-                    </div>
-
-                    {prog.description && (
-                      <p className="text-xs text-zinc-400 line-clamp-2 mt-2 leading-relaxed">
-                        {prog.description}
-                      </p>
-                    )}
                   </div>
+                );
+              })}
+            </div>
+          ) : (
+            /* Physical VHS Cassette Tape Cartridge View */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {(activeTab === 'bookmarks' ? bookmarks : tapes).map((prog, idx) => {
+                if (!prog) return null;
+                return (
+                  <div
+                    key={`cassette_${activeTab}_${selectedChan?.id || 'ch'}_${prog.identifier || 'prog'}_${prog.videoFile || prog.videoUrl || ''}_${idx}`}
+                    onClick={() => {
+                      if (activeTab === 'bookmarks') {
+                        audio.playSwitch(true);
+                        if (onPlayDirectItem) {
+                          onPlayDirectItem(prog);
+                        } else {
+                          onCustomTapePlay(prog.identifier);
+                        }
+                        onClose();
+                      } else {
+                        handleTapeClick(prog, idx);
+                      }
+                    }}
+                    className="group relative bg-[#0d0c0a] border-2 border-zinc-700 hover:border-amber-400 rounded-xl p-3 shadow-lg hover:shadow-amber-500/20 transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-2">
+                        <span className="font-pixel text-[10px] text-amber-500 flex items-center gap-1">
+                          {activeTab === 'bookmarks' && <Bookmark className="w-3 h-3 fill-current text-amber-400" />}
+                          {activeTab === 'bookmarks' ? `SAVED TAPE #${String(idx + 1).padStart(2, '0')}` : `TAPE #${String(idx + 1).padStart(2, '0')}`}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {prog.duration ? (
+                            <span className="text-[10px] font-mono text-zinc-400">
+                              {Math.round(prog.duration / 60)} MINS
+                            </span>
+                          ) : null}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyUrl(prog.identifier);
+                            }}
+                            className="p-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 border border-zinc-700 cursor-pointer"
+                            title="Copy Archive URL"
+                          >
+                            {copiedId === prog.identifier ? (
+                              <Check className="w-3 h-3 text-green-400" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                          </button>
+                          {activeTab === 'bookmarks' && (
+                            <button
+                              onClick={(e) => handleRemoveBookmark(e, prog.identifier)}
+                              className="p-1 rounded bg-red-950/60 hover:bg-red-900 text-red-400 border border-red-800/60 cursor-pointer"
+                              title="Remove from Bookmarks"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
 
-                  <button className="mt-3 w-full py-1.5 bg-zinc-800 group-hover:bg-amber-500 group-hover:text-black text-zinc-300 font-pixel text-xs font-bold rounded flex items-center justify-center gap-1.5 transition">
-                    <Play className="w-3.5 h-3.5 fill-current" />
-                    <span>INSERT & PLAY TAPE</span>
-                  </button>
-                </div>
-              ))}
+                      <div className="relative aspect-video rounded-lg overflow-hidden bg-black border border-zinc-800 mb-2.5">
+                        <img
+                          src={prog.thumbnailUrl || `https://archive.org/services/img/${prog.identifier}`}
+                          alt=""
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                        <div className="absolute bottom-2 left-2 right-2 font-pixel text-[11px] text-white font-bold truncate drop-shadow">
+                          {prog.title}
+                        </div>
+                      </div>
+
+                      <div className="bg-[#f0ede6] text-[#1c1a17] p-2 rounded border border-zinc-400 font-mono text-xs shadow-inner">
+                        <div className="font-bold truncate text-black">{prog.title}</div>
+                        <div className="text-[10px] text-zinc-700 flex justify-between mt-0.5">
+                          <span>YEAR: {prog.year || 'VINTAGE'}</span>
+                          <span className="text-red-700 font-bold">SP MODE</span>
+                        </div>
+                      </div>
+
+                      {prog.description && (
+                        <p className="text-xs text-zinc-400 line-clamp-2 mt-2 leading-relaxed">
+                          {prog.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <button className="mt-3 w-full py-1.5 bg-zinc-800 group-hover:bg-amber-500 group-hover:text-black text-zinc-300 font-pixel text-xs font-bold rounded flex items-center justify-center gap-1.5 transition">
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>INSERT & PLAY TAPE</span>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

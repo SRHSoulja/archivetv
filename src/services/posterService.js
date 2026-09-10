@@ -105,60 +105,52 @@ export function cleanTitleForSearch(title) {
 }
 
 /**
+ * Synchronously retrieves a cached poster URL if already known or memory-cached
+ */
+export function getCachedPosterSync(title, year = '', identifier = '') {
+  const cacheKey = identifier || `${title}_${year}`;
+  if (posterMemoryCache.has(cacheKey)) return posterMemoryCache.get(cacheKey);
+  if (identifier && CURATED_POSTERS[identifier]) return CURATED_POSTERS[identifier];
+
+  const lowerTitle = (title || '').toLowerCase();
+  const lowerId = (identifier || '').toLowerCase();
+  if (lowerTitle.includes('lone ranger') || lowerId.includes('lone_ranger') || lowerId.includes('theloneranger')) {
+    return CURATED_POSTERS['The_Lone_Ranger'];
+  }
+  if (lowerTitle.includes('teenage mutant ninja turtles') || lowerTitle.includes('tmnt') || lowerId.includes('tmnt') || lowerId.includes('teenage-mutant-ninja-turtles')) {
+    return CURATED_POSTERS['Teenage_Mutant_Ninja_Turtles_1987'];
+  }
+  if (lowerTitle.includes('elephants dream') || lowerId.includes('elephantsdream')) {
+    return CURATED_POSTERS['ElephantsDream'];
+  }
+  if (lowerTitle === 'sintel' || lowerTitle.startsWith('sintel') || lowerId === 'sintel') {
+    return CURATED_POSTERS['Sintel'];
+  }
+
+  const clean = cleanTitleForSearch(title);
+  const normalizedKey = clean.replace(/[^a-zA-Z0-9]/g, '_');
+  if (CURATED_POSTERS[normalizedKey]) return CURATED_POSTERS[normalizedKey];
+
+  for (const [k, v] of Object.entries(CURATED_POSTERS)) {
+    if (k.toLowerCase() === normalizedKey.toLowerCase()) return v;
+  }
+
+  return null;
+}
+
+/**
  * Searches Wikipedia / Wikimedia Commons for authentic theatrical poster / VHS cover art
  */
 export async function fetchTheatricalPoster(title, year = '', identifier = '') {
   const cacheKey = identifier || `${title}_${year}`;
   
-  // 1. Check in-memory / localStorage cache
-  if (posterMemoryCache.has(cacheKey)) {
-    return posterMemoryCache.get(cacheKey);
-  }
-
-  // 2. Check curated dictionary by identifier
-  if (identifier && CURATED_POSTERS[identifier]) {
-    saveLocalPosterCache(cacheKey, CURATED_POSTERS[identifier]);
-    return CURATED_POSTERS[identifier];
-  }
-
-  // 3. Direct substring checks for known series to guarantee authentic artwork
-  const lowerTitle = (title || '').toLowerCase();
-  const lowerId = (identifier || '').toLowerCase();
-  if (lowerTitle.includes('lone ranger') || lowerId.includes('lone_ranger') || lowerId.includes('theloneranger')) {
-    const lrPoster = CURATED_POSTERS['The_Lone_Ranger'];
-    saveLocalPosterCache(cacheKey, lrPoster);
-    return lrPoster;
-  }
-  if (lowerTitle.includes('teenage mutant ninja turtles') || lowerTitle.includes('tmnt') || lowerId.includes('tmnt') || lowerId.includes('teenage-mutant-ninja-turtles')) {
-    const tmntPoster = CURATED_POSTERS['Teenage_Mutant_Ninja_Turtles_1987'];
-    saveLocalPosterCache(cacheKey, tmntPoster);
-    return tmntPoster;
-  }
-  if (lowerTitle.includes('elephants dream') || lowerId.includes('elephantsdream')) {
-    const edPoster = CURATED_POSTERS['ElephantsDream'];
-    saveLocalPosterCache(cacheKey, edPoster);
-    return edPoster;
-  }
-  if (lowerTitle === 'sintel' || lowerTitle.startsWith('sintel') || lowerId === 'sintel') {
-    const sintelPoster = CURATED_POSTERS['Sintel'];
-    saveLocalPosterCache(cacheKey, sintelPoster);
-    return sintelPoster;
+  const instant = getCachedPosterSync(title, year, identifier);
+  if (instant) {
+    saveLocalPosterCache(cacheKey, instant);
+    return instant;
   }
 
   const clean = cleanTitleForSearch(title);
-  const normalizedKey = clean.replace(/[^a-zA-Z0-9]/g, '_');
-  if (CURATED_POSTERS[normalizedKey]) {
-    saveLocalPosterCache(cacheKey, CURATED_POSTERS[normalizedKey]);
-    return CURATED_POSTERS[normalizedKey];
-  }
-
-  for (const [k, v] of Object.entries(CURATED_POSTERS)) {
-    if (k.toLowerCase() === normalizedKey.toLowerCase()) {
-      saveLocalPosterCache(cacheKey, v);
-      return v;
-    }
-  }
-
   if (!clean || clean.length < 3) return null;
 
   // 4a. Try opensearch to find exact Wikipedia article title first
