@@ -87,7 +87,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     if (videoRef.current && onTimeUpdateReport) {
       const cur = videoRef.current.currentTime;
       const dur = videoRef.current.duration || duration || currentProgram?.duration || 0;
-      if (!isNaN(dur) && dur > 0) setDuration(dur);
+      if (cur > 0) setVideoLoading(false);
       onTimeUpdateReport(cur, dur, !videoRef.current.paused);
     }
   }, [duration, currentProgram?.duration, onTimeUpdateReport]);
@@ -343,11 +343,11 @@ const CrtScreen = forwardRef(function CrtScreen(
       return;
     }
 
-    setVideoLoading(true);
     const video = videoRef.current;
     if (!video) return;
 
     if (video.src !== activeVideoUrl) {
+      setVideoLoading(true);
       video.src = activeVideoUrl;
       video.load();
     }
@@ -355,7 +355,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     const handleLoadedMetadata = () => {
       setVideoLoading(false);
       const dur = video.duration || currentProgram?.duration || 0;
-      setDuration(dur);
+      if (dur > 0) setDuration(dur);
 
       if (liveTvMode && currentProgram?.seekSeconds && video.duration) {
         video.currentTime = currentProgram.seekSeconds % video.duration;
@@ -365,7 +365,9 @@ const CrtScreen = forwardRef(function CrtScreen(
         video.currentTime = 0;
       }
 
-      handleTimeUpdate();
+      if (onTimeUpdateReport) {
+        onTimeUpdateReport(video.currentTime, dur, !video.paused);
+      }
 
       const playPromise = video.play();
       if (playPromise !== undefined) {
@@ -380,9 +382,14 @@ const CrtScreen = forwardRef(function CrtScreen(
       }
     };
 
-    video.addEventListener('loadedmetadata', handleLoadedMetadata);
+    if (video.readyState >= 1) {
+      handleLoadedMetadata();
+    } else {
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+    }
+
     return () => video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-  }, [activeVideoUrl, canPlayDirect, powerOn, liveTvMode, currentProgram?.seekSeconds, handleTimeUpdate]);
+  }, [activeVideoUrl, canPlayDirect, powerOn, liveTvMode, currentProgram?.seekSeconds, onTimeUpdateReport]);
 
   const handleVideoError = () => {
     console.warn(`Direct stream error on candidate #${candidateIndex}: ${activeVideoUrl}`);
@@ -448,6 +455,7 @@ const CrtScreen = forwardRef(function CrtScreen(
           style={{ filter: getFilterStyle() }}
           playsInline
           onLoadedMetadata={(e) => {
+            setVideoLoading(false);
             const v = e.target;
             if (v.duration && !isNaN(v.duration)) {
               setDuration(v.duration);
@@ -457,6 +465,7 @@ const CrtScreen = forwardRef(function CrtScreen(
               setDetectedAspectRatio(ratio >= 1.5 ? '16:9' : '4:3');
             }
           }}
+          onLoadedData={() => setVideoLoading(false)}
           onDurationChange={(e) => {
             if (e.target.duration && !isNaN(e.target.duration)) {
               setDuration(e.target.duration);
@@ -474,7 +483,10 @@ const CrtScreen = forwardRef(function CrtScreen(
             setVideoLoading(false);
             handleTimeUpdate();
           }}
-          onPlay={handleTimeUpdate}
+          onPlay={() => {
+            setVideoLoading(false);
+            handleTimeUpdate();
+          }}
           onPause={handleTimeUpdate}
         />
       )}
