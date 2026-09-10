@@ -102,7 +102,7 @@ export default function RemoteControl({
         gutters?.ready && gutters.fits
           ? {
               position: 'fixed',
-              top: '50%',
+              top: `${(gutters.topInset || 0) + ((gutters.viewportH || 0) - (gutters.topInset || 0)) / 2}px`,
               left: `${gutters.rightCenter}px`,
               transform: 'translate(-50%, -50%)',
             }

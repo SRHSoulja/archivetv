@@ -18,6 +18,7 @@ export function useGutters(minPanelWidth = 200) {
     leftCenter: 0,
     rightCenter: 0,
     viewportH: 0,
+    topInset: 0,
   });
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export function useGutters(minPanelWidth = 200) {
       const left = Math.max(0, r.left);
       const right = Math.max(0, vw - r.right);
       const width = Math.min(left, right);
+      const header = document.querySelector('header') || document.querySelector('nav');
       setGutters({
         ready: true,
         // Leave a little breathing room so a panel never kisses the cabinet.
@@ -39,6 +41,9 @@ export function useGutters(minPanelWidth = 200) {
         leftCenter: left / 2,
         rightCenter: vw - right / 2,
         viewportH: window.innerHeight,
+        // The header is sticky at the top, so anything centred on the full
+        // viewport height rides up underneath it once it gets tall enough.
+        topInset: header ? Math.max(0, header.getBoundingClientRect().bottom) : 0,
       });
     };
 

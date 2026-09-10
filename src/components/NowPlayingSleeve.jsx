@@ -105,8 +105,13 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
   // ~1.5x its width plus roughly 250px of header, label and synopsis. Solving
   // that against the viewport keeps a wide gutter from producing a sleeve too
   // tall for a short screen.
+  // Usable band sits below the sticky header, with a 16px margin top and bottom.
+  const topInset = gutters?.topInset || 0;
+  const bandH = Math.max(0, (gutters?.viewportH || 0) - topInset - 32);
+  const bandCenterY = topInset + bandH / 2 + 16;
+
   const gutterCap = Math.max(0, (gutters?.width || 0) - 40);
-  const heightCap = Math.max(0, ((gutters?.viewportH || 0) - 48 - 270) / 1.5);
+  const heightCap = Math.max(0, (bandH - 270) / 1.5);
   const sleeveWidth = Math.max(180, Math.min(gutterCap, heightCap, 340));
 
   const episode =
@@ -132,7 +137,7 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
       style={{
         position: 'fixed',
         zIndex: 40,
-        top: '50%',
+        top: gutters?.ready ? `${bandCenterY}px` : '50%',
         left: gutters?.ready ? `${gutters.leftCenter}px` : '-9999px',
         transform: 'translate(-50%, -50%)',
         visibility: fits ? 'visible' : 'hidden',
@@ -142,7 +147,7 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
         ref={panelRef}
         style={{
           width: `${sleeveWidth}px`,
-          maxHeight: gutters?.viewportH ? `${gutters.viewportH - 48}px` : undefined,
+          maxHeight: bandH ? `${bandH}px` : undefined,
         }}
         className=" bg-gradient-to-b from-[#2a292e] via-[#1c1b20] to-[#121115] rounded-3xl p-4 shadow-2xl border-2 border-zinc-700/80 flex flex-col overflow-hidden">
         {/* Header strip, mirroring the remote's */}
