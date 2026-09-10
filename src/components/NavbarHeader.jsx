@@ -132,6 +132,19 @@ export default function NavbarHeader({
           <span>CHANNELS</span>
         </button>
 
+        {/* Commercial Breaks */}
+        <button
+          onClick={() => {
+            audio.playKnobClick();
+            onOpenBreaks();
+          }}
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-amber-950/80 hover:bg-amber-900 border border-amber-600/50 text-amber-200 rounded-lg font-pixel text-xs cursor-pointer transition shadow"
+          title="Commercial breaks - build a reel of spots and set how often it interrupts"
+        >
+          <Radio className="w-3.5 h-3.5 text-amber-400" />
+          <span>BREAKS</span>
+        </button>
+
         {/* Cabinet Style Selector Dropdown */}
         <select
           value={cabinetStyle}
@@ -163,18 +176,6 @@ export default function NavbarHeader({
         >
           <Radio className="w-4 h-4" />
           <span className="hidden lg:inline">REMOTE</span>
-        </button>
-
-        {/* Commercial Breaks */}
-        <button
-          onClick={() => {
-            audio.playKnobClick();
-            onOpenBreaks();
-          }}
-          className="p-1.5 rounded-lg border text-xs cursor-pointer transition bg-zinc-800/80 text-amber-300 border-zinc-700 hover:border-amber-500/60 hover:text-amber-200"
-          title="Commercial breaks - build a reel and set how often it interrupts"
-        >
-          <Radio className="w-4 h-4" />
         </button>
 
         {/* Picture Settings */}
