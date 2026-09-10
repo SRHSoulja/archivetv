@@ -35,6 +35,7 @@ Designed to look, feel, and sound like an authentic analog TV set and hi-fi VCR 
   - [4. 📻 Interactive Antennas & RF Reception](#4--interactive-antennas--rf-reception)
   - [5. 🎮 Handheld Infrared Remote Control](#5--handheld-infrared-remote-control)
   - [6. 📜 Prevue TV Guide & VHS Tape Shelf](#6--prevue-tv-guide--vhs-tape-shelf)
+  - [7. 🖼️ Box Art Tool & Art Suggestions](#7-️-box-art-tool--art-suggestions)
 - [🔬 Under the Hood & Technical Architecture](#-under-the-hood--technical-architecture)
   - [Zero Backend Streaming Architecture](#zero-backend-streaming-architecture)
   - [Procedural Web Audio Synthesizer](#procedural-web-audio-synthesizer)
@@ -172,6 +173,16 @@ Once a channel has multiple programs or episodes:
 - **Vintage Satellite Matrix**: 1990s Prevue-style blue cable guide listing all broadcast channels, station callsigns, genres, and current programs with live search and category pills.
 - **VHS Cassette Shelf**: Pull-out tape rack displaying your bookmarked video cassettes with realistic tape spine labels, runtimes, and direct eject/play levers.
 
+### 7. 🖼️ Box Art Tool & Art Suggestions
+Sleeve art is resolved automatically — a curated map first, then Wikipedia, then the item's own Archive.org image. When a programme has no Wikipedia article of its own the lookup **declines rather than guesses**, because a confident wrong portrait is worse than a plain thumbnail. Those fall back to the item image, which always loads but is often only ~180px wide.
+
+Anyone can improve one. Hit the **ART** chip on the sleeve artwork:
+- Paste an image URL. It is validated by *actually loading it*, and reports whether it loads, its dimensions, and whether it is too small to upscale cleanly.
+- It previews in the real sleeve frame, ambient backdrop and all.
+- **Use this here** saves it for your browser only (nothing you do affects other viewers).
+- **Copy code line** gives you the exact `CURATED_POSTERS` entry.
+- **Suggest for repo** opens a prefilled GitHub issue containing the identifier, URL, measured dimensions and that same line.
+
 ---
 
 ## 🔬 Under the Hood & Technical Architecture
@@ -204,7 +215,9 @@ This creates an authentic broadcast experience where tuning into a channel joins
 ### Dual-Engine Playback System
 To achieve 100% media compatibility across the Internet Archive:
 1. **Direct CRT Engine (Default)**: Plays direct `.mp4`, `.webm`, and `.ogv` files inside an HTML5 video element with custom WebGL/CSS CRT shaders, hardware scanlines, and instant timeline scrubbing.
-2. **Tube Embed Engine (Fallback)**: If an item uses an esoteric or proprietary format, switching to the Tube Embed engine renders the official Archive.org player inside the retro CRT frame.
+2. **Tube Embed Engine (Automatic Fallback)**: If an item has no directly playable derivative, the official Archive.org player is rendered inside the retro CRT frame instead.
+
+The embed is a fallback only — there is no manual switch. Because it is a cross-origin iframe its playback position cannot be read, it will not autoplay until clicked, and on a multi-file item it plays the item default rather than the selected episode. The direct engine has none of those limits, so anything that can play directly does.
 
 ### Persistent LocalStorage Schema
 All user customizations are saved locally in the browser and persist indefinitely across reloads:
@@ -217,6 +230,8 @@ All user customizations are saved locally in the browser and persist indefinitel
 | `archivetv_cabinet_style` | Active cabinet finish (`woodgrain`, `aluminum`, `charcoal`) |
 | `archivetv_color_mode` | Active picture mode (`color`, `bw`, `amber`, `green`) |
 | `archivetv_aspect_ratio` | Video aspect ratio (`4:3`, `16:9`) |
+| `archivetv_poster_cache_v8` | Resolved box art per item, so lookups are not repeated. Version-suffixed: bumping it discards automatically-resolved art that turned out wrong |
+| `archivetv_poster_overrides_v1` | Box art you chose yourself. Deliberately a separate key, so a cache version bump never discards a human decision |
 
 ---
 
@@ -242,7 +257,9 @@ All user customizations are saved locally in the browser and persist indefinitel
 | `T` | Open VHS Cassette Tape Shelf |
 | `R` | Toggle Handheld Infrared Remote |
 | `A` | Toggle Aspect Ratio (4:3 / 16:9) |
-| `F` | Toggle Fullscreen |
+| `F` | Fullscreen the picture (video fills the display) |
+| `Shift` + `F` | Fullscreen the whole site (cabinet, deck and all) |
+| `H` | Immersive mode (hide the VCR deck) |
 | `?` | Show Shortcuts Helper |
 
 ---
@@ -329,6 +346,9 @@ To add new permanent curated public domain stations to the default dial:
    python3 scripts/build_channels.py
    ```
 4. Test locally with `bun run dev` and submit a Pull Request!
+
+### Suggesting Box Art
+You do not need to clone anything to fix a bad sleeve. Click the **ART** chip on the artwork, paste a URL, and use **Suggest for repo** — it opens an issue already containing the verified URL and the exact line to add. Accepting one is a single-line paste into [`src/services/posterService.js`](src/services/posterService.js).
 
 ---
 
