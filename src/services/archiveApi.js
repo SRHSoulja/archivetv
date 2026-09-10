@@ -631,6 +631,20 @@ export function removeBookmark(identifier) {
   return updated;
 }
 
+// A personal label for a saved tape. Stored alongside the bookmark rather than
+// replacing its title, so poster lookup still has the real name to work with.
+export function updateBookmarkTitle(identifier, customTitle) {
+  const current = getBookmarks();
+  const clean = (customTitle || '').trim();
+  const updated = current.map((b) =>
+    b.identifier === identifier ? { ...b, customTitle: clean || undefined } : b
+  );
+  try {
+    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(updated));
+  } catch {}
+  return updated;
+}
+
 export function isBookmarked(identifier) {
   const current = getBookmarks();
   return current.some((b) => b.identifier === identifier);

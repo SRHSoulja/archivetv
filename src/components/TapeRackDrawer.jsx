@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon, Info } from 'lucide-react';
 import { audio } from '../services/soundEffects';
-import { getBookmarks, removeBookmark } from '../services/archiveApi';
+import { getBookmarks, removeBookmark, updateBookmarkTitle } from '../services/archiveApi';
 import { fetchTheatricalPoster, getCachedPosterSync } from '../services/posterService';
 
 export default function TapeRackDrawer({
@@ -17,6 +17,7 @@ export default function TapeRackDrawer({
   const [viewMode, setViewMode] = useState('boxart'); // 'boxart' | 'cassette'
   const [bookmarks, setBookmarks] = useState([]);
   const [infoTape, setInfoTape] = useState(null);
+  const [renameDraft, setRenameDraft] = useState('');
   const [activeChannelId, setActiveChannelId] = useState(currentChannel?.id || channels[0]?.id || 'toons');
   const [customInput, setCustomInput] = useState('');
   const [customLoading, setCustomLoading] = useState(false);
@@ -356,10 +357,10 @@ export default function TapeRackDrawer({
                       {/* Title overlay at the bottom of the box */}
                       <div className="absolute bottom-2 left-3 right-2 z-30">
                         <div
-                          title={prog.title}
+                          title={prog.customTitle || prog.title}
                           className="font-pixel text-xs font-bold text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,1)] line-clamp-2"
                         >
-                          {prog.title}
+                          {prog.customTitle || prog.title}
                         </div>
                         <div className="flex items-center justify-between mt-1 text-[9px] font-mono text-amber-300/90">
                           <span>{prog.year || 'VINTAGE'}</span>
@@ -373,6 +374,7 @@ export default function TapeRackDrawer({
                           onClick={(e) => {
                             e.stopPropagation();
                             audio.playKnobClick();
+                            setRenameDraft(prog.customTitle || '');
                             setInfoTape(prog);
                           }}
                           className="p-1 rounded-full bg-black/80 hover:bg-amber-900 text-amber-300 border border-amber-700/80 cursor-pointer shadow"
@@ -478,13 +480,18 @@ export default function TapeRackDrawer({
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                        <div className="absolute bottom-2 left-2 right-2 font-pixel text-[11px] text-white font-bold truncate drop-shadow">
-                          {prog.title}
+                        <div
+                          title={prog.customTitle || prog.title}
+                          className="absolute bottom-2 left-2 right-2 font-pixel text-[11px] text-white font-bold truncate drop-shadow"
+                        >
+                          {prog.customTitle || prog.title}
                         </div>
                       </div>
 
                       <div className="bg-[#f0ede6] text-[#1c1a17] p-2 rounded border border-zinc-400 font-mono text-xs shadow-inner">
-                        <div className="font-bold truncate text-black">{prog.title}</div>
+                        <div className="font-bold truncate text-black" title={prog.customTitle || prog.title}>
+                          {prog.customTitle || prog.title}
+                        </div>
                         <div className="text-[10px] text-zinc-700 flex justify-between mt-0.5">
                           <span>YEAR: {prog.year || 'VINTAGE'}</span>
                           <span className="text-red-700 font-bold">SP MODE</span>
@@ -551,7 +558,7 @@ export default function TapeRackDrawer({
           >
             <div className="flex items-start justify-between gap-3 shrink-0 pb-3 border-b border-zinc-800">
               <h3 className="font-pixel text-amber-400 text-sm font-bold tracking-wide leading-snug">
-                {infoTape.title}
+                {infoTape.customTitle || infoTape.title}
               </h3>
               <button
                 onClick={() => setInfoTape(null)}
@@ -577,6 +584,52 @@ export default function TapeRackDrawer({
             <p className="mt-2 shrink-0 font-mono text-[10px] text-zinc-500 break-all">
               {infoTape.identifier}
             </p>
+
+            {bookmarks.some((bm) => bm.identifier === infoTape.identifier) && (
+              <div className="mt-3 shrink-0">
+                <span className="font-pixel text-[10px] text-zinc-500 tracking-wider">YOUR LABEL</span>
+                <div className="flex gap-2 mt-1">
+                  <input
+                    type="text"
+                    value={renameDraft}
+                    onChange={(e) => setRenameDraft(e.target.value)}
+                    placeholder={infoTape.title}
+                    className="flex-1 min-w-0 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1.5 text-xs text-zinc-100 placeholder-zinc-600 outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      audio.playKnobClick();
+                      setBookmarks(updateBookmarkTitle(infoTape.identifier, renameDraft));
+                      setInfoTape({
+                        ...infoTape,
+                        customTitle: renameDraft.trim() || undefined,
+                      });
+                    }}
+                    className="shrink-0 px-3 rounded font-pixel text-[10px] tracking-wider bg-amber-600 hover:bg-amber-500 text-black font-bold cursor-pointer"
+                  >
+                    SAVE
+                  </button>
+                  {infoTape.customTitle && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBookmarks(updateBookmarkTitle(infoTape.identifier, ''));
+                        setRenameDraft('');
+                        setInfoTape({ ...infoTape, customTitle: undefined });
+                      }}
+                      className="shrink-0 px-2 rounded font-pixel text-[10px] tracking-wider bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-zinc-300 cursor-pointer"
+                    >
+                      RESET
+                    </button>
+                  )}
+                </div>
+                <p className="mt-1 text-[10px] leading-relaxed text-zinc-600">
+                  Renames this tape in your library only. Box art still resolves from the original
+                  title.
+                </p>
+              </div>
+            )}
 
             <div className="mt-3 min-h-0 flex-1 overflow-y-auto retro-scroll pr-1">
               <p className="text-xs leading-relaxed text-zinc-400 whitespace-pre-line">
