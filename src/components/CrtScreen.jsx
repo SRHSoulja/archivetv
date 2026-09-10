@@ -69,6 +69,10 @@ const CrtScreen = forwardRef(function CrtScreen(
   const [embedTime, setEmbedTime] = useState(0);
   const [embedPlaying, setEmbedPlaying] = useState(true);
   const [embedReady, setEmbedReady] = useState(false);
+  // archive.org's embed ignores autoplay=1 -- it loads nothing until the viewer
+  // clicks inside the iframe. Until that happens the video is parked, so the
+  // counter must not run or the handoff back to direct hands over a bogus time.
+  const [embedStarted, setEmbedStarted] = useState(false);
 
   // The iframe src must stay byte-identical while the embed plays: ANY change to
   // the attribute re-navigates the iframe and restarts buffering from zero. So the
@@ -95,6 +99,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     embedAnchorRef.current = null;
     embedTimeRef.current = start;
     setEmbedReady(false);
+    setEmbedStarted(false);
     setEmbedTime(start);
     setEmbedSeed((prev) => ({ start, nonce: prev.nonce + 1 }));
   }, []);
@@ -280,6 +285,31 @@ const CrtScreen = forwardRef(function CrtScreen(
     }, 350);
     return () => clearInterval(heartbeat);
   }, [powerOn, canPlayDirect, handleTimeUpdate]);
+
+  // We cannot see inside the cross-origin iframe, but focus moving to the iframe
+  // element is a reliable proxy for the viewer having clicked into the player.
+  useEffect(() => {
+    if (canPlayDirect || !embedSrc || !powerOn) return;
+    if (embedStarted || !embedPlaying) return;
+
+    const check = () => {
+      if (iframeRef.current && document.activeElement === iframeRef.current) {
+        setEmbedStarted(true);
+      }
+    };
+    window.addEventListener('blur', check);
+    const poll = setInterval(check, 400);
+    return () => {
+      window.removeEventListener('blur', check);
+      clearInterval(poll);
+    };
+  }, [canPlayDirect, embedSrc, powerOn, embedStarted, embedPlaying]);
+
+  // Anchor the clock to the moment playback actually begins, not to iframe load.
+  useEffect(() => {
+    if (!embedStarted || embedAnchorRef.current) return;
+    embedAnchorRef.current = { base: embedSeed.start, wallStart: performance.now() };
+  }, [embedStarted, embedSeed.start]);
 
   // Tube Embed playback clock. archive.org's player emits no cross-origin time
   // events, so we dead-reckon from a wall-clock anchor set when the iframe actually
@@ -679,15 +709,21 @@ const CrtScreen = forwardRef(function CrtScreen(
               if (!embedPlaying) return; // about:blank settling after a pause
               setVideoLoading(false);
               setEmbedReady(true);
-              // Player is live -- start dead-reckoning from the seeded offset.
-              embedAnchorRef.current = {
-                base: embedSeed.start,
-                wallStart: performance.now(),
-              };
+              // Chrome is up, but the video is still parked until the viewer
+              // clicks; the clock anchors on that, not here.
               embedTimeRef.current = embedSeed.start;
               setEmbedTime(embedSeed.start);
             }}
           />
+        </div>
+      )}
+
+      {/* 2a. "Press play" prompt: archive.org's embed will not start on its own. */}
+      {powerOn && !canPlayDirect && embedSrc && embedReady && embedPlaying && !embedStarted && (
+        <div className="absolute inset-0 z-20 flex items-end justify-center pb-[12%] pointer-events-none">
+          <div className="px-3 py-1.5 rounded bg-black/75 border border-amber-500/60 font-pixel text-[10px] text-amber-300 tracking-widest animate-pulse">
+            PRESS PLAY ON TUBE
+          </div>
         </div>
       )}
 
