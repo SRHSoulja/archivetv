@@ -74,15 +74,26 @@ const CrtScreen = forwardRef(function CrtScreen(
     }
   }, [playbackRate]);
 
+  const isOffAir =
+    !currentProgram ||
+    (!currentProgram.videoUrl && !currentProgram.embedUrl && !currentProgram.identifier);
+
   // Static intensity calculation
-  const calculatedStatic = Math.min(
-    1,
-    (channelZap ? 0.95 : 0) +
-      (videoLoading && activeEngine === 'direct' ? 0.35 : 0) +
-      (videoError && activeEngine === 'direct' ? 0.85 : 0) +
-      Math.abs(trackingOffset) / 70 +
-      ((100 - signalQuality) / 100) * 0.7
-  );
+  const calculatedStatic = isOffAir
+    ? Math.min(
+        1,
+        (channelZap ? 0.95 : 0) +
+          Math.abs(trackingOffset) / 70 +
+          ((100 - signalQuality) / 100) * 0.7
+      )
+    : Math.min(
+        1,
+        (channelZap ? 0.95 : 0) +
+          (videoLoading && activeEngine === 'direct' ? 0.35 : 0) +
+          (videoError && activeEngine === 'direct' ? 0.85 : 0) +
+          Math.abs(trackingOffset) / 70 +
+          ((100 - signalQuality) / 100) * 0.7
+      );
 
   // OPTIMIZED Static Canvas Loop:
   // Only loops RAF when calculatedStatic > 0.02, preventing wasteful 60fps idle clearing!
@@ -293,17 +304,68 @@ const CrtScreen = forwardRef(function CrtScreen(
         </div>
       )}
 
-      {/* 2b. Standby Screen when channel has no scheduled programs */}
-      {powerOn && !currentProgram && (
-        <div className="absolute inset-0 bg-[#0c0a10] flex flex-col items-center justify-center text-center p-4 z-10 select-none font-pixel">
-          <div className="text-amber-400 text-lg md:text-xl font-bold tracking-widest animate-pulse mb-1">
-            PLEASE STAND BY
+      {/* 2b. Retro SMPTE Color Bars Standby / Off-Air Screen */}
+      {powerOn && isOffAir && (
+        <div className="absolute inset-0 w-full h-full flex flex-col z-10 select-none overflow-hidden font-pixel">
+          {/* Top 75%: Classic 7 vertical SMPTE Color Bars */}
+          <div className="w-full flex-1 grid grid-cols-7">
+            <div className="bg-[#b5b5b5]" /> {/* 75% White / Grey */}
+            <div className="bg-[#b5b500]" /> {/* Yellow */}
+            <div className="bg-[#00b5b5]" /> {/* Cyan */}
+            <div className="bg-[#00b500]" /> {/* Green */}
+            <div className="bg-[#b500b5]" /> {/* Magenta */}
+            <div className="bg-[#b50000]" /> {/* Red */}
+            <div className="bg-[#0000b5]" /> {/* Blue */}
           </div>
-          <div className="text-zinc-400 text-xs font-mono">
-            {currentChannel?.name || 'STATION SIGN-OFF'} • NO ACTIVE BROADCAST
+
+          {/* Middle 10%: Cast transition bars */}
+          <div className="w-full h-6 grid grid-cols-7">
+            <div className="bg-[#0000b5]" />
+            <div className="bg-[#111111]" />
+            <div className="bg-[#b500b5]" />
+            <div className="bg-[#111111]" />
+            <div className="bg-[#00b5b5]" />
+            <div className="bg-[#111111]" />
+            <div className="bg-[#b5b5b5]" />
           </div>
-          <div className="text-zinc-500 text-[10px] font-mono mt-3 border border-zinc-700/80 px-2.5 py-1 rounded bg-black/80">
-            PRESS &apos;U&apos; TO OPEN CHANNEL STUDIO & DROP SHOWS
+
+          {/* Bottom 15%: Sub-black & Reference bars */}
+          <div className="w-full h-10 grid grid-cols-4 bg-[#0a0a0a]">
+            <div className="bg-[#081a2e]" />
+            <div className="bg-[#ffffff]" />
+            <div className="bg-[#1e072b]" />
+            <div className="bg-[#050505]" />
+          </div>
+
+          {/* Center Retro Station Standby Card */}
+          <div className="absolute inset-0 flex items-center justify-center p-3">
+            <div className="bg-[#0e0c12]/95 border-3 border-amber-500 rounded-2xl p-4 md:p-5 shadow-[0_0_35px_rgba(0,0,0,0.95)] max-w-sm w-full text-center flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_#ef4444]" />
+                <span className="font-pixel text-yellow-400 text-base md:text-lg font-bold tracking-widest">
+                  PLEASE STAND BY
+                </span>
+              </div>
+
+              <div className="font-pixel text-amber-400 text-xs font-bold">
+                CH {currentChannel?.number || '00'} • {currentChannel?.callsign || 'OFF-AIR'}
+              </div>
+
+              <div className="font-mono text-zinc-200 text-xs font-bold mt-1.5 truncate max-w-full px-2">
+                {currentChannel?.name || 'STATION SIGN-OFF'}
+              </div>
+
+              <div className="text-zinc-400 text-[10px] font-mono mt-1">
+                TRANSMITTER CARRIER ACTIVE • NO SCHEDULED TAPE
+              </div>
+
+              <div className="mt-3 pt-2 border-t border-zinc-800 w-full flex items-center justify-center gap-1.5 text-zinc-300 font-pixel text-[10px]">
+                <span className="text-amber-400 font-bold bg-zinc-900 border border-zinc-700 px-1.5 py-0.5 rounded">
+                  PRESS [U]
+                </span>
+                <span>TO DROP SHOWS IN STUDIO</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
