@@ -2,7 +2,7 @@
 // Fetches authentic posters from Wikimedia Commons / Wikipedia API & Archive.org image files,
 // with persistent localStorage caching to minimize network lookups and avoid rate limits.
 
-const POSTER_CACHE_KEY = 'archivetv_poster_cache_v5';
+const POSTER_CACHE_KEY = 'archivetv_poster_cache_v6';
 const posterMemoryCache = new Map();
 
 // Known authentic posters for classic public domain and archive masterpieces
@@ -22,10 +22,10 @@ const CURATED_POSTERS = {
   'Lone_Ranger': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Lone_ranger_silver_1965.JPG/500px-Lone_ranger_silver_1965.JPG',
   'The_Lone_Ranger__Enter_the_Lone_Ranger': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Lone_ranger_silver_1965.JPG/500px-Lone_ranger_silver_1965.JPG',
 
-  // Curated Animations & Open Cinema
-  'ElephantsDream': 'https://archive.org/services/img/ElephantsDream',
-  'Elephants_Dream': 'https://archive.org/services/img/ElephantsDream',
-  'Sintel': 'https://archive.org/services/img/Sintel',
+  // Curated Animations & Open Cinema (Theatrical High-Res Posters)
+  'ElephantsDream': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/ElephantsDreamPoster.jpg/500px-ElephantsDreamPoster.jpg',
+  'Elephants_Dream': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/ElephantsDreamPoster.jpg/500px-ElephantsDreamPoster.jpg',
+  'Sintel': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Sintel_poster.jpg/500px-Sintel_poster.jpg',
   'Popeye_forPresident': 'https://archive.org/services/img/Popeye_forPresident',
   'popeye_patriotic_popeye': 'https://archive.org/services/img/popeye_patriotic_popeye',
 
