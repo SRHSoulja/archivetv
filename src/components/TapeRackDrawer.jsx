@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star } from 'lucide-react';
+import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { getBookmarks, removeBookmark } from '../services/archiveApi';
 
@@ -13,6 +13,7 @@ export default function TapeRackDrawer({
   onPlayDirectItem,
 }) {
   const [activeTab, setActiveTab] = useState('channels'); // 'channels' | 'bookmarks'
+  const [viewMode, setViewMode] = useState('boxart'); // 'boxart' | 'cassette'
   const [bookmarks, setBookmarks] = useState([]);
   const [activeChannelId, setActiveChannelId] = useState(currentChannel?.id || channels[0]?.id);
   const [customInput, setCustomInput] = useState('');
@@ -148,8 +149,42 @@ export default function TapeRackDrawer({
             </button>
           </div>
 
-          <div className="font-mono text-zinc-500 text-[11px] hidden sm:block">
-            {activeTab === 'bookmarks' ? `${bookmarks.length} TAPES IN YOUR PERSONAL VAULT` : 'SELECT TAPE SHELF'}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center bg-black/60 rounded-lg p-0.5 border border-zinc-700">
+              <button
+                onClick={() => {
+                  audio.playKnobClick();
+                  setViewMode('boxart');
+                }}
+                className={`px-2.5 py-1 rounded-md font-pixel text-[11px] flex items-center gap-1 cursor-pointer transition ${
+                  viewMode === 'boxart'
+                    ? 'bg-amber-500 text-black font-bold shadow'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+                title="View as VHS Box Art / Movie Posters"
+              >
+                <ImageIcon className="w-3 h-3" />
+                <span>BOX ART</span>
+              </button>
+              <button
+                onClick={() => {
+                  audio.playKnobClick();
+                  setViewMode('cassette');
+                }}
+                className={`px-2.5 py-1 rounded-md font-pixel text-[11px] flex items-center gap-1 cursor-pointer transition ${
+                  viewMode === 'cassette'
+                    ? 'bg-amber-500 text-black font-bold shadow'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+                title="View as Physical VHS Cassette Tapes"
+              >
+                <LayoutGrid className="w-3 h-3" />
+                <span>CASSETTES</span>
+              </button>
+            </div>
+            <div className="font-mono text-zinc-500 text-[11px] hidden md:block">
+              {activeTab === 'bookmarks' ? `${bookmarks.length} TAPES SAVED` : 'SELECT TAPE'}
+            </div>
           </div>
         </div>
 
@@ -186,7 +221,100 @@ export default function TapeRackDrawer({
                 while watching any video to save it to your personal tape collection!
               </p>
             </div>
+          ) : viewMode === 'boxart' ? (
+            /* Authentic VHS Box Art / Movie Poster Slipcovers Grid */
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {(activeTab === 'bookmarks' ? bookmarks : tapes).map((prog, idx) => (
+                <div
+                  key={prog.identifier || idx}
+                  onClick={() => {
+                    if (activeTab === 'bookmarks') {
+                      audio.playSwitch(true);
+                      if (onPlayDirectItem) {
+                        onPlayDirectItem(prog);
+                      } else {
+                        onCustomTapePlay(prog.identifier);
+                      }
+                      onClose();
+                    } else {
+                      handleTapeClick(prog, idx);
+                    }
+                  }}
+                  className="group relative bg-[#181614] border-2 border-[#45372b] hover:border-amber-400 rounded-xl vhs-box-shadow hover:-translate-y-1 transition-all duration-200 cursor-pointer flex flex-col overflow-hidden select-none"
+                >
+                  {/* VHS Worn Cardboard Spine Effect (Left Edge) */}
+                  <div className="absolute left-0 top-0 bottom-0 w-2.5 vhs-spine z-20 pointer-events-none border-r border-black/40" />
+
+                  {/* Top Vintage Video Studio Header Banner */}
+                  <div className="bg-gradient-to-r from-red-950 via-red-900 to-amber-950 px-2 py-1 flex items-center justify-between border-b border-black/60 z-10">
+                    <span className="font-pixel text-[9px] text-amber-300 font-bold tracking-widest truncate">
+                      ★ ARCHIVE VIDEO
+                    </span>
+                    <span className="font-mono text-[9px] text-red-300 px-1 bg-black/60 rounded">
+                      VHS
+                    </span>
+                  </div>
+
+                  {/* Vertical Poster Box Art Artwork */}
+                  <div className="relative aspect-[2/3] w-full bg-black overflow-hidden flex items-center justify-center">
+                    <img
+                      src={prog.thumbnailUrl || `https://archive.org/services/img/${prog.identifier}`}
+                      alt={prog.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+
+                    {/* Plastic Slipcover Light Sheen */}
+                    <div className="absolute inset-0 vhs-box-sheen" />
+
+                    {/* Age / Cardboard Wear Texture */}
+                    <div className="absolute inset-0 vhs-cardboard-wear pointer-events-none" />
+
+                    {/* Bottom Vignette for Title legibility */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
+
+                    {/* Title overlay at the bottom of the box */}
+                    <div className="absolute bottom-2 left-3 right-2 z-10">
+                      <div className="font-pixel text-xs font-bold text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,1)] line-clamp-2">
+                        {prog.title}
+                      </div>
+                      <div className="flex items-center justify-between mt-1 text-[9px] font-mono text-amber-300/90">
+                        <span>{prog.year || 'VINTAGE'}</span>
+                        {prog.duration ? <span>{Math.round(prog.duration / 60)}M</span> : <span>HI-FI</span>}
+                      </div>
+                    </div>
+
+                    {/* Bookmark Badge or Remove Button */}
+                    <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
+                      {activeTab === 'bookmarks' && (
+                        <button
+                          onClick={(e) => handleRemoveBookmark(e, prog.identifier)}
+                          className="p-1 rounded-full bg-black/80 hover:bg-red-900 text-red-400 border border-red-800/80 cursor-pointer shadow"
+                          title="Remove from bookmarks"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bottom Spine & Play Bar */}
+                  <div className="bg-[#12100e] p-2 border-t border-zinc-800 flex items-center justify-between gap-1 z-10">
+                    <span className="font-pixel text-[9px] text-zinc-400 truncate">
+                      {activeTab === 'bookmarks' ? 'SAVED TAPE' : `CH ${selectedChan?.number || '02'}`}
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-amber-500/20 group-hover:bg-amber-500 text-amber-300 group-hover:text-black font-pixel text-[9px] font-bold transition flex items-center gap-1">
+                      <Play className="w-2.5 h-2.5 fill-current" />
+                      PLAY
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
+            /* Physical VHS Cassette Tape Cartridge View */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {(activeTab === 'bookmarks' ? bookmarks : tapes).map((prog, idx) => (
                 <div
