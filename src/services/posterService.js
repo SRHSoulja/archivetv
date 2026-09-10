@@ -2,18 +2,18 @@
 // Fetches authentic posters from Wikimedia Commons / Wikipedia API & Archive.org image files,
 // with persistent localStorage caching to minimize network lookups and avoid rate limits.
 
-const POSTER_CACHE_KEY = 'archivetv_poster_cache_v6';
+const POSTER_CACHE_KEY = 'archivetv_poster_cache_v7';
 const posterMemoryCache = new Map();
 
 // Known authentic posters for classic public domain and archive masterpieces
 const CURATED_POSTERS = {
-  // Teenage Mutant Ninja Turtles (1987 Classic Animated Series)
-  'tmnt-season-1-2': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
-  'Teenage_Mutant_Ninja_Turtles_1987_TV_series': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
-  'Teenage_Mutant_Ninja_Turtles_1987': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
-  'Teenage_Mutant_Ninja_Turtles': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
-  'tmnt_1987': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
-  'tmnt': 'https://thumb.wikimedia.org/wikipedia/en/thumb/1/12/TMNT1987Series.png/500px-TMNT1987Series.png',
+  // Teenage Mutant Ninja Turtles (1987 Classic Animated Series - True 2:3 Vertical Slipcase Poster)
+  'tmnt-season-1-2': 'https://upload.wikimedia.org/wikipedia/en/8/8f/TMNT_The_Cowabunga_Collection_cover_art.jpg',
+  'Teenage_Mutant_Ninja_Turtles_1987_TV_series': 'https://upload.wikimedia.org/wikipedia/en/8/8f/TMNT_The_Cowabunga_Collection_cover_art.jpg',
+  'Teenage_Mutant_Ninja_Turtles_1987': 'https://upload.wikimedia.org/wikipedia/en/8/8f/TMNT_The_Cowabunga_Collection_cover_art.jpg',
+  'Teenage_Mutant_Ninja_Turtles': 'https://upload.wikimedia.org/wikipedia/en/8/8f/TMNT_The_Cowabunga_Collection_cover_art.jpg',
+  'tmnt_1987': 'https://upload.wikimedia.org/wikipedia/en/8/8f/TMNT_The_Cowabunga_Collection_cover_art.jpg',
+  'tmnt': 'https://upload.wikimedia.org/wikipedia/en/8/8f/TMNT_The_Cowabunga_Collection_cover_art.jpg',
 
   // The Lone Ranger (1949 TV Series starring Clayton Moore & Jay Silverheels)
   'theloneranger_201705': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Lone_ranger_silver_1965.JPG/500px-Lone_ranger_silver_1965.JPG',
@@ -30,6 +30,8 @@ const CURATED_POSTERS = {
   'popeye_patriotic_popeye': 'https://archive.org/services/img/popeye_patriotic_popeye',
 
   // Horror & Sci-Fi Masterpieces
+  'TheNakedWitch': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/The_Naked_Witch_%281964%29_-_Title.jpg/500px-The_Naked_Witch_%281964%29_-_Title.jpg',
+  'The_Naked_Witch': 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/The_Naked_Witch_%281964%29_-_Title.jpg/500px-The_Naked_Witch_%281964%29_-_Title.jpg',
   'Night_of_the_Living_Dead': 'https://upload.wikimedia.org/wikipedia/en/9/91/Night_of_the_Living_Dead_%281968%29_poster.jpg',
   'Night.Of.The.Living.Dead_1080p': 'https://upload.wikimedia.org/wikipedia/en/9/91/Night_of_the_Living_Dead_%281968%29_poster.jpg',
   'night_of_the_living_dead_dvd': 'https://upload.wikimedia.org/wikipedia/en/9/91/Night_of_the_Living_Dead_%281968%29_poster.jpg',

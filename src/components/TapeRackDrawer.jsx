@@ -320,10 +320,19 @@ export default function TapeRackDrawer({
 
                     {/* Vertical Poster Box Art Artwork */}
                     <div className="relative aspect-[2/3] w-full bg-[#0a0806] overflow-hidden flex items-center justify-center">
+                      {/* Ambient Atmospheric Backdrop for Wide Stills / Non-2:3 Artwork */}
+                      <img
+                        src={posterSrc}
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-0 w-full h-full object-cover blur-sm scale-110 opacity-40 pointer-events-none"
+                      />
+
+                      {/* Main Poster Artwork: object-contain ensures wide cards and banners fit fully without clipping */}
                       <img
                         src={posterSrc}
                         alt={prog.title}
-                        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                        className="relative z-10 w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
                           // If poster fails, fallback to archive thumbnail
                           if (e.target.src !== prog.thumbnailUrl && prog.thumbnailUrl) {
@@ -335,16 +344,16 @@ export default function TapeRackDrawer({
                       />
 
                       {/* Plastic Slipcover Light Sheen */}
-                      <div className="absolute inset-0 vhs-box-sheen" />
+                      <div className="absolute inset-0 vhs-box-sheen pointer-events-none z-20" />
 
                       {/* Age / Cardboard Wear Texture */}
-                      <div className="absolute inset-0 vhs-cardboard-wear pointer-events-none" />
+                      <div className="absolute inset-0 vhs-cardboard-wear pointer-events-none z-20" />
 
                       {/* Bottom Vignette for Title legibility */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent pointer-events-none z-20" />
 
                       {/* Title overlay at the bottom of the box */}
-                      <div className="absolute bottom-2 left-3 right-2 z-10">
+                      <div className="absolute bottom-2 left-3 right-2 z-30">
                         <div className="font-pixel text-xs font-bold text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,1)] line-clamp-2">
                           {prog.title}
                         </div>
@@ -355,7 +364,7 @@ export default function TapeRackDrawer({
                       </div>
 
                       {/* Bookmark Badge or Remove Button */}
-                      <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
+                      <div className="absolute top-2 right-2 z-30 flex items-center gap-1">
                         {activeTab === 'bookmarks' && (
                           <button
                             onClick={(e) => handleRemoveBookmark(e, prog.identifier)}
