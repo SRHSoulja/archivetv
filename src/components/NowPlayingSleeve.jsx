@@ -35,11 +35,17 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
 
   const [poster, setPoster] = useState(null);
   const [fullBlurb, setFullBlurb] = useState('');
+  const [artFailed, setArtFailed] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [clipped, setClipped] = useState(false);
+  const blurbRef = useRef(null);
 
   // Same two-step the tape rack uses: cached/curated art paints instantly, the
   // network lookup only runs when there is nothing on hand.
   useEffect(() => {
     let alive = true;
+    setArtFailed(false);
+    setExpanded(false);
     const instant = getCachedPosterSync(title, year, identifier);
     setPoster(instant || null);
     if (instant || !identifier) return undefined;
@@ -59,6 +65,13 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
   // breakpoints, so its real width is only knowable after layout. It stays
   // mounted and is hidden with visibility (not display) precisely so it can
   // always be measured.
+  useLayoutEffect(() => {
+    const el = blurbRef.current;
+    if (el && !expanded) {
+      setClipped(el.scrollHeight > el.clientHeight + 1);
+    }
+  });
+
   useLayoutEffect(() => {
     const el = panelRef.current;
     if (!el) return;
@@ -93,7 +106,7 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
   // that against the viewport keeps a wide gutter from producing a sleeve too
   // tall for a short screen.
   const gutterCap = Math.max(0, (gutters?.width || 0) - 40);
-  const heightCap = Math.max(0, ((gutters?.viewportH || 0) - 48 - 210) / 1.5);
+  const heightCap = Math.max(0, ((gutters?.viewportH || 0) - 48 - 270) / 1.5);
   const sleeveWidth = Math.max(180, Math.min(gutterCap, heightCap, 340));
 
   const episode =
@@ -101,6 +114,15 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
       ? fullTitle.slice(seriesTitle.length + 3)
       : null;
   const blurb = fullBlurb || stripHtml(currentProgram.description);
+
+  // Same source chain the tape rack uses. Falling back to the item's thumbnail
+  // and then archive.org's image service is why the rack nearly always has
+  // artwork; the sleeve was giving up after posterService and showing a
+  // placeholder instead.
+  const posterSrc =
+    poster ||
+    currentProgram.thumbnailUrl ||
+    (identifier ? `https://archive.org/services/img/${identifier}` : null);
   const episodeCount = currentProgram.availableFiles?.length || 0;
   const runtime = formatRuntime(currentProgram.duration);
 
@@ -120,12 +142,11 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
         ref={panelRef}
         style={{
           width: `${sleeveWidth}px`,
-          height: gutters?.viewportH ? `${gutters.viewportH - 48}px` : undefined,
           maxHeight: gutters?.viewportH ? `${gutters.viewportH - 48}px` : undefined,
         }}
-        className=" bg-gradient-to-b from-[#2a292e] via-[#1c1b20] to-[#121115] rounded-3xl p-4 shadow-2xl border-2 border-zinc-700/80 flex flex-col">
+        className=" bg-gradient-to-b from-[#2a292e] via-[#1c1b20] to-[#121115] rounded-3xl p-4 shadow-2xl border-2 border-zinc-700/80 flex flex-col overflow-hidden">
         {/* Header strip, mirroring the remote's */}
-        <div className="w-full flex items-center justify-between pb-3 border-b border-zinc-700/60">
+        <div className="w-full shrink-0 flex items-center justify-between pb-3 border-b border-zinc-700/60">
           <div className="flex items-center gap-2">
             <Film className="w-3.5 h-3.5 text-amber-400" />
             <span className="font-pixel text-[11px] text-zinc-400 tracking-wider">NOW PLAYING</span>
@@ -139,14 +160,33 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
 
         {/* Box art, presented as a tape sleeve */}
         <div className="w-full my-3 shrink-0 rounded-xl overflow-hidden border-2 border-zinc-800 bg-[#060b08] shadow-[inset_0_2px_10px_rgba(0,0,0,0.9)]">
-          <div className="relative w-full aspect-[2/3] bg-[#0b0a0c] flex items-center justify-center">
-            {poster ? (
-              <img
-                src={poster}
-                alt=""
-                className="w-full h-full object-cover"
-                onError={() => setPoster(null)}
-              />
+          <div className="relative w-full aspect-[2/3] bg-[#0a0806] overflow-hidden flex items-center justify-center">
+            {posterSrc && !artFailed ? (
+              <>
+                {/* Ambient backdrop, so non-2:3 artwork fills the sleeve rather
+                    than sitting on dead space */}
+                <img
+                  src={posterSrc}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover blur-sm scale-110 opacity-40 pointer-events-none"
+                />
+                {/* object-contain, not cover: wide title cards and banners fit
+                    whole instead of being cropped */}
+                <img
+                  src={posterSrc}
+                  alt={title}
+                  className="relative z-10 w-full h-full object-contain"
+                  onError={(e) => {
+                    const thumb = currentProgram.thumbnailUrl;
+                    if (thumb && e.target.src !== thumb) {
+                      e.target.src = thumb;
+                    } else {
+                      setArtFailed(true);
+                    }
+                  }}
+                />
+              </>
             ) : (
               <div className="flex flex-col items-center gap-2 px-3 text-center">
                 <Radio className="w-7 h-7 text-zinc-700" />
@@ -162,11 +202,13 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
 
         {/* Tape label */}
         <div className="w-full shrink-0 bg-[#060b08] rounded-xl p-2.5 border-2 border-zinc-800 shadow-[inset_0_2px_8px_rgba(0,0,0,0.9)]">
-          <div className="font-vcr text-phosphor-green text-sm font-bold leading-snug break-words drop-shadow-[0_0_6px_rgba(74,222,128,0.5)]">
+          <div className="font-vcr text-phosphor-green text-sm font-bold leading-snug break-words line-clamp-3 drop-shadow-[0_0_6px_rgba(74,222,128,0.5)]">
             {title || 'UNTITLED'}
           </div>
           {episode && (
-            <div className="font-mono text-[11px] text-zinc-400 mt-1 break-words">{episode}</div>
+            <div className="font-mono text-[11px] text-zinc-400 mt-1 break-words line-clamp-2" title={episode}>
+              {episode}
+            </div>
           )}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5 pt-1.5 border-t border-zinc-900/70 font-pixel text-[9px] text-zinc-500">
             {year && <span>{year}</span>}
@@ -180,9 +222,28 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
         </div>
 
         {blurb && (
-          <div className="mt-3 min-h-0 flex-1 overflow-y-auto retro-scroll pr-1">
-            <p className="text-[11px] leading-relaxed text-zinc-400">{blurb}</p>
+          <div
+            className="mt-3 min-h-0 flex-1 overflow-y-auto retro-scroll pr-1"
+          >
+            <p
+              ref={blurbRef}
+              className={`text-[11px] leading-relaxed text-zinc-400 ${
+                expanded ? '' : 'line-clamp-6'
+              }`}
+            >
+              {blurb}
+            </p>
           </div>
+        )}
+
+        {blurb && (clipped || expanded) && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="mt-2 shrink-0 self-start font-pixel text-[9px] text-amber-400 hover:text-amber-300 tracking-wider cursor-pointer"
+          >
+            {expanded ? '- SHOW LESS' : '+ READ MORE'}
+          </button>
         )}
       </div>
     </div>
