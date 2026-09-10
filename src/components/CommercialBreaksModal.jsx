@@ -12,6 +12,7 @@ import {
   getAdConfig,
   setAdConfig,
   MIN_PROGRAMME_SECONDS,
+  formatSpotLength,
 } from '../services/commercials';
 
 export default function CommercialBreaksModal({
@@ -37,6 +38,7 @@ export default function CommercialBreaksModal({
   const [collection, setCollection] = useState('classic_tv_commercials');
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [skippedCount, setSkippedCount] = useState(0);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -60,9 +62,19 @@ export default function CommercialBreaksModal({
     setCandidate(null);
     try {
       const resolved = await resolvePlayableItem(id);
-      const files = (resolved?.availableFiles || []).filter((f) => f.videoUrl);
+      const all = (resolved?.availableFiles || []).filter((f) => f.videoUrl);
+      // A spot the browser cannot decode (.avi and friends) falls back to the
+      // archive.org embed mid-break, which needs a click to start and never
+      // reports that it ended -- so the break strands. Never offer them.
+      const files = all.filter((f) => f.isBrowserPlayable);
+      const skipped = all.length - files.length;
+      setSkippedCount(skipped);
       if (files.length === 0) {
-        setError('No playable files on that item.');
+        setError(
+          all.length > 0
+            ? `That item's ${all.length} files are all in formats browsers cannot play.`
+            : 'No playable files on that item.'
+        );
       } else {
         setCandidate({ resolved, files });
         setPicked(new Set(files.map((_, i) => i)));
@@ -336,6 +348,9 @@ export default function CommercialBreaksModal({
                         <span className="flex-1 min-w-0 truncate text-[10px] text-zinc-400">
                           {spot.title}
                         </span>
+                        <span className="shrink-0 text-[10px] text-zinc-500 font-mono">
+                          {formatSpotLength(spot.duration)}
+                        </span>
                         <button
                           type="button"
                           onClick={() => setSets(removeSpotFromSet(s.id, i))}
@@ -509,6 +524,12 @@ export default function CommercialBreaksModal({
                   className="w-full mt-2 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1.5 text-xs text-zinc-100 outline-none"
                 />
               )}
+              {skippedCount > 0 && (
+                <p className="mt-2 text-[10px] leading-relaxed text-amber-400/90">
+                  {skippedCount} file{skippedCount > 1 ? 's' : ''} hidden &mdash; the browser cannot
+                  play that format, and it would stall a break.
+                </p>
+              )}
               <div className="mt-2 max-h-44 overflow-y-auto retro-scroll border border-zinc-800 rounded-lg divide-y divide-zinc-800/70">
                 {candidate.files.map((f, i) => (
                   <label
@@ -526,7 +547,12 @@ export default function CommercialBreaksModal({
                       }}
                       className="accent-amber-500 cursor-pointer"
                     />
-                    <span className="truncate text-zinc-300">{f.displayName || f.name}</span>
+                    <span className="flex-1 min-w-0 truncate text-zinc-300">
+                      {f.displayName || f.name}
+                    </span>
+                    <span className="shrink-0 text-[10px] text-zinc-500 font-mono">
+                      {formatSpotLength(f.duration)}
+                    </span>
                   </label>
                 ))}
               </div>

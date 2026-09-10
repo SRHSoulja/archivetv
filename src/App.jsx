@@ -303,6 +303,20 @@ export default function App() {
   }, []);
 
   // Shared by the timed trigger and the "play one now" test button.
+  const advanceBreak = useCallback(() => {
+    const brk = adBreakRef.current;
+    if (!brk) return;
+    lastSpotRef.current = brk.queue[brk.index]?.videoFile || null;
+    const nextIndex = brk.index + 1;
+    if (nextIndex < brk.queue.length) {
+      const updated = { ...brk, index: nextIndex };
+      adBreakRef.current = updated;
+      setAdBreak(updated);
+    } else {
+      resumeFromBreak();
+    }
+  }, [resumeFromBreak]);
+
   const startBreak = useCallback(
     (spots, resumeProgram, resumeSeconds) => {
       if (!spots?.length) return;
@@ -486,17 +500,8 @@ export default function App() {
 
   // Program advancement (loop to next program or episode)
   const handleProgramEnded = useCallback(() => {
-    const brk = adBreakRef.current;
-    if (brk) {
-      lastSpotRef.current = brk.queue[brk.index]?.videoFile || null;
-      const nextIndex = brk.index + 1;
-      if (nextIndex < brk.queue.length) {
-        const updated = { ...brk, index: nextIndex };
-        adBreakRef.current = updated;
-        setAdBreak(updated);
-      } else {
-        resumeFromBreak();
-      }
+    if (adBreakRef.current) {
+      advanceBreak();
       return;
     }
 
@@ -543,13 +548,23 @@ export default function App() {
     }
   }, [activeExplicitProgram, currentPrograms.length, currentProgram]);
 
-  const handleEngineChange = useCallback((newEngine) => {
-    if (typeof newEngine === 'string') {
-      setActiveEngine(newEngine);
-    } else {
-      setActiveEngine((prev) => (prev === 'direct' ? 'embed' : 'direct'));
-    }
-  }, []);
+  const handleEngineChange = useCallback(
+    (newEngine) => {
+      // A spot whose file the browser cannot decode falls back to the embed,
+      // which needs a click to start and never reports that it ended -- so the
+      // break would sit there until the watchdog. Move past it instead.
+      if (newEngine === 'embed' && adBreakRef.current) {
+        advanceBreak();
+        return;
+      }
+      if (typeof newEngine === 'string') {
+        setActiveEngine(newEngine);
+      } else {
+        setActiveEngine((prev) => (prev === 'direct' ? 'embed' : 'direct'));
+      }
+    },
+    [advanceBreak]
+  );
 
   const handlePlayDirectItem = useCallback(
     (resolvedItem) => {

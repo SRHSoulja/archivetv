@@ -137,6 +137,13 @@ export function scheduleNextBreak(fromSeconds, duration, everyMinutes) {
   return target;
 }
 
+export function formatSpotLength(seconds) {
+  const s = Math.round(Number(seconds) || 0);
+  if (!s) return '';
+  const m = Math.floor(s / 60);
+  return m > 0 ? `${m}:${String(s % 60).padStart(2, '0')}` : `0:${String(s).padStart(2, '0')}`;
+}
+
 export function pickSpots(set, count, lastPlayedName = null) {
   const spots = (set?.spots || []).filter(Boolean);
   if (spots.length === 0) return [];
