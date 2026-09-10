@@ -7,7 +7,7 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
-import { Radio, VolumeX } from 'lucide-react';
+import { Radio, VolumeX, Maximize2, Minimize2 } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { getCanonicalEpisodeKey } from '../services/archiveApi';
 
@@ -63,6 +63,7 @@ const CrtScreen = forwardRef(function CrtScreen(
   const [osdVisible, setOsdVisible] = useState(true);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const [detectedAspectRatio, setDetectedAspectRatio] = useState('4:3');
+  const [isScreenFullscreen, setIsScreenFullscreen] = useState(false);
 
   // Direct candidate streams & graceful fallback state
   const [candidateIndex, setCandidateIndex] = useState(0);
@@ -161,6 +162,37 @@ const CrtScreen = forwardRef(function CrtScreen(
     }
   }, [duration, currentProgram?.duration, onTimeUpdateReport]);
 
+  const toggleScreenFullscreen = useCallback(() => {
+    const doc = document;
+    const active = doc.fullscreenElement || doc.webkitFullscreenElement;
+    if (active) {
+      const exit = doc.exitFullscreen || doc.webkitExitFullscreen;
+      try {
+        Promise.resolve(exit?.call(doc)).catch(() => {});
+      } catch {}
+      return;
+    }
+    const el = screenRef.current;
+    if (!el) return;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    try {
+      Promise.resolve(req?.call(el)).catch(() => {});
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const sync = () => {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      setIsScreenFullscreen(Boolean(active) && active === screenRef.current);
+    };
+    document.addEventListener('fullscreenchange', sync);
+    document.addEventListener('webkitfullscreenchange', sync);
+    return () => {
+      document.removeEventListener('fullscreenchange', sync);
+      document.removeEventListener('webkitfullscreenchange', sync);
+    };
+  }, []);
+
   // Expose imperative methods to parent (for VCR deck and keyboard shortcuts)
   useImperativeHandle(ref, () => ({
     seekTo: (seconds) => {
@@ -211,19 +243,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     // used to do, up in App) just scaled up the page furniture -- navbar, cabinet
     // and VCR deck included -- which is why the Tube embed's own fullscreen
     // button looked better than ours.
-    toggleFullscreen: () => {
-      const doc = document;
-      const active = doc.fullscreenElement || doc.webkitFullscreenElement;
-      if (active) {
-        const exit = doc.exitFullscreen || doc.webkitExitFullscreen;
-        try { Promise.resolve(exit?.call(doc)).catch(() => {}); } catch {}
-        return;
-      }
-      const el = screenRef.current;
-      if (!el) return;
-      const req = el.requestFullscreen || el.webkitRequestFullscreen;
-      try { Promise.resolve(req?.call(el)).catch(() => {}); } catch {}
-    },
+    toggleFullscreen: toggleScreenFullscreen,
     restart: () => {
       if (canPlayDirect && videoRef.current) {
         videoRef.current.currentTime = 0;
@@ -844,6 +864,26 @@ const CrtScreen = forwardRef(function CrtScreen(
       {/* 7. Curved Glass Vignette & Reflection */}
       <div className={`absolute inset-0 crt-bezel-shadow pointer-events-none z-20 ${cabinetStyle === 'pure' ? 'opacity-40' : 'opacity-100'}`} />
       <div className={`absolute inset-0 crt-glass-reflection pointer-events-none z-20 ${cabinetStyle === 'trinitron' ? 'opacity-60' : 'opacity-100'}`} />
+
+      {powerOn && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            audio.playKnobClick();
+            toggleScreenFullscreen();
+          }}
+          title={isScreenFullscreen ? 'Exit Fullscreen [F]' : 'Fullscreen Picture [F]'}
+          aria-label={isScreenFullscreen ? 'Exit fullscreen' : 'Fullscreen picture'}
+          className="absolute bottom-3 right-3 z-30 p-2 rounded-lg bg-black/65 border border-zinc-500/60 text-zinc-300 opacity-40 hover:opacity-100 hover:text-white hover:border-amber-400/70 focus:opacity-100 transition-all cursor-pointer active:scale-95"
+        >
+          {isScreenFullscreen ? (
+            <Minimize2 className="w-4 h-4" />
+          ) : (
+            <Maximize2 className="w-4 h-4" />
+          )}
+        </button>
+      )}
 
       {/* 8. Channel Switch "Zap" Flash */}
       {channelZap && (
