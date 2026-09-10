@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Film, Radio } from 'lucide-react';
 import { fetchTheatricalPoster, getCachedPosterSync } from '../services/posterService';
-import { fetchFullDescription } from '../services/archiveApi';
-import { ImagePlus } from 'lucide-react';
+import { fetchFullDescription, getCustomTitle, setCustomTitle } from '../services/archiveApi';
+import { ImagePlus, Pencil, Check as CheckIcon, X as XIcon } from 'lucide-react';
 import ArtOverridePanel from './ArtOverridePanel';
 
 function formatRuntime(seconds) {
@@ -40,6 +40,9 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
   const [artFailed, setArtFailed] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [artToolOpen, setArtToolOpen] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState('');
+  const [titleVersion, setTitleVersion] = useState(0);
   const [clipped, setClipped] = useState(false);
   const blurbRef = useRef(null);
 
@@ -50,6 +53,7 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
     setArtFailed(false);
     setExpanded(false);
     setArtToolOpen(false);
+    setEditingTitle(false);
     const instant = getCachedPosterSync(title, year, identifier);
     setPoster(instant || null);
     if (instant || !identifier) return undefined;
@@ -227,9 +231,70 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
 
         {/* Tape label */}
         <div className="w-full shrink-0 bg-[#060b08] rounded-xl p-2.5 border-2 border-zinc-800 shadow-[inset_0_2px_8px_rgba(0,0,0,0.9)]">
-          <div className="font-vcr text-phosphor-green text-sm font-bold leading-snug break-words line-clamp-3 drop-shadow-[0_0_6px_rgba(74,222,128,0.5)]">
-            {title || 'UNTITLED'}
-          </div>
+          {editingTitle ? (
+            <div className="flex flex-col gap-1">
+              <input
+                type="text"
+                autoFocus
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setCustomTitle(identifier, titleDraft);
+                    setTitleVersion((v) => v + 1);
+                    setEditingTitle(false);
+                  }
+                  if (e.key === 'Escape') setEditingTitle(false);
+                }}
+                placeholder={title}
+                className="w-full bg-black/70 border border-zinc-600 focus:border-amber-500/80 rounded px-1.5 py-1 text-[11px] text-zinc-100 placeholder-zinc-600 outline-none"
+              />
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomTitle(identifier, titleDraft);
+                    setTitleVersion((v) => v + 1);
+                    setEditingTitle(false);
+                  }}
+                  className="flex-1 flex items-center justify-center gap-1 py-1 rounded bg-green-900/70 hover:bg-green-800/80 border border-green-600/60 text-green-200 font-pixel text-[9px] tracking-wider cursor-pointer"
+                >
+                  <CheckIcon className="w-3 h-3" /> SAVE
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingTitle(false)}
+                  className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-zinc-300 cursor-pointer"
+                  aria-label="Cancel rename"
+                >
+                  <XIcon className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-start gap-1">
+              <div
+                key={`t${titleVersion}`}
+                className="flex-1 font-vcr text-phosphor-green text-sm font-bold leading-snug break-words line-clamp-3 drop-shadow-[0_0_6px_rgba(74,222,128,0.5)]"
+              >
+                {getCustomTitle(identifier) || title || 'UNTITLED'}
+              </div>
+              {identifier && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTitleDraft(getCustomTitle(identifier));
+                    setEditingTitle(true);
+                  }}
+                  title="Rename this for your library"
+                  aria-label="Rename this tape"
+                  className="shrink-0 mt-0.5 text-zinc-600 hover:text-amber-400 transition-colors cursor-pointer"
+                >
+                  <Pencil className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+          )}
           {episode && (
             <div className="font-mono text-[11px] text-zinc-400 mt-1 break-words line-clamp-2" title={episode}>
               {episode}

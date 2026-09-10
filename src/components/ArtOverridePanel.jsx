@@ -118,7 +118,7 @@ export default function ArtOverridePanel({ identifier, title, year, onClose, onA
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[60] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 select-none animate-in fade-in duration-200"
+      className="fixed inset-0 z-[70] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 select-none animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div

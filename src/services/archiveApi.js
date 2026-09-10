@@ -631,18 +631,39 @@ export function removeBookmark(identifier) {
   return updated;
 }
 
-// A personal label for a saved tape. Stored alongside the bookmark rather than
-// replacing its title, so poster lookup still has the real name to work with.
-export function updateBookmarkTitle(identifier, customTitle) {
-  const current = getBookmarks();
-  const clean = (customTitle || '').trim();
-  const updated = current.map((b) =>
-    b.identifier === identifier ? { ...b, customTitle: clean || undefined } : b
-  );
+// Personal labels, keyed by identifier and kept separate from the item itself
+// so poster lookup still has the real name to work with, and so anything can be
+// relabelled -- not just saved tapes.
+const CUSTOM_TITLES_KEY = 'archivetv_custom_titles_v1';
+
+function loadCustomTitles() {
   try {
-    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(updated));
+    return JSON.parse(localStorage.getItem(CUSTOM_TITLES_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+let customTitles = loadCustomTitles();
+
+export function getCustomTitle(identifier) {
+  if (!identifier) return '';
+  if (customTitles[identifier]) return customTitles[identifier];
+  // Labels written before this moved off the bookmark record.
+  const legacy = getBookmarks().find((b) => b.identifier === identifier);
+  return legacy?.customTitle || '';
+}
+
+export function setCustomTitle(identifier, title) {
+  if (!identifier) return;
+  const clean = (title || '').trim();
+  const next = { ...customTitles };
+  if (clean) next[identifier] = clean;
+  else delete next[identifier];
+  customTitles = next;
+  try {
+    localStorage.setItem(CUSTOM_TITLES_KEY, JSON.stringify(next));
   } catch {}
-  return updated;
 }
 
 export function isBookmarked(identifier) {

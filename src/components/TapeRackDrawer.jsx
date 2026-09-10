@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon, Info } from 'lucide-react';
 import { audio } from '../services/soundEffects';
-import { getBookmarks, removeBookmark, updateBookmarkTitle } from '../services/archiveApi';
+import { getBookmarks, removeBookmark, getCustomTitle, setCustomTitle } from '../services/archiveApi';
 import { fetchTheatricalPoster, getCachedPosterSync } from '../services/posterService';
+import ArtOverridePanel from './ArtOverridePanel';
 
 export default function TapeRackDrawer({
   isOpen,
@@ -18,6 +19,8 @@ export default function TapeRackDrawer({
   const [bookmarks, setBookmarks] = useState([]);
   const [infoTape, setInfoTape] = useState(null);
   const [renameDraft, setRenameDraft] = useState('');
+  const [artTape, setArtTape] = useState(null);
+  const [titleVersion, setTitleVersion] = useState(0);
   const [activeChannelId, setActiveChannelId] = useState(currentChannel?.id || channels[0]?.id || 'toons');
   const [customInput, setCustomInput] = useState('');
   const [customLoading, setCustomLoading] = useState(false);
@@ -280,7 +283,10 @@ export default function TapeRackDrawer({
             </div>
           ) : viewMode === 'boxart' ? (
             /* Authentic VHS Box Art / Movie Poster Slipcovers Grid */
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <div
+              key={`grid_${titleVersion}`}
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+            >
               {(activeTab === 'bookmarks' ? bookmarks : tapes).map((prog, idx) => {
                 if (!prog) return null;
                 const posterSrc =
@@ -357,10 +363,10 @@ export default function TapeRackDrawer({
                       {/* Title overlay at the bottom of the box */}
                       <div className="absolute bottom-2 left-3 right-2 z-30">
                         <div
-                          title={prog.customTitle || prog.title}
+                          title={getCustomTitle(prog.identifier) || prog.title}
                           className="font-pixel text-xs font-bold text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,1)] line-clamp-2"
                         >
-                          {prog.customTitle || prog.title}
+                          {getCustomTitle(prog.identifier) || prog.title}
                         </div>
                         <div className="flex items-center justify-between mt-1 text-[9px] font-mono text-amber-300/90">
                           <span>{prog.year || 'VINTAGE'}</span>
@@ -374,7 +380,7 @@ export default function TapeRackDrawer({
                           onClick={(e) => {
                             e.stopPropagation();
                             audio.playKnobClick();
-                            setRenameDraft(prog.customTitle || '');
+                            setRenameDraft(getCustomTitle(prog.identifier));
                             setInfoTape(prog);
                           }}
                           className="p-1 rounded-full bg-black/80 hover:bg-amber-900 text-amber-300 border border-amber-700/80 cursor-pointer shadow"
@@ -481,16 +487,16 @@ export default function TapeRackDrawer({
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                         <div
-                          title={prog.customTitle || prog.title}
+                          title={getCustomTitle(prog.identifier) || prog.title}
                           className="absolute bottom-2 left-2 right-2 font-pixel text-[11px] text-white font-bold truncate drop-shadow"
                         >
-                          {prog.customTitle || prog.title}
+                          {getCustomTitle(prog.identifier) || prog.title}
                         </div>
                       </div>
 
                       <div className="bg-[#f0ede6] text-[#1c1a17] p-2 rounded border border-zinc-400 font-mono text-xs shadow-inner">
-                        <div className="font-bold truncate text-black" title={prog.customTitle || prog.title}>
-                          {prog.customTitle || prog.title}
+                        <div className="font-bold truncate text-black" title={getCustomTitle(prog.identifier) || prog.title}>
+                          {getCustomTitle(prog.identifier) || prog.title}
                         </div>
                         <div className="text-[10px] text-zinc-700 flex justify-between mt-0.5">
                           <span>YEAR: {prog.year || 'VINTAGE'}</span>
@@ -547,6 +553,23 @@ export default function TapeRackDrawer({
         </div>
       </div>
 
+      {artTape && (
+        <ArtOverridePanel
+          identifier={artTape.identifier}
+          title={artTape.title}
+          year={artTape.year}
+          onClose={() => setArtTape(null)}
+          onApplied={(url) => {
+            setPosterMap((prev) => {
+              const next = { ...prev };
+              if (url) next[artTape.identifier] = url;
+              else delete next[artTape.identifier];
+              return next;
+            });
+          }}
+        />
+      )}
+
       {infoTape && (
         <div
           className="fixed inset-0 z-[60] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4"
@@ -558,7 +581,7 @@ export default function TapeRackDrawer({
           >
             <div className="flex items-start justify-between gap-3 shrink-0 pb-3 border-b border-zinc-800">
               <h3 className="font-pixel text-amber-400 text-sm font-bold tracking-wide leading-snug">
-                {infoTape.customTitle || infoTape.title}
+                {getCustomTitle(infoTape.identifier) || infoTape.title}
               </h3>
               <button
                 onClick={() => setInfoTape(null)}
@@ -585,8 +608,7 @@ export default function TapeRackDrawer({
               {infoTape.identifier}
             </p>
 
-            {bookmarks.some((bm) => bm.identifier === infoTape.identifier) && (
-              <div className="mt-3 shrink-0">
+            <div className="mt-3 shrink-0">
                 <span className="font-pixel text-[10px] text-zinc-500 tracking-wider">YOUR LABEL</span>
                 <div className="flex gap-2 mt-1">
                   <input
@@ -600,23 +622,20 @@ export default function TapeRackDrawer({
                     type="button"
                     onClick={() => {
                       audio.playKnobClick();
-                      setBookmarks(updateBookmarkTitle(infoTape.identifier, renameDraft));
-                      setInfoTape({
-                        ...infoTape,
-                        customTitle: renameDraft.trim() || undefined,
-                      });
+                      setCustomTitle(infoTape.identifier, renameDraft);
+                      setTitleVersion((v) => v + 1);
                     }}
                     className="shrink-0 px-3 rounded font-pixel text-[10px] tracking-wider bg-amber-600 hover:bg-amber-500 text-black font-bold cursor-pointer"
                   >
                     SAVE
                   </button>
-                  {infoTape.customTitle && (
+                  {getCustomTitle(infoTape.identifier) && (
                     <button
                       type="button"
                       onClick={() => {
-                        setBookmarks(updateBookmarkTitle(infoTape.identifier, ''));
+                        setCustomTitle(infoTape.identifier, '');
                         setRenameDraft('');
-                        setInfoTape({ ...infoTape, customTitle: undefined });
+                        setTitleVersion((v) => v + 1);
                       }}
                       className="shrink-0 px-2 rounded font-pixel text-[10px] tracking-wider bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-zinc-300 cursor-pointer"
                     >
@@ -625,11 +644,9 @@ export default function TapeRackDrawer({
                   )}
                 </div>
                 <p className="mt-1 text-[10px] leading-relaxed text-zinc-600">
-                  Renames this tape in your library only. Box art still resolves from the original
-                  title.
+                  Renames this tape for you only. Box art still resolves from the original title.
                 </p>
               </div>
-            )}
 
             <div className="mt-3 min-h-0 flex-1 overflow-y-auto retro-scroll pr-1">
               <p className="text-xs leading-relaxed text-zinc-400 whitespace-pre-line">
@@ -638,14 +655,27 @@ export default function TapeRackDrawer({
               </p>
             </div>
 
-            <a
-              href={`https://archive.org/details/${infoTape.identifier}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 shrink-0 self-start font-pixel text-[10px] text-amber-400 hover:text-amber-300 underline cursor-pointer"
-            >
-              VIEW ON ARCHIVE.ORG
-            </a>
+            <div className="mt-3 shrink-0 flex items-center gap-3 flex-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  audio.playKnobClick();
+                  setArtTape(infoTape);
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-pixel text-[10px] tracking-wider border-2 bg-zinc-800 hover:bg-zinc-700 border-zinc-600 text-zinc-200 cursor-pointer transition"
+              >
+                <ImageIcon className="w-3.5 h-3.5" /> CHANGE BOX ART
+              </button>
+
+              <a
+                href={`https://archive.org/details/${infoTape.identifier}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-pixel text-[10px] text-amber-400 hover:text-amber-300 underline cursor-pointer"
+              >
+                VIEW ON ARCHIVE.ORG
+              </a>
+            </div>
           </div>
         </div>
       )}
