@@ -63,6 +63,36 @@ const CrtScreen = forwardRef(function CrtScreen(
   const [streamFailedAll, setStreamFailedAll] = useState(false);
   const [embedTime, setEmbedTime] = useState(0);
   const [embedPlaying, setEmbedPlaying] = useState(true);
+  const [embedReady, setEmbedReady] = useState(false);
+
+  // The iframe src must stay byte-identical while the embed plays: ANY change to
+  // the attribute re-navigates the iframe and restarts buffering from zero. So the
+  // URL is pinned to a "seed" position that only moves on a real navigation event
+  // (program change, engine switch, seek, restart) -- never on the ticking clock.
+  const [embedSeed, setEmbedSeed] = useState({ start: 0, nonce: 0 });
+  // Wall-clock anchor for dead-reckoning embed position; null while buffering.
+  const embedAnchorRef = useRef(null);
+  const embedTimeRef = useRef(0);
+  const embedPlayingRef = useRef(true);
+
+  useEffect(() => {
+    embedTimeRef.current = embedTime;
+  }, [embedTime]);
+
+  useEffect(() => {
+    embedPlayingRef.current = embedPlaying;
+  }, [embedPlaying]);
+
+  // Re-point the embed at a new offset. This is the only path that reloads the
+  // iframe, so every caller here is an intentional navigation.
+  const reseedEmbed = useCallback((startSeconds) => {
+    const start = Math.max(0, Math.floor(startSeconds || 0));
+    embedAnchorRef.current = null;
+    embedTimeRef.current = start;
+    setEmbedReady(false);
+    setEmbedTime(start);
+    setEmbedSeed((prev) => ({ start, nonce: prev.nonce + 1 }));
+  }, []);
 
   // Compute prioritized list of direct playable video URLs for this item / episode
   const candidateUrls = useMemo(() => {
@@ -92,6 +122,24 @@ const CrtScreen = forwardRef(function CrtScreen(
   const activeVideoUrl = candidateUrls[candidateIndex] || currentProgram?.videoUrl || null;
   const canPlayDirect = activeEngine === 'direct' && Boolean(activeVideoUrl) && !streamFailedAll;
 
+  // Stable embed URL, rebuilt only when the seeded offset or the item changes.
+  const embedSrc = useMemo(() => {
+    const base =
+      currentProgram?.embedUrl ||
+      (currentProgram?.identifier
+        ? `https://archive.org/embed/${currentProgram.identifier}`
+        : null);
+    if (!base) return null;
+    // A stored embedUrl may already carry autoplay/start; we own both params.
+    const [path, query = ''] = base.split('?');
+    const params = new URLSearchParams(query);
+    params.delete('autoplay');
+    params.delete('start');
+    params.set('autoplay', '1');
+    if (embedSeed.start > 0) params.set('start', String(embedSeed.start));
+    return `${path}?${params.toString()}`;
+  }, [currentProgram?.embedUrl, currentProgram?.identifier, embedSeed.start]);
+
   const handleTimeUpdate = useCallback(() => {
     if (videoRef.current && onTimeUpdateReport) {
       const cur = videoRef.current.currentTime;
@@ -112,16 +160,12 @@ const CrtScreen = forwardRef(function CrtScreen(
       } else {
         const dur = duration || currentProgram?.duration || 999999;
         const target = Math.max(0, Math.min(seconds, dur));
-        setEmbedTime(target);
-        if (onTimeUpdateReport) {
-          onTimeUpdateReport(target, dur, embedPlaying);
-        }
-        if (iframeRef.current?.contentWindow) {
-          try {
-            iframeRef.current.contentWindow.postMessage({ method: 'seek', value: target }, '*');
-            iframeRef.current.contentWindow.postMessage({ event: 'seek', value: target }, '*');
-          } catch {}
-        }
+        // archive.org's player exposes no cross-origin seek API (the postMessage
+        // calls we used to make were silently dropped), so a seek is a deliberate
+        // reload of the iframe pinned at the new offset.
+        reseedEmbed(target);
+        setEmbedPlaying(true);
+        onTimeUpdateReportRef.current?.(target, dur, true);
       }
     },
     togglePlayPause: () => {
@@ -133,18 +177,23 @@ const CrtScreen = forwardRef(function CrtScreen(
         }
         handleTimeUpdate();
       } else {
-        setEmbedPlaying((prev) => {
-          const next = !prev;
-          if (iframeRef.current?.contentWindow) {
-            try {
-              iframeRef.current.contentWindow.postMessage({ method: next ? 'play' : 'pause' }, '*');
-            } catch {}
-          }
-          if (onTimeUpdateReport) {
-            onTimeUpdateReport(embedTime, duration || currentProgram?.duration || 3600, next);
-          }
-          return next;
-        });
+        const next = !embedPlayingRef.current;
+        const at = embedTimeRef.current;
+        embedPlayingRef.current = next;
+        setEmbedPlaying(next);
+        if (next) {
+          // Resuming reloads the player at the frozen position (the src switch
+          // to about:blank below is what actually stops it).
+          reseedEmbed(at);
+        } else {
+          embedAnchorRef.current = null;
+          setEmbedReady(false);
+        }
+        onTimeUpdateReportRef.current?.(
+          at,
+          duration || currentProgram?.duration || 3600,
+          next
+        );
       }
     },
     restart: () => {
@@ -153,17 +202,11 @@ const CrtScreen = forwardRef(function CrtScreen(
         videoRef.current.play().catch(() => {});
         handleTimeUpdate();
       } else {
-        setEmbedTime(0);
+        // Reseed rather than mutating iframe.src directly -- imperative writes
+        // fought with React's control of the attribute and got reverted.
+        reseedEmbed(0);
         setEmbedPlaying(true);
-        if (iframeRef.current) {
-          const baseEmbed =
-            currentProgram?.embedUrl ||
-            `https://archive.org/embed/${currentProgram?.identifier}?autoplay=1`;
-          iframeRef.current.src = baseEmbed;
-        }
-        if (onTimeUpdateReport) {
-          onTimeUpdateReport(0, duration || currentProgram?.duration || 3600, true);
-        }
+        onTimeUpdateReportRef.current?.(0, duration || currentProgram?.duration || 3600, true);
       }
       if (onRestartProgram) onRestartProgram();
     },
@@ -176,30 +219,30 @@ const CrtScreen = forwardRef(function CrtScreen(
     }
   }, [playbackRate]);
 
-  // Bidirectional timestamp handoff: capture time from outgoing engine when switching
+  // Bidirectional timestamp handoff: capture time from outgoing engine when switching.
+  // Reads the outgoing embed position through a ref so this effect does NOT depend
+  // on embedTime -- it used to, and re-ran several times a second as a result.
   useEffect(() => {
     if (prevEngineRef.current === activeEngine) return;
+    const leaving = prevEngineRef.current;
+    prevEngineRef.current = activeEngine;
 
     // Capture position from the engine we're leaving
-    if (prevEngineRef.current === 'direct' && videoRef.current) {
+    if (leaving === 'direct' && videoRef.current) {
       lastPlaybackTimeRef.current = videoRef.current.currentTime || 0;
-    } else if (prevEngineRef.current === 'embed') {
-      lastPlaybackTimeRef.current = embedTime || 0;
+    } else if (leaving === 'embed') {
+      lastPlaybackTimeRef.current = embedTimeRef.current || 0;
     }
 
-    // When arriving at direct mode, force-clear loadedVideoUrlRef so the
-    // video setup effect re-runs and seeks to lastPlaybackTimeRef
     if (activeEngine === 'direct') {
+      // Force-clear loadedVideoUrlRef so the video setup effect re-runs and
+      // seeks to lastPlaybackTimeRef
       loadedVideoUrlRef.current = null;
+    } else {
+      reseedEmbed(lastPlaybackTimeRef.current);
+      setEmbedPlaying(true);
     }
-
-    // When arriving at embed mode, seed embedTime from the saved position
-    if (activeEngine === 'embed') {
-      setEmbedTime(lastPlaybackTimeRef.current);
-    }
-
-    prevEngineRef.current = activeEngine;
-  }, [activeEngine, embedTime]);
+  }, [activeEngine, reseedEmbed]);
 
   // Reset timestamps and stream index on program/channel change
   useEffect(() => {
@@ -210,7 +253,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     const initialSeek = currentProgram?.seekSeconds || 0;
     const initialDur = currentProgram?.duration || 0;
     setDuration(initialDur);
-    setEmbedTime(initialSeek);
+    reseedEmbed(initialSeek);
     setEmbedPlaying(true);
     lastPlaybackTimeRef.current = initialSeek;
     if (onTimeUpdateReport) {
@@ -229,24 +272,26 @@ const CrtScreen = forwardRef(function CrtScreen(
     return () => clearInterval(heartbeat);
   }, [powerOn, canPlayDirect, handleTimeUpdate]);
 
-  // Tube Embed playback clock: ensures VCR counter & scrubber track real time even in embed mode
+  // Tube Embed playback clock. archive.org's player emits no cross-origin time
+  // events, so we dead-reckon from a wall-clock anchor set when the iframe actually
+  // finishes loading. Anchoring on load rather than on mount keeps buffering time
+  // out of the counter -- counting it is what desynced the handoff back to direct.
   useEffect(() => {
     if (!powerOn || canPlayDirect) return;
     if (!embedPlaying) return;
 
     const embedInterval = setInterval(() => {
-      setEmbedTime((prev) => {
-        const dur = duration || currentProgram?.duration || 3600;
-        const nextTime = Math.min(dur, prev + 0.5 * playbackRate);
-        if (onTimeUpdateReport) {
-          onTimeUpdateReport(nextTime, dur, true);
-        }
-        return nextTime;
-      });
-    }, 500);
+      const anchor = embedAnchorRef.current;
+      if (!anchor) return; // still buffering; counter holds at the seeded offset
+      const dur = duration || currentProgram?.duration || 3600;
+      const elapsed = ((performance.now() - anchor.wallStart) / 1000) * playbackRate;
+      const nextTime = Math.min(dur, anchor.base + elapsed);
+      setEmbedTime(nextTime);
+      onTimeUpdateReportRef.current?.(nextTime, dur, true);
+    }, 250);
 
     return () => clearInterval(embedInterval);
-  }, [powerOn, canPlayDirect, embedPlaying, playbackRate, duration, currentProgram?.duration, onTimeUpdateReport]);
+  }, [powerOn, canPlayDirect, embedPlaying, playbackRate, duration, currentProgram?.duration]);
 
   // PostMessage listener to sync timestamps from iframe if emitted
   useEffect(() => {
@@ -292,7 +337,10 @@ const CrtScreen = forwardRef(function CrtScreen(
     : Math.min(
         1,
         (channelZap ? 0.95 : 0) +
-          (videoLoading && activeEngine === 'direct' ? 0.35 : 0) +
+          ((videoLoading && activeEngine === 'direct') ||
+          (!canPlayDirect && embedPlaying && !embedReady)
+            ? 0.35
+            : 0) +
           (videoError && activeEngine === 'direct' ? 0.85 : 0) +
           Math.abs(trackingOffset) / 70 +
           ((100 - signalQuality) / 100) * 0.7
@@ -605,31 +653,34 @@ const CrtScreen = forwardRef(function CrtScreen(
       )}
 
       {/* 2. Universal Archive.org Tube Embed Player */}
-      {powerOn && !canPlayDirect && (currentProgram?.embedUrl || currentProgram?.identifier) && (() => {
-        // Build embed URL with &start= for seamless timestamp handoff
-        const startSec = Math.max(0, Math.floor(embedTime || lastPlaybackTimeRef.current || 0));
-        const baseUrl = currentProgram.embedUrl || `https://archive.org/embed/${currentProgram.identifier}`;
-        const sep = baseUrl.includes('?') ? '&' : '?';
-        const embedSrc = startSec > 0
-          ? `${baseUrl}${sep}autoplay=1&start=${startSec}`
-          : `${baseUrl}${sep}autoplay=1`;
-        return (
-          <div
-            className="absolute inset-0 w-full h-full bg-black flex items-center justify-center z-10"
-            style={{ filter: getFilterStyle() }}
-          >
-            <iframe
-              ref={iframeRef}
-              src={embedSrc}
-              title={currentProgram.title}
-              className="w-full h-full border-0"
-              allow="autoplay; fullscreen"
-              allowFullScreen
-              onLoad={() => setVideoLoading(false)}
-            />
-          </div>
-        );
-      })()}
+      {powerOn && !canPlayDirect && embedSrc && (
+        <div
+          className="absolute inset-0 w-full h-full bg-black flex items-center justify-center z-10"
+          style={{ filter: getFilterStyle() }}
+        >
+          <iframe
+            key={embedSeed.nonce}
+            ref={iframeRef}
+            src={embedPlaying ? embedSrc : 'about:blank'}
+            title={currentProgram.title}
+            className="w-full h-full border-0"
+            allow="autoplay; fullscreen"
+            allowFullScreen
+            onLoad={() => {
+              if (!embedPlaying) return; // about:blank settling after a pause
+              setVideoLoading(false);
+              setEmbedReady(true);
+              // Player is live -- start dead-reckoning from the seeded offset.
+              embedAnchorRef.current = {
+                base: embedSeed.start,
+                wallStart: performance.now(),
+              };
+              embedTimeRef.current = embedSeed.start;
+              setEmbedTime(embedSeed.start);
+            }}
+          />
+        </div>
+      )}
 
       {/* 2b. Retro SMPTE Color Bars Standby / Off-Air Screen */}
       {powerOn && isOffAir && (
