@@ -35,7 +35,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     eraTintEnabled = true,
     interstitial = null,
     activeEngine = 'direct',
-    _onEngineChange,
+    onEngineChange,
     onTimeUpdateReport,
     cabinetStyle = 'woodgrain',
   },
@@ -396,7 +396,7 @@ const CrtScreen = forwardRef(function CrtScreen(
           (!canPlayDirect && embedPlaying && !embedReady)
             ? 0.35
             : 0) +
-          (videoError && activeEngine === 'direct' ? 0.85 : 0) +
+          (videoError && activeEngine === 'direct' && !streamFailedAll ? 0.85 : 0) +
           ((100 - signalQuality) / 100) * 0.7
       );
 
@@ -541,6 +541,10 @@ const CrtScreen = forwardRef(function CrtScreen(
       setStreamFailedAll(true);
       setVideoLoading(false);
       setVideoError('DIRECT STREAM OFFLINE - TUBE BACKUP ACTIVE');
+      // Tell the app we fell back, or it keeps believing playback is direct --
+      // which buries the working embed under error static and lets commercial
+      // breaks schedule against a clock they cannot resume from.
+      onEngineChange?.('embed');
     }
   };
 

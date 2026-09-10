@@ -164,19 +164,19 @@ export default function ArchiveSearchModal({
     setSelectedCollection('');
     setSelectedDecade('');
     setActiveTab('search');
-    doSearch(preset, 1, false);
+    doSearch(preset, 1, false, { collection: '', decade: '' });
   };
 
   const handleCollectionSelect = (collId) => {
     setSelectedCollection(collId);
     setActiveTab('search');
-    doSearch(query, 1, false);
+    doSearch(query, 1, false, { collection: collId });
   };
 
   const handleDecadeSelect = (dec) => {
     setSelectedDecade(dec);
     setActiveTab('search');
-    doSearch(query, 1, false);
+    doSearch(query, 1, false, { decade: dec });
   };
 
   const handleLoadMore = () => {

@@ -112,7 +112,26 @@ export default function TapeRackDrawer({
   };
 
   const commitOrder = () => {
-    if (dragId) setTapeOrder(sortedList.map((p) => p.identifier));
+    if (dragId) {
+      // The stored order is one global list, but only the current tab is on
+      // screen. Writing just the visible ids would drop every other channel's
+      // arrangement, so splice the new sequence into the positions those items
+      // already occupy and leave everything else untouched.
+      const visible = sortedList.map((p) => p.identifier);
+      const visibleSet = new Set(visible);
+      const stored = getTapeOrder();
+      const merged = [];
+      let vi = 0;
+      for (const id of stored) {
+        if (visibleSet.has(id)) {
+          if (vi < visible.length) merged.push(visible[vi++]);
+        } else {
+          merged.push(id);
+        }
+      }
+      for (; vi < visible.length; vi += 1) merged.push(visible[vi]);
+      setTapeOrder(merged);
+    }
     setDragId(null);
   };
 

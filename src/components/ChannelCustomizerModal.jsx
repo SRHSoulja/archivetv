@@ -378,7 +378,7 @@ export default function ChannelCustomizerModal({
     } else if (inspectedItem.availableFiles && inspectedItem.availableFiles.length > 1) {
       // Use selected episodes from the episode explorer
       const filesToInclude = inspectedItem.availableFiles.filter((_, idx) =>
-        selectedEpisodes.size > 0 ? selectedEpisodes.has(idx) : true
+        selectedEpisodes.has(idx)
       );
 
       programsToAdd = filesToInclude.map((file, idx) =>
