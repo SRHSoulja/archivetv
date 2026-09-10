@@ -350,34 +350,13 @@ const CrtScreen = forwardRef(function CrtScreen(
     return () => clearInterval(embedInterval);
   }, [powerOn, canPlayDirect, embedPlaying, playbackRate, duration, currentProgram?.duration]);
 
-  // PostMessage listener to sync timestamps from iframe if emitted
-  useEffect(() => {
-    const handleMessage = (e) => {
-      try {
-        const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
-        if (!data) return;
-        if (typeof data.currentTime === 'number' && !isNaN(data.currentTime)) {
-          setEmbedTime(data.currentTime);
-          if (data.duration && !isNaN(data.duration)) setDuration(data.duration);
-          if (onTimeUpdateReport) {
-            onTimeUpdateReport(data.currentTime, data.duration || duration, true);
-          }
-        } else if (data.event === 'timeupdate' && typeof data.value === 'number') {
-          setEmbedTime(data.value);
-          if (onTimeUpdateReport) {
-            onTimeUpdateReport(data.value, duration, true);
-          }
-        } else if (data.event === 'pause') {
-          setEmbedPlaying(false);
-        } else if (data.event === 'play') {
-          setEmbedPlaying(true);
-        }
-      } catch {}
-    };
+  // NOTE: there is deliberately no 'message' listener here. archive.org's embed
+  // emits nothing to the parent -- measured across 16s of confirmed playback,
+  // before and after the click: zero messages. A listener would therefore never
+  // hear from the player, but WOULD hear from anything else on the page, and a
+  // stray {event:'pause'} would blank the iframe. Embed position is dead
+  // reckoned from embedAnchorRef instead; see the playback clock above.
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [duration, onTimeUpdateReport]);
 
   const isOffAir =
     !currentProgram ||
