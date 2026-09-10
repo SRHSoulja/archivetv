@@ -45,6 +45,11 @@ const CrtScreen = forwardRef(function CrtScreen(
   const loadedVideoUrlRef = useRef(null);
   const onTimeUpdateReportRef = useRef(onTimeUpdateReport);
   const lastPlaybackTimeRef = useRef(0);
+  // Resume position for an engine handoff. This is deliberately NOT
+  // lastPlaybackTimeRef: that one is the live position tracker, rewritten by every
+  // timeupdate -- including the currentTime===0 events a freshly mounted <video>
+  // fires while loading, which wiped the saved position before the seek ran.
+  const pendingResumeRef = useRef(0);
   const prevEngineRef = useRef(activeEngine);
 
   useEffect(() => {
@@ -227,19 +232,22 @@ const CrtScreen = forwardRef(function CrtScreen(
     const leaving = prevEngineRef.current;
     prevEngineRef.current = activeEngine;
 
-    // Capture position from the engine we're leaving
-    if (leaving === 'direct' && videoRef.current) {
-      lastPlaybackTimeRef.current = videoRef.current.currentTime || 0;
+    // Capture position from the engine we're leaving. React has already unmounted
+    // the <video> by the time this passive effect runs, so videoRef is usually
+    // null here -- lastPlaybackTimeRef is the reliable source for that direction.
+    let captured = 0;
+    if (leaving === 'direct') {
+      captured = videoRef.current?.currentTime || lastPlaybackTimeRef.current || 0;
     } else if (leaving === 'embed') {
-      lastPlaybackTimeRef.current = embedTimeRef.current || 0;
+      captured = embedTimeRef.current || 0;
     }
 
     if (activeEngine === 'direct') {
-      // Force-clear loadedVideoUrlRef so the video setup effect re-runs and
-      // seeks to lastPlaybackTimeRef
+      pendingResumeRef.current = captured;
+      // Force-clear loadedVideoUrlRef so the video setup effect re-runs and seeks
       loadedVideoUrlRef.current = null;
     } else {
-      reseedEmbed(lastPlaybackTimeRef.current);
+      reseedEmbed(captured);
       setEmbedPlaying(true);
     }
   }, [activeEngine, reseedEmbed]);
@@ -256,6 +264,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     reseedEmbed(initialSeek);
     setEmbedPlaying(true);
     lastPlaybackTimeRef.current = initialSeek;
+    pendingResumeRef.current = 0;
     if (onTimeUpdateReport) {
       onTimeUpdateReport(initialSeek, initialDur, true);
     }
@@ -449,10 +458,10 @@ const CrtScreen = forwardRef(function CrtScreen(
         video.currentTime = currentProgram.seekSeconds % video.duration;
       } else if (currentProgram?.seekSeconds) {
         video.currentTime = currentProgram.seekSeconds;
-      } else if (lastPlaybackTimeRef.current > 0) {
+      } else if (pendingResumeRef.current > 0) {
         // Resume from saved position (e.g. returning from embed mode)
-        video.currentTime = lastPlaybackTimeRef.current;
-        lastPlaybackTimeRef.current = 0;
+        video.currentTime = pendingResumeRef.current;
+        pendingResumeRef.current = 0;
       } else {
         video.currentTime = 0;
       }
