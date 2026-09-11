@@ -717,7 +717,7 @@ const CrtScreen = forwardRef(function CrtScreen(
     <div
       ref={screenRef}
       onClick={handleScreenClick}
-      className={`crt-screen-root relative w-full h-full bg-[#050706] overflow-hidden flex items-center justify-center select-none ${eraCurvatureClass}`}
+      className={`crt-screen-root group relative w-full h-full bg-[#050706] overflow-hidden flex items-center justify-center select-none ${eraCurvatureClass}`}
       style={{
         aspectRatio: effectiveAspectRatio === '4:3' ? '4/3' : '16/9',
       }}
@@ -1004,6 +1004,10 @@ const CrtScreen = forwardRef(function CrtScreen(
         </div>
       )}
 
+      {/* Hidden until you are looking at the picture. It sat at 40% opacity over
+          every programme otherwise -- a control parked on top of the thing it
+          exists to get out of the way of. Touch screens have no hover to wait
+          for, so it stays faintly visible there. */}
       {powerOn && (
         <button
           type="button"
@@ -1014,7 +1018,7 @@ const CrtScreen = forwardRef(function CrtScreen(
           }}
           title={isScreenFullscreen ? 'Exit Fullscreen [F]' : 'Fullscreen Picture [F]'}
           aria-label={isScreenFullscreen ? 'Exit fullscreen' : 'Fullscreen picture'}
-          className="absolute bottom-3 right-3 z-30 p-2 rounded-lg bg-black/65 border border-zinc-500/60 text-zinc-300 opacity-40 hover:opacity-100 hover:text-white hover:border-amber-400/70 focus:opacity-100 transition-all cursor-pointer active:scale-95"
+          className="absolute bottom-3 right-3 z-30 p-2 rounded-lg bg-black/65 border border-zinc-500/60 text-zinc-300 opacity-0 group-hover:opacity-80 hover:!opacity-100 hover:text-white hover:border-amber-400/70 focus-visible:opacity-100 [@media(hover:none)]:opacity-50 transition-opacity duration-200 cursor-pointer active:scale-95"
         >
           {isScreenFullscreen ? (
             <Minimize2 className="w-4 h-4" />
