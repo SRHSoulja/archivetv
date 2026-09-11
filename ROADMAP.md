@@ -174,12 +174,18 @@ The reason the thing exists. Ordered by sentiment per unit of effort.
 - [ ] **Browsable shelf.** Move from a grid to something you move *through* —
       spines you flip past, pulling a tape out to read the back. The shelf styling
       already exists; this is the interaction layer on top
-- [ ] Ghosting / multipath — a faint offset double image, sells "aerial" better
-      than snow does
-- [ ] Chroma bleed — colour smearing past edges, why red titles glowed on tape
-- [ ] Channel-change banner — the most-seen piece of cable-era TV furniture
-- [ ] Digital-era failure mode: macroblocking and frozen frames rather than snow,
-      for the 90s/2000s cabinets. Digital *fails*, it does not degrade
+- [x] Ghosting / multipath — a faint offset double image on a weak aerial, which
+      is what reception actually looked like day to day; snow was the extreme
+- [x] Chroma bleed — colour smearing past its edges, why red titles glowed on
+      tape. Kept very low: this is the effect most likely to read as "why is
+      this blurry". Skipped entirely when the picture is not in colour
+- [x] Channel-change banner — the lower third a cable box drew: coloured number
+      block, callsign, what is on. It renders *instead of* the analogue OSD, not
+      beside it, because no television ever had both
+- [x] Digital-era failure: macroblocking and frozen frames rather than snow. The
+      picture stays visible and breaks into blocks, which is what digital
+      actually did. The signal term is dropped from the snow on that set, so it
+      is blocks *instead of* snow rather than both at once
 - [ ] Broadcast ritual. Researched separately; recorded below because half of it
       is already built and the rest needs to dodge some well-worn myths
 

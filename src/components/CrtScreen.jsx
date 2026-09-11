@@ -388,11 +388,30 @@ const CrtScreen = forwardRef(function CrtScreen(
     !currentProgram ||
     (!currentProgram.videoUrl && !currentProgram.embedUrl && !currentProgram.identifier);
 
+  // One era of furniture per set, and every effect reachable on the set it
+  // belongs to.
+  //   woodgrain / trinitron  aerial and a deck: head switching, ghosting,
+  //                          chroma bleed, the set's own on-screen display
+  //   portable               its own badge reads VHF/UHF/CABLE, so: the cable
+  //                          box banner, chroma bleed, and macroblocking rather
+  //                          than ghosting -- cable has no multipath to ghost
+  //   pure                   bare glass. No cabinet, no aerial, no furniture:
+  //                          this is the mode for people who want the video
+  const isTapeEra = cabinetStyle === 'woodgrain' || cabinetStyle === 'trinitron';
+  const isCableEra = cabinetStyle === 'portable';
+  const hasChroma = cabinetStyle !== 'pure';
+
+  // A weak signal means snow on an aerial and blocks on a cable box, not both.
+  // Digital does not degrade gracefully -- that is the whole character of it --
+  // so on the cable set the signal term is dropped from the snow and the
+  // macroblock overlay carries the failure instead.
+  const snowFromSignal = isCableEra ? 0 : ((100 - signalQuality) / 100) * 0.7;
+
   // Static intensity calculation
   const calculatedStatic = isOffAir
     ? Math.min(
         1,
-        (channelZap ? 0.95 : 0) + ((100 - signalQuality) / 100) * 0.7
+        (channelZap ? 0.95 : 0) + snowFromSignal
       )
     : Math.min(
         1,
@@ -402,7 +421,7 @@ const CrtScreen = forwardRef(function CrtScreen(
             ? 0.35
             : 0) +
           (videoError && activeEngine === 'direct' && !streamFailedAll ? 0.85 : 0) +
-          ((100 - signalQuality) / 100) * 0.7
+          snowFromSignal
       );
 
   // OPTIMIZED Static Canvas Loop:
@@ -678,8 +697,6 @@ const CrtScreen = forwardRef(function CrtScreen(
     return f;
   };
 
-  // Only the sets you would have plugged a VCR into get tape artefacts.
-  const isTapeEra = cabinetStyle === 'woodgrain' || cabinetStyle === 'trinitron';
 
   const eraCurvatureClass = curvatureEnabled
     ? cabinetStyle === 'trinitron'
@@ -903,6 +920,46 @@ const CrtScreen = forwardRef(function CrtScreen(
         />
       )}
 
+      {/* 5c. Ghosting.
+
+           Multipath: the same signal arriving twice, once direct and once off a
+           building, painting a faint offset copy a few pixels to the right. It
+           is what a weak aerial actually looked like -- snow was the extreme
+           case, ghosting was the everyday one -- so it rides signal quality and
+           only appears on the analogue sets. */}
+      {powerOn && scanlinesEnabled && isTapeEra && signalQuality < 92 && (
+        <div
+          className="crt-ghost pointer-events-none z-20"
+          style={{
+            '--ghost-shift': `${(((92 - signalQuality) / 92) * 2.4 + 0.5).toFixed(2)}%`,
+            opacity: Math.min(0.4, ((92 - signalQuality) / 92) * 0.45),
+          }}
+        />
+      )}
+
+      {/* 5d. Chroma bleed.
+
+           Colour was carried at a fraction of the luminance bandwidth, so it
+           smeared past the edges it belonged to -- which is why red titles on
+           tape always glowed. Skipped entirely when the picture is not in
+           colour, because there would be nothing to bleed. */}
+      {powerOn && scanlinesEnabled && hasChroma && colorMode === 'color' && (
+        <div className="crt-chroma-bleed pointer-events-none z-20" />
+      )}
+
+      {/* 5e. Digital-era failure.
+
+           Digital does not degrade, it fails: the picture holds, then breaks
+           into blocks, then freezes. Snow is the wrong artefact for a set with a
+           box on top of it, so the later cabinets get this instead, on the same
+           signal-quality reading that drives the snow elsewhere. */}
+      {powerOn && isCableEra && signalQuality < 80 && (
+        <div
+          className="crt-macroblock pointer-events-none z-20"
+          style={{ opacity: Math.min(0.85, ((80 - signalQuality) / 80) * 1.1) }}
+        />
+      )}
+
       {/* 5b. Sony Trinitron Aperture Grille Vertical Slits */}
       {powerOn && cabinetStyle === 'trinitron' && (
         <div className="absolute inset-0 crt-aperture-grille opacity-50 pointer-events-none z-20" />
@@ -976,8 +1033,42 @@ const CrtScreen = forwardRef(function CrtScreen(
         <div className="absolute inset-0 bg-white/45 pointer-events-none animate-pulse z-30" />
       )}
 
-      {/* 9. Minimalist OSD Channel Badge on Change */}
-      {powerOn && (osdVisible || showOsd) && (
+      {/* 9a. Channel banner, for the sets that had a box on top of them.
+
+           The same information as the analogue OSD below, in the furniture of a
+           different decade: a cable box drew a lower third with the channel, the
+           callsign and what was on, rather than scattering readouts across the
+           top of the picture. Rendered INSTEAD of the OSD, never alongside it --
+           one piece of furniture per set. */}
+      {powerOn && isCableEra && (osdVisible || showOsd) && (
+        <div className="absolute left-4 right-4 bottom-6 z-30 pointer-events-none flex justify-start">
+          <div className="crt-channel-banner">
+            <div
+              className="crt-channel-banner-number"
+              style={{ background: currentChannel?.themeColor || '#0ea5e9' }}
+            >
+              {currentChannel?.number || '02'}
+            </div>
+            <div className="crt-channel-banner-body">
+              <div className="crt-channel-banner-top">
+                <span className="crt-channel-banner-call">
+                  {currentChannel?.callsign || 'W-ARCH'}
+                </span>
+                <span className="crt-channel-banner-dot">•</span>
+                <span className="crt-channel-banner-badge">
+                  {currentChannel?.badge || 'AIR'}
+                </span>
+              </div>
+              <div className="crt-channel-banner-title">
+                {currentProgram?.title || currentChannel?.name || 'NOW PLAYING'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 9b. Minimalist OSD Channel Badge on Change */}
+      {powerOn && !isCableEra && (osdVisible || showOsd) && (
         <div className="absolute top-4 left-4 right-4 z-30 pointer-events-none flex items-center justify-between font-vcr text-phosphor-green text-2xl md:text-3xl tracking-wider uppercase font-bold drop-shadow-md">
           <div className="flex items-center gap-2">
             <span className="bg-black/80 px-2 py-0.5 rounded border border-green-500/50">

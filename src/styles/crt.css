@@ -758,3 +758,155 @@ textarea {
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Channel banner
+
+   What a cable or satellite box drew across the bottom of the picture when you
+   changed channel: a coloured number block, the callsign, and what was on. The
+   analogue sets keep their own on-screen display instead -- the two never
+   appear together, because no television ever had both.
+   --------------------------------------------------------------------------- */
+
+.crt-channel-banner {
+  display: flex;
+  align-items: stretch;
+  max-width: min(92%, 30rem);
+  border-radius: 5px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(14, 18, 28, 0.95), rgba(8, 10, 16, 0.97));
+  border: 1px solid rgba(150, 190, 255, 0.28);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6);
+  animation: crt-banner-in 260ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@keyframes crt-banner-in {
+  from { transform: translateY(14px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.crt-channel-banner-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.1rem;
+  padding: 0 0.6rem;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: clamp(16px, 2.6vw, 22px);
+  font-weight: 700;
+  color: #05080d;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.crt-channel-banner-body {
+  min-width: 0;
+  padding: 0.35rem 0.75rem 0.45rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+}
+
+.crt-channel-banner-top {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: #9fc4ef;
+}
+
+.crt-channel-banner-dot {
+  opacity: 0.5;
+}
+
+.crt-channel-banner-badge {
+  color: #6fe3c0;
+}
+
+.crt-channel-banner-title {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: clamp(11px, 1.9vw, 15px);
+  font-weight: 600;
+  color: #eaf2ff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-channel-banner { animation: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   Ghosting, chroma bleed, and the way digital breaks instead
+   --------------------------------------------------------------------------- */
+
+/* Multipath: a second, weaker copy of the picture landing a little to the right
+   of the first. The shift is set inline from signal quality. */
+.crt-ghost {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(0px);
+  background: transparent;
+  box-shadow:
+    inset var(--ghost-shift, 1%) 0 0 -0.5% rgba(190, 210, 230, 0.1),
+    inset calc(var(--ghost-shift, 1%) * 2) 0 0 -0.7% rgba(190, 210, 230, 0.06);
+  mix-blend-mode: screen;
+  animation: crt-ghost-drift 7s ease-in-out infinite;
+}
+
+/* A real ghost wandered as the reflection path changed -- traffic, weather */
+@keyframes crt-ghost-drift {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(0.35%); }
+}
+
+/* Colour running past the edges it belongs to. Kept very low: this is the
+   effect most likely to read as "why is this blurry" rather than as nostalgia. */
+.crt-chroma-bleed {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: color-dodge;
+  opacity: 0.09;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 40, 60, 0.5) 0%,
+    rgba(0, 0, 0, 0) 12%,
+    rgba(0, 0, 0, 0) 88%,
+    rgba(40, 120, 255, 0.45) 100%
+  );
+  filter: blur(2.5px);
+}
+
+/* Digital failure: blocks, not snow. A coarse grid that appears in patches and
+   holds still, because a frozen frame is what you actually got. */
+.crt-macroblock {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: hard-light;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(120, 160, 255, 0.5) 0 2px, rgba(0,0,0,0) 2px 16px),
+    repeating-linear-gradient(0deg, rgba(255, 140, 190, 0.4) 0 2px, rgba(0,0,0,0) 2px 16px),
+    radial-gradient(ellipse 30% 22% at 22% 34%, rgba(90, 200, 255, 0.4), rgba(0,0,0,0) 70%),
+    radial-gradient(ellipse 26% 18% at 71% 62%, rgba(255, 120, 200, 0.35), rgba(0,0,0,0) 70%),
+    radial-gradient(ellipse 18% 26% at 46% 18%, rgba(180, 255, 160, 0.3), rgba(0,0,0,0) 70%);
+  background-size: 16px 16px, 16px 16px, 100% 100%, 100% 100%, 100% 100%;
+  animation: crt-macroblock-hold 2.4s steps(1, end) infinite;
+}
+
+/* Holds, jumps, holds. Never a smooth transition -- that is the whole point. */
+@keyframes crt-macroblock-hold {
+  0%, 44%   { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; }
+  45%, 62%  { background-position: 6px 10px, 10px 6px, 14% -8%, -11% 6%, 5% 12%; }
+  63%, 100% { background-position: -4px 2px, 2px -4px, -7% 5%, 9% -4%, -3% -6%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-ghost,
+  .crt-macroblock {
+    animation: none;
+  }
+}
