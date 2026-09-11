@@ -109,8 +109,38 @@ export default function App() {
 
   const [trackingOffset, setTrackingOffset] = useState(0);
   const [antennaAngle, setAntennaAngle] = useState(0);
-  const [liveTvMode, setLiveTvMode] = useState(false); // Default to Start From Beginning!
+  // Remembered between visits, and asked once rather than defaulted silently.
+  // This was not persisted at all before, so anyone who switched it on lost the
+  // setting the moment they closed the tab.
+  const [liveTvMode, setLiveTvMode] = useState(() => {
+    try {
+      return localStorage.getItem('archivetv_live_tv_v1') === 'on';
+    } catch {
+      return false;
+    }
+  });
+  const [tuneInAsked, setTuneInAsked] = useState(() => {
+    try {
+      return localStorage.getItem('archivetv_live_tv_v1') !== null;
+    } catch {
+      return true;
+    }
+  });
   const [channelZap, setChannelZap] = useState(false);
+
+  // Top-of-hour station identification. Polls rather than timing a single long
+  // timeout: a laptop that sleeps through the hour would otherwise fire the
+  // ident whenever it woke up, announcing a time that had already passed.
+  const [stationIdAt, setStationIdAt] = useState(null);
+  const lastIdentHourRef = useRef(null);
+
+  const handleTuneInChoice = useCallback((live) => {
+    setLiveTvMode(live);
+    setTuneInAsked(true);
+    try {
+      localStorage.setItem('archivetv_live_tv_v1', live ? 'on' : 'off');
+    } catch {}
+  }, []);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const gutters = useGutters();
 
@@ -182,6 +212,29 @@ export default function App() {
       localStorage.setItem('archivetv_aspect_ratio', aspectRatio);
     } catch {}
   }, [aspectRatio]);
+
+  useEffect(() => {
+    if (!powerOn || !liveTvMode) {
+      setStationIdAt(null);
+      return undefined;
+    }
+    const check = () => {
+      const now = new Date();
+      const hourKey = `${now.toDateString()}:${now.getHours()}`;
+      if (lastIdentHourRef.current === hourKey) return;
+      // A twenty-second window after the hour, so arriving at 12:00:04 still
+      // gets one and arriving at 12:31 does not get a stale one.
+      if (now.getMinutes() === 0 && now.getSeconds() < 20) {
+        lastIdentHourRef.current = hourKey;
+        setStationIdAt(now.getTime());
+        audio.playRemoteBeep();
+        setTimeout(() => setStationIdAt(null), 5000);
+      }
+    };
+    check();
+    const timer = setInterval(check, 5000);
+    return () => clearInterval(timer);
+  }, [powerOn, liveTvMode]);
 
   // Automatic Channel Import from URL Share Links (?shareChannel=... or ?importChannel=...)
   useEffect(() => {
@@ -949,7 +1002,7 @@ export default function App() {
           onAntennaAngleChange={setAntennaAngle}
           signalQuality={signalQuality}
           liveTvMode={liveTvMode}
-          onToggleLiveTv={() => setLiveTvMode((l) => !l)}
+          onToggleLiveTv={() => handleTuneInChoice(!liveTvMode)}
           onRestartProgram={handleRestartProgram}
           onOpenGuide={() => setGuideOpen(true)}
           onOpenSearch={() => setSearchOpen(true)}
@@ -967,6 +1020,9 @@ export default function App() {
           directUnavailable={directUnavailable}
           mediaLoad={mediaLoad}
           onMediaLoadDone={() => setMediaLoad(null)}
+          tuneInPrompt={powerOn && !tuneInAsked}
+          onTuneInChoice={handleTuneInChoice}
+          stationIdAt={stationIdAt}
           onPlaybackStateChange={setIsPlaying}
           onPlaybackProgress={handlePlaybackProgress}
           interstitial={
@@ -1041,7 +1097,7 @@ export default function App() {
         onOpenSearch={() => setSearchOpen(true)}
         onOpenTapeRack={() => setTapeRackOpen(true)}
         onOpenChannelStudio={() => handleOpenChannelStudio()}
-        onToggleLiveTv={() => setLiveTvMode((l) => !l)}
+        onToggleLiveTv={() => handleTuneInChoice(!liveTvMode)}
         onRestartProgram={handleRestartProgram}
         liveTvMode={liveTvMode}
         aspectRatio={aspectRatio}

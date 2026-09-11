@@ -57,6 +57,9 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
     directUnavailable = false,
     mediaLoad = null,
     onMediaLoadDone,
+    tuneInPrompt = false,
+    onTuneInChoice,
+    stationIdAt = null,
     onEngineChange,
     onToggleEngine,
     onPlaybackStateChange,
@@ -350,6 +353,9 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                   interstitial={interstitial}
                   mediaLoad={mediaLoad}
                   onMediaLoadDone={onMediaLoadDone}
+                  tuneInPrompt={tuneInPrompt}
+                  onTuneInChoice={onTuneInChoice}
+                  stationIdAt={stationIdAt}
                   activeEngine={activeEngine}
                   onEngineChange={onEngineChange || onToggleEngine}
                   onTimeUpdateReport={handleTimeUpdateReport}

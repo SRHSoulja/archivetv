@@ -11,6 +11,8 @@ import { Radio, VolumeX, Maximize2, Minimize2 } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { getCanonicalEpisodeKey } from '../services/archiveApi';
 import MediaLoadOverlay from './MediaLoadOverlay';
+import TuneInPrompt from './TuneInPrompt';
+import StationIdent from './StationIdent';
 
 const CrtScreen = forwardRef(function CrtScreen(
   {
@@ -41,6 +43,9 @@ const CrtScreen = forwardRef(function CrtScreen(
     cabinetStyle = 'woodgrain',
     mediaLoad = null,
     onMediaLoadDone,
+    tuneInPrompt = false,
+    onTuneInChoice,
+    stationIdAt = null,
   },
   ref
 ) {
@@ -1027,6 +1032,12 @@ const CrtScreen = forwardRef(function CrtScreen(
           onDone={onMediaLoadDone}
         />
       )}
+
+      {/* 7d. Top-of-hour identification, live mode only */}
+      {powerOn && <StationIdent channel={currentChannel} at={stationIdAt} />}
+
+      {/* 7c. Asked once, the first time the set comes on */}
+      <TuneInPrompt isOpen={tuneInPrompt} onChoose={onTuneInChoice} />
 
       {/* 8. Channel Switch "Zap" Flash */}
       {channelZap && (

@@ -202,8 +202,9 @@ The reason the thing exists. Ordered by sentiment per unit of effort.
       picture stays visible and breaks into blocks, which is what digital
       actually did. The signal term is dropped from the snow on that set, so it
       is blocks *instead of* snow rather than both at once
-- [ ] Broadcast ritual. Researched separately; recorded below because half of it
-      is already built and the rest needs to dodge some well-worn myths
+- [x] Broadcast ritual. Researched separately and recorded below. More of it was
+      already built than the research assumed, two items turned out to be blocked
+      on data the app does not have, and one is deliberately refused
 
 ### Broadcast ritual — what exists, what's missing, what to avoid
 
@@ -214,19 +215,34 @@ lockstep. Those were the top two recommendations of the research, and they are
 done. The real gap is that `liveTvMode` defaults to `false`, so the most
 broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
 
-- [ ] Consider live TV as the default, or a first-run choice between
-      "join in progress" and "start from the beginning"
-- [ ] Dayparting against real hours. The schedule currently loops continuously
-      with no notion of morning, primetime or late night
-- [ ] Sign-on/sign-off, with the 15–20 minute test-pattern pre-roll that preceded
-      sign-on. FCC § 73.1740 explicitly treats patterns and slides as *not*
-      broadcasting — the regulator formalised the "transmitter on, nothing
-      happening" state this app wants to portray
-- [ ] Top-of-hour station ID
-- [ ] Late-night texture drift — ad character changes as the night wears on. The
-      August 1984 Commercial TV Deregulation Order (98 F.C.C.2d 1075) removed the
-      per-hour ad ceiling and the public-affairs obligation at a stroke, which is
-      the hinge between "channel signs off" and "infomercials until dawn"
+- [x] A first-run choice between "join in progress" and "start from the
+      beginning", asked once and remembered. `liveTvMode` was not persisted at
+      all before, so anyone who did find the switch lost it on reload
+- [ ] Dayparting against real hours. **Blocked on data, not effort.** Deciding
+      what belongs in primetime versus late night needs a genre or suitability
+      tag per programme, and nothing in the line-up carries one — archive.org's
+      metadata does not reliably supply it either. Anything built on top of what
+      exists would be arbitrary dressed up as a schedule, so it is left undone
+      rather than faked
+- [~] Sign-on/sign-off. The test pattern itself is already built and always was:
+      a channel with nothing playable shows full SMPTE colour bars with the
+      cast and reference strips. FCC § 73.1740 treats patterns and slides as
+      *not* broadcasting, which is exactly the state that screen portrays.
+      What is deliberately NOT built is a scheduled sign-off: an app that
+      refuses to show anything watchable between certain hours is hostile,
+      however period-correct. Principle 2 — period-correct never beats usable
+- [x] Top-of-hour station ID — callsign, channel and the hour, for five seconds,
+      live mode only. American stations identified on the hour because they were
+      required to, which is why it is one of the few rituals that really did
+      happen everywhere. Polls rather than timing one long timeout, so a laptop
+      that sleeps through the hour does not announce a time that has passed
+- [ ] Late-night texture drift. **Blocked on data for the same reason as
+      dayparting.** Reels are bring-your-own and carry no character tag, so the
+      app cannot tell an infomercial from a toy advert. The history is sound —
+      the August 1984 Commercial TV Deregulation Order (98 F.C.C.2d 1075) removed
+      the per-hour ad ceiling and the public-affairs obligation at a stroke,
+      which is the hinge between "channel signs off" and "infomercials until
+      dawn" — but sorting spots by time of day at random would not reproduce it
 
 **Researched and deliberately not building:**
 
