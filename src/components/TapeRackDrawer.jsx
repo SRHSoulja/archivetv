@@ -348,12 +348,13 @@ export default function TapeRackDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 md:p-6 select-none animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 md:p-6 select-none animate-in fade-in duration-200" onClick={onClose}>
       <div ref={dialogRef}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label="Tape shelf"
+        onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-4xl h-[80vh] bg-[#1a1715] border-4 border-[#3d2c20] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-[#e3ded9]">
         {/* VCR Tape Rack Header */}
         <div className="woodgrain-pattern p-4 border-b-2 border-[#523d2e] flex items-center justify-between">

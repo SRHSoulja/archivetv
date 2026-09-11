@@ -18,6 +18,7 @@ import {
   Palette,
   Tv,
   Sliders,
+  ListVideo,
 } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 
@@ -461,10 +462,10 @@ export default function RemoteControl({
                 triggerIr();
                 onOpenChannelStudio();
               }}
-              title="Channel Studio: Customize Lineup & Drop Videos"
+              title="Channel Studio — build and edit channels"
               className="py-1.5 px-2 col-span-2 bg-gradient-to-r from-amber-950 via-orange-950 to-amber-950 hover:from-amber-900 hover:to-orange-900 border border-amber-500/60 text-amber-300 rounded font-pixel text-[10px] flex items-center justify-center gap-1 cursor-pointer shadow-sm active:scale-95"
             >
-              <Sliders className="w-3 h-3 text-amber-400" />
+              <ListVideo className="w-3 h-3 text-amber-400" />
               <span>CHANNEL STUDIO</span>
             </button>
           )}

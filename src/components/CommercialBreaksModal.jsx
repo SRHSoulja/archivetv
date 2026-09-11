@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Radio, Plus, Trash2, Check } from 'lucide-react';
+import { X, Radio, Plus, Trash2, Check , Megaphone } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { resolvePlayableItem, searchArchive } from '../services/archiveApi';
 import { useDialog } from '../hooks/useDialog';
@@ -154,7 +154,7 @@ export default function CommercialBreaksModal({
         <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
-              <Radio className="w-4 h-4 text-amber-400" />
+              <Megaphone className="w-4 h-4 text-amber-400" />
             </div>
             <div>
               <h3 className="font-pixel text-amber-400 text-sm font-bold tracking-wide">

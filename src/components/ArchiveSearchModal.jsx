@@ -17,6 +17,7 @@ import {
   FolderOpen,
   Copy,
   Sliders,
+  ListVideo,
 } from 'lucide-react';
 import {
   searchArchive,
@@ -265,12 +266,13 @@ export default function ArchiveSearchModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 md:p-6 select-none animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 md:p-6 select-none animate-in fade-in duration-200" onClick={onClose}>
       <div ref={dialogRef}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label="Archive search"
+        onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-6xl h-[90vh] bg-[#121117] border-4 border-amber-600/70 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-[#dedede]">
         {/* Top Header */}
         <div className="bg-gradient-to-r from-amber-950 via-[#211712] to-amber-950 p-3 md:p-4 border-b-2 border-amber-600/50 flex items-center justify-between">
@@ -292,9 +294,9 @@ export default function ArchiveSearchModal({
             <button
               onClick={() => handleOpenStudio()}
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-950 hover:bg-teal-900 border border-teal-500 text-teal-300 font-pixel text-xs cursor-pointer shadow transition"
-              title="Open Channel Studio & Customizer"
+              title="Channel Studio — build and edit channels"
             >
-              <Sliders className="w-3.5 h-3.5" />
+              <ListVideo className="w-3.5 h-3.5" />
               <span>CHANNEL STUDIO</span>
             </button>
 

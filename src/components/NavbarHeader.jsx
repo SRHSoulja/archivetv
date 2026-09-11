@@ -10,6 +10,8 @@ import {
   Keyboard,
   Radio,
   Info,
+  ListVideo,
+  Megaphone,
 } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 
@@ -126,9 +128,9 @@ export default function NavbarHeader({
             if (onOpenChannelStudio) onOpenChannelStudio();
           }}
           className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-teal-950/80 hover:bg-teal-900 border border-teal-600/50 text-teal-200 rounded-lg font-pixel text-xs cursor-pointer transition shadow"
-          title="Open Channel Studio & Customizer"
+          title="Channel Studio — build and edit channels"
         >
-          <Sliders className="w-3.5 h-3.5 text-teal-400" />
+          <ListVideo className="w-3.5 h-3.5 text-teal-400" />
           <span className="hidden sm:inline">CHANNELS</span>
         </button>
 
@@ -141,9 +143,11 @@ export default function NavbarHeader({
           className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-amber-950/80 hover:bg-amber-900 border border-amber-600/50 text-amber-200 rounded-lg font-pixel text-xs cursor-pointer transition shadow"
           title="Commercial breaks - build a reel of spots and set how often it interrupts"
         >
-          <Radio className="w-3.5 h-3.5 text-amber-400" />
+          <Megaphone className="w-3.5 h-3.5 text-amber-400" />
           <span className="hidden sm:inline">BREAKS</span>
         </button>
+
+        <span className="mx-0.5 h-5 w-px bg-zinc-700/80 shrink-0" aria-hidden="true" />
 
         {/* Cabinet Style Selector Dropdown */}
         <select
@@ -189,40 +193,6 @@ export default function NavbarHeader({
         >
           <Sliders className="w-4 h-4" />
         </button>
-
-        {/* Keyboard Shortcuts Button */}
-        <button
-          onClick={onOpenShortcuts}
-          className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-400 hover:text-white cursor-pointer"
-          title="Keyboard Hotkeys Guide"
-        >
-          <Keyboard className="w-4 h-4" />
-        </button>
-
-        {/* About & Legal Notice Button */}
-        {onOpenAbout && (
-          <button
-            onClick={() => {
-              audio.playKnobClick();
-              onOpenAbout();
-            }}
-            className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-400 hover:text-amber-400 cursor-pointer transition"
-            title="About ArchiveTV & Legal Disclaimer"
-          >
-            <Info className="w-4 h-4" />
-          </button>
-        )}
-
-        {/* GitHub Repository Link */}
-        <a
-          href="https://github.com/SRHSoulja/archivetv"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-400 hover:text-white cursor-pointer transition flex items-center justify-center"
-          title="ArchiveTV on GitHub (Open Source)"
-        >
-          <GithubIcon className="w-4 h-4" />
-        </a>
 
         {/* Fullscreen Toggle */}
         <button

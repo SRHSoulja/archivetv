@@ -20,12 +20,13 @@ export default function AboutModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 select-none animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 select-none animate-in fade-in duration-200" onClick={onClose}>
       <div ref={dialogRef}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label="About ArchiveTV"
+        onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-xl bg-[#141211] border-2 border-amber-600/70 rounded-2xl p-5 md:p-6 shadow-2xl text-zinc-300 font-sans">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4">

@@ -120,15 +120,28 @@ Quality-of-life. The app currently punishes anyone not on a wide desktop with a 
 
 ## Phase 3 — Coherence
 
-- [ ] Two modal design systems built hours apart. Adopt the newer one's close
-      button, real `<h3>`, `aria-label` and backdrop dismissal everywhere
-- [ ] One feature, four names (CHANNELS / CHANNEL STUDIO / ANALOG BROADCAST STUDIO
-      / Channel Studio & Lineup Customizer). Same for Search and Guide
-- [ ] Two overlapping search surfaces — the Studio has a search tab that duplicates
-      the standalone modal, which has a button back into the Studio
-- [ ] Icon reuse: `Radio` serves six functions, `Sliders` two, twice in the same row
-- [ ] Navbar is twelve equal peers with colour used for identity rather than status.
-      About/Hotkeys already exist in the footer and are pure duplication up top
+- [x] Two modal design systems built hours apart. The newer one's conventions are
+      everywhere now: real headings, named close buttons, `role="dialog"` with a
+      name, and backdrop dismissal on the six panels that lacked it — with the
+      panel itself swallowing the click so working inside one does not close it
+- [x] One feature, four names. It is CHANNEL STUDIO everywhere now: the modal
+      header, every tooltip, every entry point
+- [x] Looked at and deliberately kept. They are not duplicates: the standalone
+      search finds something to *watch now* (play, bookmark, or hand off), while
+      the Studio's tab finds something to *add to a line-up*. Their labels
+      already say so — "SEARCH ARCHIVE & ADD SHOWS" against "DEEP ARCHIVE
+      SEARCH". Merging them would cost a working distinction to fix a naming
+      impression
+- [x] Icon reuse: `Sliders` meant both Picture and Channel Studio, twice in the
+      same navbar row. `Sliders` is Picture alone now, the Studio has `ListVideo`
+      at all four of its entry points and on its own header, and BREAKS has
+      `Megaphone` rather than a third `Radio`. `Radio` is left where it means an
+      actual signal — tuning, LIVE AIR, receiving
+- [x] Navbar was twelve equal peers. Hotkeys and About were pure duplication of
+      the footer, so they are gone from it; the repo link joined them down there
+      rather than being dropped. Nine controls now, split by a rule into the five
+      that open something and the four that describe the set. Still 9 of 9
+      visible with zero overflow from 1600px to 390px
 
 ## Phase 4 — Performance
 

@@ -1132,6 +1132,15 @@ export default function App() {
             [?] HOTKEYS
           </button>
           <span>•</span>
+          <a
+            href="https://github.com/SRHSoulja/archivetv"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-amber-400 cursor-pointer font-pixel"
+          >
+            [SOURCE ON GITHUB]
+          </a>
+          <span>•</span>
           <span>USE VCR SCRUB BAR OR J/K/L TO SEEK</span>
         </div>
       </footer>

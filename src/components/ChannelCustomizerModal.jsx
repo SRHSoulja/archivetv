@@ -19,6 +19,7 @@ import {
   Upload,
   Share2,
   Pencil,
+  ListVideo,
 } from 'lucide-react';
 import {
   getCustomChannels,
@@ -622,22 +623,23 @@ export default function ChannelCustomizerModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 md:p-6 select-none animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 md:p-6 select-none animate-in fade-in duration-200" onClick={onClose}>
       <div ref={dialogRef}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label="Channel studio"
+        onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-5xl h-[88vh] bg-[#121117] border-4 border-teal-600/70 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-zinc-200">
         {/* Top Studio Header */}
         <div className="bg-gradient-to-r from-teal-950 via-[#152a28] to-teal-950 p-3 md:p-4 border-b-2 border-teal-600/50 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-teal-500/20 border border-teal-400 flex items-center justify-center shadow-inner">
-              <Radio className="w-6 h-6 text-teal-300 animate-pulse" />
+              <ListVideo className="w-6 h-6 text-teal-300" />
             </div>
             <div>
               <div className="font-pixel text-teal-300 text-lg md:text-xl font-bold">
-                ANALOG BROADCAST STUDIO • CHANNEL CUSTOMIZER
+                CHANNEL STUDIO
               </div>
               <div className="font-mono text-teal-100/70 text-xs hidden sm:block">
                 CREATE CUSTOM CHANNELS, DROP ARCHIVE.ORG URLS & ARRANGE BROADCAST SCHEDULES

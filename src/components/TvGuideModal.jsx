@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Play, Tv, Search, Sliders } from 'lucide-react';
+import { X, Play, Tv, Search, Sliders , ListVideo } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { useDialog } from '../hooks/useDialog';
 
@@ -36,12 +36,13 @@ export default function TvGuideModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 md:p-6 select-none animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 md:p-6 select-none animate-in fade-in duration-200" onClick={onClose}>
       <div ref={dialogRef}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label="TV guide"
+        onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-5xl h-[85vh] bg-[#0c142c] border-4 border-[#2b4c8f] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white font-sans">
         {/* Vintage Prevue Guide Blue Header */}
         <div className="bg-gradient-to-r from-[#17306b] via-[#214b9c] to-[#17306b] p-3 md:p-4 border-b-2 border-[#3d6ec7] flex items-center justify-between">
@@ -68,9 +69,9 @@ export default function TvGuideModal({
                   onOpenChannelStudio();
                 }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-pixel font-bold text-xs shadow cursor-pointer transition active:scale-95"
-                title="Open Channel Studio to customize dials and drop Archive videos"
+                title="Channel Studio — build and edit channels"
               >
-                <Sliders className="w-3.5 h-3.5" />
+                <ListVideo className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">CHANNEL STUDIO</span>
                 <span className="sm:hidden">STUDIO</span>
               </button>
