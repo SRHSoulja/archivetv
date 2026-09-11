@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { X, Play, Tv, Search, Sliders , ListVideo } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { useDialog } from '../hooks/useDialog';
+import { calculateLiveTvSlot } from '../services/archiveApi';
 
 export default function TvGuideModal({
   isOpen,
   onClose,
   channels = [],
   currentChannel,
+  currentProgramIndex = 0,
+  liveTvMode = false,
   onSelectChannel,
   onOpenChannelStudio,
 }) {
@@ -129,8 +132,53 @@ export default function TvGuideModal({
           ) : (
             filteredChannels.map((channel) => {
               const isCurrent = currentChannel?.number === channel.number;
-              const currentProg = channel.programs?.[0];
-              const upNextProg = channel.programs?.[1];
+              const progs = channel.programs || [];
+
+              /**
+               * What is actually on, rather than always the first item.
+               *
+               * This used to read `programs[0]` and `programs[1]` for every
+               * channel on the page, so the guide told you episode 1 was airing
+               * no matter which episode you were seven minutes into -- and said
+               * the same about every other dial too.
+               *
+               *  - the channel you are on: whatever you are actually watching
+               *  - any other channel, live mode: the wall-clock slot, because
+               *    that is genuinely what would be on if you tuned over
+               *  - any other channel otherwise: the first item, which is
+               *    correct, because that is where tuning in would start you
+               */
+              let nowIdx = 0;
+              if (isCurrent) {
+                nowIdx = Math.min(Math.max(currentProgramIndex, 0), Math.max(progs.length - 1, 0));
+              } else if (liveTvMode && progs.length > 0) {
+                nowIdx = calculateLiveTvSlot(channel).programIndex;
+              }
+              const nextIdx = progs.length > 1 ? (nowIdx + 1) % progs.length : -1;
+              const currentProg = progs[nowIdx];
+              const upNextProg = nextIdx >= 0 ? progs[nextIdx] : null;
+
+              /**
+               * "EP 3 OF 12" is only true when the twelve really are episodes.
+               *
+               * Of the twelve channels that ship, exactly one is a series: all
+               * sixteen Lone Ranger programmes come from a single archive.org
+               * item. The other eleven are twelve unrelated films, so numbering
+               * McLintock! as episode four of four is simply wrong.
+               *
+               * Sharing an identifier is the signal, and it is counted per
+               * programme rather than per channel, so a channel that mixes a
+               * series with a few films still numbers the series properly and
+               * leaves the films alone.
+               */
+              const episodeLabel = (() => {
+                const prog = progs[nowIdx];
+                if (!prog?.identifier) return null;
+                const siblings = progs.filter((p) => p.identifier === prog.identifier);
+                if (siblings.length < 2) return null;
+                const within = siblings.indexOf(prog) + 1;
+                return `EP ${within} OF ${siblings.length}`;
+              })();
 
               return (
                 <div
@@ -167,7 +215,7 @@ export default function TvGuideModal({
 
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => handleTuneChannel(channel, 0)}
+                        onClick={() => handleTuneChannel(channel, nowIdx)}
                         className={`px-4 py-2 rounded-lg font-pixel text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow transition active:scale-95 ${
                           isCurrent
                             ? 'bg-yellow-400 text-black hover:bg-yellow-300 animate-pulse'
@@ -184,7 +232,7 @@ export default function TvGuideModal({
                     <div className="bg-black/30 border-t border-blue-900/40 p-2.5 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
                       {currentProg && (
                         <div
-                          onClick={() => handleTuneChannel(channel, 0)}
+                          onClick={() => handleTuneChannel(channel, nowIdx)}
                           className="flex items-center gap-2 p-2 rounded-lg bg-blue-950/60 border border-blue-800/40 hover:border-yellow-400/50 cursor-pointer group"
                         >
                           <img
@@ -196,8 +244,14 @@ export default function TvGuideModal({
                             }}
                           />
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1 text-yellow-400 font-pixel text-[10px]">
+                            <div className="flex flex-wrap items-center gap-1 text-yellow-400 font-pixel text-[10px]">
                               <span>● NOW AIRING</span>
+                              {episodeLabel && (
+                                <>
+                                  <span>•</span>
+                                  <span className="text-yellow-200">{episodeLabel}</span>
+                                </>
+                              )}
                               <span>•</span>
                               <span>{Math.round(currentProg.duration / 60)} MIN</span>
                             </div>
@@ -210,7 +264,7 @@ export default function TvGuideModal({
 
                       {upNextProg && (
                         <div
-                          onClick={() => handleTuneChannel(channel, 1)}
+                          onClick={() => handleTuneChannel(channel, nextIdx)}
                           className="flex items-center gap-2 p-2 rounded-lg bg-blue-950/40 border border-blue-900/40 hover:border-yellow-400/50 cursor-pointer group"
                         >
                           <img

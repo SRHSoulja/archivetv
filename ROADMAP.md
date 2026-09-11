@@ -275,6 +275,31 @@ broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
 - **TMDB or any keyed API.** Would require a proxy, trading away the zero-backend
   property the project is built on
 
+## Found by the user after the plan was written
+
+- [x] The Guide always read `programs[0]` as "NOW AIRING" and `programs[1]` as
+      "UP NEXT", for every channel on the page. So it said episode 1 was on no
+      matter which episode you were watching, and said the same about every
+      other dial. It now shows what is genuinely on: what you are actually
+      watching on your own channel, the wall-clock slot on the others in live
+      mode, and the first item otherwise
+- [x] Picking an episode set an explicit programme and left `currentProgramIndex`
+      alone, so nothing downstream could tell which episode was on
+- [x] The episode picker spread the previous programme and overrode only the URL,
+      leaving `videoFile` naming the episode you were watching *before*
+- [x] "EP 3 OF 12" was wrong on eleven of the twelve shipped channels. Only CH 04
+      is a series — its sixteen programmes are one archive.org item. The rest are
+      twelve unrelated films, so numbering *McLintock!* as episode four of four
+      was nonsense. Episodes are detected by a shared identifier, counted per
+      programme, so a channel mixing a series with films gets both right
+- [x] Bookmarked tapes were a dead end. You could collect, rename and re-art
+      them, and then the only thing you could do with the collection was play one
+      at a time — the Channel Studio could build from a search but could not see
+      the shelf you had already curated. A tape can now be put on any channel
+      from its detail sheet, the whole shelf can become a channel in one press,
+      and the archive.org link is copyable from the sheet rather than only from
+      one of the three view modes
+
 ## Known-imperfect, stated plainly
 
 - Episode counts are wrong on films with multiple cuts — counts `availableFiles`,

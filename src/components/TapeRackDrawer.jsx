@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon, Info, GripVertical, Library } from 'lucide-react';
+import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon, Info, GripVertical, Library, ListVideo } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import {
   getBookmarks,
@@ -12,6 +12,11 @@ import {
   setTapeOrder,
   getTapeSort,
   setTapeSort,
+  getChannelLineup,
+  saveCustomChannel,
+  addProgramToChannel,
+  ensureEditableChannel,
+  sanitizeProgram,
 } from '../services/archiveApi';
 import {
   fetchTheatricalPoster,
@@ -29,6 +34,7 @@ export default function TapeRackDrawer({
   onSelectChannel,
   onCustomTapePlay,
   onPlayDirectItem,
+  onChannelsUpdated,
 }) {
   const dialogRef = useDialog(isOpen);
   const [activeTab, setActiveTab] = useState('channels'); // 'channels' | 'bookmarks'
@@ -47,6 +53,8 @@ export default function TapeRackDrawer({
   const dragIdRef = useRef(null);
   const [orderIds, setOrderIds] = useState(() => getTapeOrder());
   const [yearDraft, setYearDraft] = useState('');
+  const [sendTarget, setSendTarget] = useState('NEW');
+  const [sendNotice, setSendNotice] = useState(null);
   const [activeChannelId, setActiveChannelId] = useState(currentChannel?.id || channels[0]?.id || 'toons');
   const [customInput, setCustomInput] = useState('');
   const [customLoading, setCustomLoading] = useState(false);
@@ -319,6 +327,66 @@ export default function TapeRackDrawer({
 
   if (!isOpen) return null;
 
+  const note = (text) => {
+    setSendNotice(text);
+    setTimeout(() => setSendNotice(null), 3500);
+  };
+
+  /**
+   * Tapes into channels.
+   *
+   * A bookmark used to be a dead end: you could collect tapes, rename them and
+   * give them better artwork, and then the only thing you could do with the
+   * collection was play one at a time. The Channel Studio could build a channel
+   * from a search, but it could not see the shelf you had already curated --
+   * which is the wrong way round, because the shelf is where the deliberate
+   * choices are.
+   */
+  const asProgram = (prog) =>
+    sanitizeProgram({
+      identifier: prog.identifier,
+      title: getCustomTitle(prog.identifier) || prog.title,
+      seriesTitle: prog.seriesTitle || '',
+      year: getCustomYear(prog.identifier) || prog.year || 'Vintage',
+      description: prog.description || '',
+      videoFile: prog.videoFile,
+      videoUrl: prog.videoUrl,
+      candidateStreamUrls: prog.candidateStreamUrls || (prog.videoUrl ? [prog.videoUrl] : []),
+      embedUrl: prog.embedUrl,
+      thumbnailUrl: prog.thumbnailUrl,
+      duration: prog.duration || 1800,
+    });
+
+  const sendToChannel = (progs, targetId, newName) => {
+    const list = (Array.isArray(progs) ? progs : [progs]).map(asProgram).filter(Boolean);
+    if (list.length === 0) {
+      note('Nothing playable on that tape to add.');
+      return;
+    }
+    let chan;
+    if (targetId === 'NEW') {
+      const next = saveCustomChannel({
+        name: (newName || 'MY TAPES').slice(0, 24).toUpperCase(),
+        callsign: 'K-TAPE',
+        badge: 'CUSTOM',
+        description: 'Built from the tape shelf.',
+        programs: list,
+      });
+      chan = next[next.length - 1];
+    } else {
+      // A shipped channel forks on its first edit and comes back with a new id.
+      const editableId = ensureEditableChannel(targetId);
+      const next = addProgramToChannel(editableId, list);
+      chan = next.find((c) => c.id === editableId);
+    }
+    if (onChannelsUpdated) onChannelsUpdated();
+    note(
+      chan
+        ? `Added ${list.length} tape${list.length > 1 ? 's' : ''} to CH ${chan.number} — ${chan.name}.`
+        : `Added ${list.length} tape${list.length > 1 ? 's' : ''}.`
+    );
+  };
+
   const handleTapeClick = (prog, idx) => {
     audio.playSwitch(true);
     if (selectedChan) {
@@ -486,6 +554,21 @@ export default function TapeRackDrawer({
                 <option value="custom">Custom (drag)</option>
               </select>
             </div>
+
+            {activeTab === 'bookmarks' && sortedList.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  audio.playSwitch(true);
+                  sendToChannel(sortedList, 'NEW', 'MY TAPES');
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-teal-600/60 bg-teal-950/70 text-teal-200 hover:bg-teal-900 font-pixel text-[10px] tracking-wider cursor-pointer transition"
+                title="Make a channel that plays every tape on this shelf, in this order"
+              >
+                <ListVideo className="w-3 h-3" />
+                <span>MAKE A CHANNEL ({sortedList.length})</span>
+              </button>
+            )}
 
             <button
               type="button"
@@ -989,9 +1072,63 @@ export default function TapeRackDrawer({
               ) : null}
             </div>
 
-            <p className="mt-2 shrink-0 font-mono text-[10px] text-zinc-400 break-all">
-              {infoTape.identifier}
-            </p>
+            <div className="mt-2 shrink-0 flex items-center gap-2">
+              <p className="min-w-0 flex-1 font-mono text-[10px] text-zinc-400 break-all">
+                {infoTape.identifier}
+              </p>
+              <button
+                type="button"
+                onClick={() => handleCopyUrl(infoTape.identifier)}
+                className="shrink-0 flex items-center gap-1 px-2 py-1 rounded border border-zinc-700 bg-zinc-900/70 text-zinc-300 hover:text-amber-300 hover:border-amber-600/60 font-pixel text-[9px] tracking-wider cursor-pointer transition"
+                title="Copy this tape's archive.org address"
+              >
+                {copiedId === infoTape.identifier ? (
+                  <><Check className="w-3 h-3 text-green-400" /> COPIED</>
+                ) : (
+                  <><Copy className="w-3 h-3" /> COPY LINK</>
+                )}
+              </button>
+            </div>
+
+            {/* Put this tape on a channel. The shelf is where the deliberate
+                choices live, so it should be able to feed the dial directly
+                rather than making you find the same item again in a search. */}
+            <div className="mt-3 shrink-0 rounded-xl border border-zinc-800 bg-black/40 p-2.5">
+              <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">
+                PUT THIS TAPE ON A CHANNEL
+              </span>
+              <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                <select
+                  value={sendTarget}
+                  onChange={(e) => setSendTarget(e.target.value)}
+                  className="flex-1 min-w-[10rem] bg-[#181614] border border-zinc-700 focus:border-amber-500 text-amber-300 font-pixel text-[11px] rounded-lg px-2 py-1.5 cursor-pointer"
+                >
+                  <option value="NEW">+ NEW CHANNEL</option>
+                  {getChannelLineup().map((c) => (
+                    <option key={c.id} value={c.id}>
+                      CH {c.number} • {c.name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    audio.playSwitch(true);
+                    sendToChannel(
+                      infoTape,
+                      sendTarget,
+                      getCustomTitle(infoTape.identifier) || infoTape.title
+                    );
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-black font-pixel text-[11px] font-bold cursor-pointer shadow transition active:scale-95"
+                >
+                  ADD
+                </button>
+              </div>
+              {sendNotice && (
+                <p className="mt-1.5 text-[10px] text-teal-300">{sendNotice}</p>
+              )}
+            </div>
 
             <div className="mt-3 shrink-0">
                 <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">YOUR LABEL</span>

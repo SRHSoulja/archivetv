@@ -719,6 +719,10 @@ export default function App() {
         ...currentProgram,
         seriesTitle: baseTitle,
         videoUrl: ep.videoUrl,
+        // Carried over from the previous episode before this: the spread kept
+        // the old videoFile, so anything reading the file name while an episode
+        // was selected got the name of the one you were watching before it.
+        videoFile: ep.name || ep.videoFile || currentProgram.videoFile,
         candidateStreamUrls: ep.candidateStreamUrls || [ep.videoUrl],
         title: `${baseTitle} - ${ep.displayName}`,
         duration: ep.duration,
@@ -729,6 +733,32 @@ export default function App() {
     },
     [currentProgram, triggerChannelZap]
   );
+
+  /**
+   * Which slot on the current channel is genuinely on air.
+   *
+   * `currentProgramIndex` is only half the answer: picking an episode sets an
+   * explicit programme and leaves the index where it was, so the Guide sat on
+   * "EP 1 OF 16" while the deck correctly showed episode 7. Match the explicit
+   * programme back to the line-up by its file, which is what tells one episode
+   * of a tape from another, and fall back to the index when there is nothing
+   * explicit playing.
+   */
+  const airingProgramIndex = useMemo(() => {
+    const progs = currentChannel?.programs || [];
+    const explicit = activeExplicitProgram;
+    if (explicit && !explicit.isAuxiliary && progs.length > 0) {
+      if (explicit.videoUrl) {
+        const byUrl = progs.findIndex((p) => p.videoUrl === explicit.videoUrl);
+        if (byUrl !== -1) return byUrl;
+      }
+      if (explicit.videoFile) {
+        const byFile = progs.findIndex((p) => p.videoFile === explicit.videoFile);
+        if (byFile !== -1) return byFile;
+      }
+    }
+    return currentProgramIndex;
+  }, [currentChannel, activeExplicitProgram, currentProgramIndex]);
 
   const handleToggleAux = useCallback(() => {
     triggerChannelZap();
@@ -1126,6 +1156,8 @@ export default function App() {
         onClose={() => setGuideOpen(false)}
         channels={channels}
         currentChannel={displayChannel}
+        currentProgramIndex={airingProgramIndex}
+        liveTvMode={liveTvMode}
         onSelectChannel={handleSelectChannel}
         onOpenChannelStudio={() => handleOpenChannelStudio()}
       />
@@ -1139,6 +1171,7 @@ export default function App() {
         onSelectChannel={handleSelectChannel}
         onCustomTapePlay={handleCustomTapePlay}
         onPlayDirectItem={handlePlayDirectItem}
+        onChannelsUpdated={reloadChannels}
       />
 
       {/* 6. Internet Archive Deep Antenna Explorer Modal */}
