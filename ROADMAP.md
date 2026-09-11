@@ -111,8 +111,10 @@ Quality-of-life. The app currently punishes anyone not on a wide desktop with a 
       panel grounds, where small text needs 4.5:1. Prose moved to zinc-400 (7:1+);
       icons, separators and disabled states left alone. Zero failures across the
       main screen, tapes, channels, breaks, guide and picture
-- [ ] Tape drag-reorder is mouse-only and hidden behind the sixth option of a
-      dropdown; needs touch support and a visible grip
+- [x] Tape drag-reorder was mouse-only — HTML5 drag-and-drop does not fire on a
+      touch screen — and hidden behind the sixth option of a dropdown. Rebuilt on
+      pointer events with a visible grip and an ARRANGE button; verified by touch
+      on a tablet and by mouse, including that the new order persists
 - [x] Hotkey list omitted `?`, `Esc` and `Shift+F`, and described `F` wrongly —
       it fullscreens the picture, not the site
 

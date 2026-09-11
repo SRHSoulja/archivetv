@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon, Info } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon, Info, GripVertical } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import {
   getBookmarks,
@@ -36,6 +36,9 @@ export default function TapeRackDrawer({
   const [titleVersion, setTitleVersion] = useState(0);
   const [sortMode, setSortMode] = useState(() => getTapeSort());
   const [dragId, setDragId] = useState(null);
+  // Pointer handlers fire faster than state settles, so the id being dragged is
+  // held in a ref as well and read from there during a move.
+  const dragIdRef = useRef(null);
   const [orderIds, setOrderIds] = useState(() => getTapeOrder());
   const [yearDraft, setYearDraft] = useState('');
   const [activeChannelId, setActiveChannelId] = useState(currentChannel?.id || channels[0]?.id || 'toons');
@@ -103,14 +106,64 @@ export default function TapeRackDrawer({
 
   // Rearrange as the cursor passes over a neighbour, rather than computing the
   // result on release -- you can see where it will land before letting go.
-  const previewMove = (targetId) => {
-    if (!dragId || dragId === targetId) return;
+  const previewMove = (targetId, sourceId = dragId) => {
+    if (!sourceId || sourceId === targetId) return;
     const ids = sortedList.map((p) => p.identifier);
-    const from = ids.indexOf(dragId);
+    const from = ids.indexOf(sourceId);
     const to = ids.indexOf(targetId);
     if (from === -1 || to === -1) return;
     ids.splice(to, 0, ids.splice(from, 1)[0]);
     setOrderIds(ids);
+  };
+
+  // HTML5 drag-and-drop does not exist on a touch screen, so arranging the
+  // shelf was mouse-only. Pointer events cover mouse, touch and pen alike; the
+  // grip carries touch-action: none so a drag does not scroll the shelf away.
+  // The move and commit handlers are attached to the window for the duration of
+  // a drag, so they would otherwise close over the list as it was when the drag
+  // began. Reading them through refs keeps every preview working off the
+  // current order rather than repeatedly re-deriving it from the first one.
+  const handlersRef = useRef({});
+  useEffect(() => {
+    handlersRef.current = { previewMove, commitOrder, sorted: sortedList };
+  });
+
+  const startReorder = (identifier, e) => {
+    // Touch pointers do not reliably keep capture: in testing the grip saw
+    // pointerdown, one pointermove, then lostpointercapture and nothing else --
+    // no pointerup at all, so the new order was shown but never saved. Listening
+    // on the window for the duration of the drag does not depend on capture.
+    e.preventDefault();
+    e.stopPropagation();
+    dragIdRef.current = identifier;
+    setDragId(identifier);
+
+    const onMove = (ev) => {
+      const source = dragIdRef.current;
+      if (!source) return;
+      if (ev.cancelable) ev.preventDefault();
+      const targetId = document
+        .elementFromPoint(ev.clientX, ev.clientY)
+        ?.closest?.('[data-tape-id]')
+        ?.getAttribute('data-tape-id');
+      if (targetId) handlersRef.current.previewMove?.(targetId, source);
+    };
+
+    const onEnd = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onEnd);
+      window.removeEventListener('pointercancel', onEnd);
+      window.removeEventListener('lostpointercapture', onEnd);
+      window.removeEventListener('touchend', onEnd);
+      if (!dragIdRef.current) return;
+      dragIdRef.current = null;
+      handlersRef.current.commitOrder?.();
+    };
+
+    window.addEventListener('pointermove', onMove, { passive: false });
+    window.addEventListener('pointerup', onEnd);
+    window.addEventListener('pointercancel', onEnd);
+    window.addEventListener('touchend', onEnd);
   };
 
   const commitOrder = () => {
@@ -355,9 +408,25 @@ export default function TapeRackDrawer({
               </select>
             </div>
 
-            {sortMode === 'custom' && (
-              <span className="font-pixel text-[10px] text-amber-400/90">DRAG TO ARRANGE</span>
-            )}
+            <button
+              type="button"
+              onClick={() => {
+                audio.playKnobClick();
+                const next = sortMode === 'custom' ? 'default' : 'custom';
+                setSortMode(next);
+                setTapeSort(next);
+              }}
+              aria-pressed={sortMode === 'custom'}
+              title="Arrange the shelf by hand — drag tapes by the grip"
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-pixel text-[10px] tracking-wider transition cursor-pointer ${
+                sortMode === 'custom'
+                  ? 'bg-amber-500 text-black border-amber-300 font-bold'
+                  : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:border-amber-500/60'
+              }`}
+            >
+              <GripVertical className="w-3 h-3" />
+              <span>{sortMode === 'custom' ? 'DRAG TO ARRANGE' : 'ARRANGE'}</span>
+            </button>
 
             <div className="font-mono text-zinc-400 text-[11px] hidden md:block">
               {activeTab === 'bookmarks' ? `${bookmarks.length} TAPES SAVED` : 'SELECT TAPE'}
@@ -418,27 +487,7 @@ export default function TapeRackDrawer({
                     style={{ '--tilt': `${tiltFor(prog.identifier)}deg` }}
                   >
                   <div
-                    draggable={sortMode === 'custom'}
-                    onDragStart={(e) => {
-                      setDragId(prog.identifier);
-                      e.dataTransfer.effectAllowed = 'move';
-                      try {
-                        e.dataTransfer.setData('text/plain', prog.identifier);
-                      } catch {}
-                    }}
-                    onDragEnter={() => {
-                      if (sortMode === 'custom') previewMove(prog.identifier);
-                    }}
-                    onDragOver={(e) => {
-                      if (sortMode !== 'custom') return;
-                      e.preventDefault();
-                      e.dataTransfer.dropEffect = 'move';
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      commitOrder();
-                    }}
-                    onDragEnd={commitOrder}
+                    data-tape-id={prog.identifier}
                     onClick={() => {
                       if (activeTab === 'bookmarks') {
                         audio.playSwitch(true);
@@ -460,6 +509,19 @@ export default function TapeRackDrawer({
                         : 'border-[#45372b] hover:border-amber-400 hover:-translate-y-1'
                     }`}
                   >
+                    {sortMode === 'custom' && (
+                      <button
+                        type="button"
+                        aria-label={`Drag to reposition ${getCustomTitle(prog.identifier) || prog.title}`}
+                        title="Drag to reposition this tape"
+                        onClick={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => startReorder(prog.identifier, e)}
+                        className="absolute top-1.5 right-1.5 z-30 p-1.5 rounded-md bg-black/85 border border-amber-500/70 text-amber-300 shadow cursor-grab active:cursor-grabbing touch-none"
+                      >
+                        <GripVertical className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+
                     {/* VHS Worn Cardboard Spine Effect (Left Edge) */}
                     <div className="absolute left-0 top-0 bottom-0 w-2.5 vhs-spine z-20 pointer-events-none border-r border-black/40" />
 
