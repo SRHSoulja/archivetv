@@ -300,6 +300,15 @@ broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
       and the archive.org link is copyable from the sheet rather than only from
       one of the three view modes
 
+- [x] The live/from-the-beginning switch existed only as an unlabelled
+      `START 00:00` button on the remote — so closing the remote removed the
+      setting entirely, and the label never said what it did. The first-run
+      prompt's claim that you could "change it any time from the remote" was
+      therefore only true while the remote happened to be open. It is now
+      explained in a tooltip, mirrored at the top of the TV Guide where it
+      belongs (the guide is the thing that says what is on, and this decides
+      what is on), and bound to `V`
+
 ## Known-imperfect, stated plainly
 
 - Episode counts are wrong on films with multiple cuts — counts `availableFiles`,

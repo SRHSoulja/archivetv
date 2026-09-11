@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Play, Tv, Search, Sliders , ListVideo } from 'lucide-react';
+import { X, Play, Tv, Search, Sliders, ListVideo, Radio } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { useDialog } from '../hooks/useDialog';
 import { calculateLiveTvSlot } from '../services/archiveApi';
@@ -11,6 +11,7 @@ export default function TvGuideModal({
   currentChannel,
   currentProgramIndex = 0,
   liveTvMode = false,
+  onToggleLiveTv,
   onSelectChannel,
   onOpenChannelStudio,
 }) {
@@ -63,7 +64,30 @@ export default function TvGuideModal({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {onToggleLiveTv && (
+              <button
+                onClick={() => {
+                  audio.playKnobClick();
+                  onToggleLiveTv();
+                }}
+                aria-pressed={liveTvMode}
+                title={
+                  liveTvMode
+                    ? 'Channels are running to the clock, so this guide shows what is part-way through. Press to start everything from 00:00 instead.'
+                    : 'Programmes start at 00:00. Press to run the channels to the clock, so the guide shows what would already be part-way through.'
+                }
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-pixel text-xs shadow cursor-pointer transition active:scale-95 border ${
+                  liveTvMode
+                    ? 'bg-red-950 text-red-200 border-red-500/70'
+                    : 'bg-blue-950/80 text-blue-200 border-blue-700 hover:bg-blue-900'
+                }`}
+              >
+                <Radio className="w-3.5 h-3.5" />
+                <span>{liveTvMode ? 'LIVE — JOINING IN PROGRESS' : 'STARTING FROM 00:00'}</span>
+              </button>
+            )}
+
             {onOpenChannelStudio && (
               <button
                 onClick={() => {

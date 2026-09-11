@@ -11,8 +11,9 @@ import { audio } from '../services/soundEffects';
  * also off by default and mentioned nowhere, so almost nobody ever saw it.
  *
  * This is one question, answered once, remembered afterwards. It is not a
- * settings panel: the same switch lives on the remote for anyone who changes
- * their mind.
+ * settings panel, but the switch has to be findable afterwards or the question
+ * becomes a trap: it lives on the remote, at the top of the TV Guide, and on
+ * the V key.
  */
 export default function TuneInPrompt({ isOpen, onChoose }) {
   if (!isOpen) return null;
@@ -34,7 +35,8 @@ export default function TuneInPrompt({ isOpen, onChoose }) {
           HOW DO YOU WANT TO WATCH?
         </h3>
         <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">
-          Asked once. You can change it any time from the remote.
+          Asked once. Change it whenever you like — it is on the remote, at the top
+          of the TV Guide, and on the <span className="text-amber-300">V</span> key.
         </p>
 
         <div className="mt-4 flex flex-col gap-2">

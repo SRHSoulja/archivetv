@@ -26,6 +26,7 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }) {
     { key: 'T', desc: 'Open VHS Cassette Tape Shelf' },
     { key: 'R', desc: 'Toggle Handheld Infrared Remote' },
     { key: 'B', desc: 'Open Commercial Breaks & Reel Builder' },
+    { key: 'V', desc: 'Live (join in progress) / Start Everything at 00:00' },
     { key: 'A', desc: 'Cycle Aspect Ratio (Auto / 4:3 / 16:9)' },
     { key: 'F', desc: 'Fullscreen the Picture Only' },
     { key: 'Shift + F', desc: 'Fullscreen the Whole Set (F11 does this too)' },

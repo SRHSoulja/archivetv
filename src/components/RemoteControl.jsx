@@ -418,6 +418,12 @@ export default function RemoteControl({
               triggerIr();
               onToggleLiveTv();
             }}
+            aria-pressed={liveTvMode}
+            title={
+              liveTvMode
+                ? 'LIVE: channels run to the clock, so you join partway in. Press to start programmes from 00:00 instead.'
+                : 'Programmes start at 00:00. Press to run the channels to the clock and join whatever is already on.'
+            }
             className={`py-1.5 px-2 rounded font-pixel text-[10px] flex items-center justify-center gap-1 cursor-pointer border ${
               liveTvMode
                 ? 'bg-red-950 text-red-200 border-red-600/60 animate-pulse'

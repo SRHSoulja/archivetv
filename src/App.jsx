@@ -136,12 +136,25 @@ export default function App() {
   const [stationIdAt, setStationIdAt] = useState(null);
   const lastIdentHourRef = useRef(null);
 
-  const handleTuneInChoice = useCallback((live) => {
-    setLiveTvMode(live);
-    setTuneInAsked(true);
+  const rememberLiveTv = (live) => {
     try {
       localStorage.setItem('archivetv_live_tv_v1', live ? 'on' : 'off');
     } catch {}
+    return live;
+  };
+
+  const handleTuneInChoice = useCallback((live) => {
+    setLiveTvMode(rememberLiveTv(live));
+    setTuneInAsked(true);
+  }, []);
+
+  // Reads the current value through the setter rather than the closure, so it
+  // keeps a stable identity and can sit in the hotkey handler without dragging
+  // `liveTvMode` into that effect's dependencies -- where leaving it out would
+  // have meant `v` toggling against a stale value.
+  const handleToggleLiveTv = useCallback(() => {
+    setTuneInAsked(true);
+    setLiveTvMode((prev) => rememberLiveTv(!prev));
   }, []);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const gutters = useGutters();
@@ -939,6 +952,9 @@ export default function App() {
       } else if (key.toLowerCase() === 'b') {
         e.preventDefault();
         setBreaksOpen((b) => !b);
+      } else if (key.toLowerCase() === 'v') {
+        e.preventDefault();
+        handleToggleLiveTv();
       } else if (key.toLowerCase() === 'backspace' || key.toLowerCase() === 'home') {
         e.preventDefault();
         handleRestartProgram();
@@ -1045,7 +1061,7 @@ export default function App() {
           onAntennaAngleChange={setAntennaAngle}
           signalQuality={signalQuality}
           liveTvMode={liveTvMode}
-          onToggleLiveTv={() => handleTuneInChoice(!liveTvMode)}
+          onToggleLiveTv={handleToggleLiveTv}
           onRestartProgram={handleRestartProgram}
           onOpenGuide={() => setGuideOpen(true)}
           onOpenSearch={() => setSearchOpen(true)}
@@ -1140,7 +1156,7 @@ export default function App() {
         onOpenSearch={() => setSearchOpen(true)}
         onOpenTapeRack={() => setTapeRackOpen(true)}
         onOpenChannelStudio={() => handleOpenChannelStudio()}
-        onToggleLiveTv={() => handleTuneInChoice(!liveTvMode)}
+        onToggleLiveTv={handleToggleLiveTv}
         onRestartProgram={handleRestartProgram}
         liveTvMode={liveTvMode}
         aspectRatio={aspectRatio}
@@ -1158,6 +1174,7 @@ export default function App() {
         currentChannel={displayChannel}
         currentProgramIndex={airingProgramIndex}
         liveTvMode={liveTvMode}
+        onToggleLiveTv={handleToggleLiveTv}
         onSelectChannel={handleSelectChannel}
         onOpenChannelStudio={() => handleOpenChannelStudio()}
       />
