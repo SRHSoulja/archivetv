@@ -728,9 +728,28 @@ export default function App() {
       if (!currentProgram) return;
       triggerChannelZap();
       const baseTitle = currentProgram.seriesTitle || currentProgram.title.split(' - ')[0] || currentProgram.title;
+      // archive.org carries no per-file description -- every file in an item
+      // shares the item's blurb -- so the app composes "<episode>. <item text>".
+      // Switching episode rewrote the title and left that composed description
+      // alone, so the sleeve read "ep 5 My Favorite..." over ep 6. Strip the
+      // previous episode's label back off and put the new one on.
+      const prevLabel =
+        currentProgram.title && currentProgram.title.includes(' - ')
+          ? currentProgram.title.slice(currentProgram.title.indexOf(' - ') + 3).trim()
+          : null;
+      let baseDescription = (currentProgram.description || '').trim();
+      if (prevLabel && baseDescription.startsWith(prevLabel)) {
+        baseDescription = baseDescription.slice(prevLabel.length).replace(/^[.\s]+/, '');
+      }
+      const epLabel = (ep.displayName || ep.name || '').trim();
+      const description = epLabel
+        ? `${epLabel}. ${baseDescription}`.trim().replace(/\.\s*$/, '')
+        : baseDescription;
+
       setActiveExplicitProgram({
         ...currentProgram,
         seriesTitle: baseTitle,
+        description,
         videoUrl: ep.videoUrl,
         // Carried over from the previous episode before this: the spread kept
         // the old videoFile, so anything reading the file name while an episode

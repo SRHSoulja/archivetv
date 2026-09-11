@@ -330,6 +330,13 @@ broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
       derivatives. That same item advertised 62 episodes and contains exactly
       one programme. The badge reads FILES now and says what it means
 
+- [x] Switching episode left the sleeve's blurb on the previous one. archive.org
+      carries no per-file description — every file in an item shares the item's
+      blurb — so the app composes "<episode>. <item text>". The episode picker
+      rewrote the title and the file but never that composed description, so the
+      sleeve read "ep 5 My Favorite…" over ep 6. The previous label is stripped
+      before the new one goes on, so they do not stack up either
+
 ## Known-imperfect, stated plainly
 
 - Episode counts are wrong on films with multiple cuts — counts `availableFiles`,
