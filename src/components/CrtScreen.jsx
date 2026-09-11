@@ -7,7 +7,7 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
-import { Radio, VolumeX, Maximize2, Minimize2 } from 'lucide-react';
+import { Radio, Maximize2, Minimize2 } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { getCanonicalEpisodeKey } from '../services/archiveApi';
 import MediaLoadOverlay from './MediaLoadOverlay';
@@ -493,6 +493,10 @@ const CrtScreen = forwardRef(function CrtScreen(
   }, [powerOn, calculatedStatic, muted]);
 
   const autoplayBlockedRef = useRef(false);
+  const mutedRef = useRef(muted);
+  useEffect(() => {
+    mutedRef.current = muted;
+  }, [muted]);
   const prevMutedRef = useRef(muted);
 
   useEffect(() => {
@@ -604,14 +608,41 @@ const CrtScreen = forwardRef(function CrtScreen(
     }
   };
 
-  // Screen click to unmute if blocked
-  const handleScreenClick = () => {
-    if (autoplayBlocked && videoRef.current) {
-      videoRef.current.muted = muted;
-      setAutoplayBlocked(false);
-      audio.init();
+  const clearAutoplayBlock = useCallback(() => {
+    if (!autoplayBlockedRef.current) return;
+    const video = videoRef.current;
+    if (video) {
+      video.muted = mutedRef.current;
+      video.play().catch(() => {});
     }
-  };
+    setAutoplayBlocked(false);
+    audio.init();
+  }, []);
+
+  const handleScreenClick = () => clearAutoplayBlock();
+
+  // The browser's restriction lifts on the FIRST gesture anywhere on the page,
+  // not specifically on the picture -- so clicking TAPES or pressing a key used
+  // to leave the set silently muted with a notice still asking for a click it
+  // had already received. Any gesture clears it now, except the mute control
+  // itself, which is someone asking for silence on purpose.
+  useEffect(() => {
+    if (!autoplayBlocked) return undefined;
+    const onGesture = (e) => {
+      if (e.type === 'keydown' && String(e.key).toLowerCase() === 'm') return;
+      // Leave the card's own buttons alone. Clearing the block on pointerdown
+      // unmounts the card mid-click, so the button's onClick never lands and a
+      // first-run choice would be thrown away. Those buttons call in themselves.
+      if (e.target?.closest?.('[role="dialog"]')) return;
+      clearAutoplayBlock();
+    };
+    window.addEventListener('pointerdown', onGesture, true);
+    window.addEventListener('keydown', onGesture, true);
+    return () => {
+      window.removeEventListener('pointerdown', onGesture, true);
+      window.removeEventListener('keydown', onGesture, true);
+    };
+  }, [autoplayBlocked, clearAutoplayBlock]);
 
   // OSD auto-hide
   useEffect(() => {
@@ -1041,7 +1072,15 @@ const CrtScreen = forwardRef(function CrtScreen(
       {powerOn && <StationIdent channel={currentChannel} at={stationIdAt} />}
 
       {/* 7c. Asked once, the first time the set comes on */}
-      <TuneInPrompt isOpen={tuneInPrompt} onChoose={onTuneInChoice} />
+      <TuneInPrompt
+        isOpen={powerOn && (tuneInPrompt || autoplayBlocked)}
+        firstRun={tuneInPrompt}
+        onChoose={(live) => {
+          clearAutoplayBlock();
+          onTuneInChoice?.(live);
+        }}
+        onSwitchOn={clearAutoplayBlock}
+      />
 
       {/* 8. Channel Switch "Zap" Flash */}
       {channelZap && (
@@ -1120,14 +1159,6 @@ const CrtScreen = forwardRef(function CrtScreen(
             <span>•</span>
             <span>{aspectRatio === 'auto' ? `AUTO (${effectiveAspectRatio})` : aspectRatio}</span>
           </div>
-        </div>
-      )}
-
-      {/* 10. Autoplay Blocked / Unmute Overlay */}
-      {powerOn && autoplayBlocked && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 bg-black/90 border-2 border-yellow-400 text-yellow-300 px-4 py-2 rounded-xl flex items-center gap-2 font-pixel text-xs cursor-pointer hover:bg-yellow-950/90 shadow-2xl animate-pulse">
-          <VolumeX className="w-4 h-4 text-yellow-400" />
-          <span>AUDIO MUTED BY BROWSER • CLICK SCREEN TO UNMUTE</span>
         </div>
       )}
 

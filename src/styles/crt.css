@@ -1205,3 +1205,29 @@ textarea {
 @media (prefers-reduced-motion: reduce) {
   .station-ident { animation: none; }
 }
+
+/* ---------------------------------------------------------------------------
+   Dropdown popups
+
+   A native <select> paints its option list on the browser's own ground, which
+   is white, and the options do not inherit the control's colours. Every
+   dropdown in this app uses amber or teal text, so every one of them was
+   unreadable the moment it opened. `color-scheme` gets the browser to render
+   the popup dark natively; the explicit colours are the fallback for engines
+   that ignore it.
+   --------------------------------------------------------------------------- */
+
+select {
+  color-scheme: dark;
+}
+
+select option,
+select optgroup {
+  background-color: #16151a;
+  color: #e7e3dc;
+}
+
+select option:checked {
+  background-color: #3a2f1c;
+  color: #ffd27f;
+}

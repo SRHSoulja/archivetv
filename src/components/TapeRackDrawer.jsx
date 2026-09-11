@@ -544,7 +544,7 @@ export default function TapeRackDrawer({
                   setSortMode(e.target.value);
                   setTapeSort(e.target.value);
                 }}
-                className="bg-transparent text-amber-300 text-[11px] font-mono focus:outline-none cursor-pointer"
+                className="bg-[#16151a] text-amber-300 text-[11px] font-mono rounded px-1.5 py-0.5 cursor-pointer"
               >
                 <option value="default">As listed</option>
                 <option value="az">Title A-Z</option>
