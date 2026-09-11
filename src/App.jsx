@@ -698,12 +698,43 @@ export default function App() {
     };
   }, []);
 
+  // Panels that take over the screen. The remote is deliberately absent: it is a
+  // floating panel, open by default, and does not capture the view.
+  // Ordered innermost-first so Escape closes what is actually on top.
+  const blockingModals = [
+    [episodesOpen, setEpisodesOpen],
+    [shortcutsOpen, setShortcutsOpen],
+    [aboutOpen, setAboutOpen],
+    [pictureOpen, setPictureOpen],
+    [breaksOpen, setBreaksOpen],
+    [customizerOpen, setCustomizerOpen],
+    [searchOpen, setSearchOpen],
+    [tapeRackOpen, setTapeRackOpen],
+    [guideOpen, setGuideOpen],
+  ];
+  const anyModalOpen = blockingModals.some(([open]) => open);
+
   // Keyboard Navigation & Scrubbing Listener
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
 
       const key = e.key;
+
+      // Escape closes the topmost panel. Nothing else reaches the set while one
+      // is open -- arrow keys were changing channel behind an open tape rack,
+      // and `p` was powering the television off underneath it.
+      if (key === 'Escape') {
+        for (const [open, setOpen] of blockingModals) {
+          if (open) {
+            e.preventDefault();
+            setOpen(false);
+            return;
+          }
+        }
+        return;
+      }
+      if (anyModalOpen) return;
 
       if (key === 'ArrowUp') {
         e.preventDefault();
@@ -797,6 +828,16 @@ export default function App() {
     handleCycleAspectRatio,
     handleOpenChannelStudio,
     currentProgram,
+    anyModalOpen,
+    episodesOpen,
+    shortcutsOpen,
+    aboutOpen,
+    pictureOpen,
+    breaksOpen,
+    customizerOpen,
+    searchOpen,
+    tapeRackOpen,
+    guideOpen,
   ]);
 
   return (
