@@ -270,8 +270,15 @@ broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
   already read well, and it deepens the "worse on purpose" problem
 - **Natural break detection.** Real scene/silence detection on arbitrary
   archive.org video is not tractable here. Timed with jitter is honest and works
-- **Per-episode box art.** Deferred by preference; the art path resolves from the
-  item title and would need rework
+- **Per-episode box art.** Not deferred — not possible without a backend, and
+  tested rather than assumed. archive.org stores one image per *item*, so all
+  sixteen Lone Ranger episodes share `services/img/theloneranger_201705`.
+  Capturing a frame from the video client-side fails both ways: with
+  `crossOrigin="anonymous"` the load is refused, because the redirect carries
+  `access-control-allow-origin` but the CDN node it lands on does not; without
+  it the video plays but the canvas is tainted and `toDataURL` throws
+  `SecurityError`. TMDB has episode stills and needs a key, which needs a proxy.
+  Nothing here is worth revisiting unless the zero-backend rule changes
 - **TMDB or any keyed API.** Would require a proxy, trading away the zero-backend
   property the project is built on
 
