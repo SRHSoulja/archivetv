@@ -29,6 +29,14 @@ import {
 } from '../services/archiveApi';
 import { audio } from '../services/soundEffects';
 
+function formatRuntime(seconds) {
+  const s = Math.round(seconds);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m`;
+  return m > 0 ? `${m}m` : `${s}s`;
+}
+
 export default function ArchiveSearchModal({
   isOpen,
   onClose,
@@ -55,6 +63,9 @@ export default function ArchiveSearchModal({
   const [uploaderLookupId, setUploaderLookupId] = useState(null);
   const [page, setPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
+  // archive.org does not list a length for every item; the LENGTH filter has to
+  // hide those, so say how many rather than leaving a silently short page.
+  const [hiddenNoLength, setHiddenNoLength] = useState(0);
 
   // Curated Collections
   const collectionsList = [
@@ -140,6 +151,7 @@ export default function ArchiveSearchModal({
         setResults(data.items);
       }
       setTotalResults(data.total);
+      setHiddenNoLength((prev) => (append ? prev + (data.hiddenNoLength || 0) : data.hiddenNoLength || 0));
       setPage(newPage);
 
       if (data.items.length === 0 && newPage === 1) {
@@ -148,6 +160,13 @@ export default function ArchiveSearchModal({
     } catch (err) {
       console.error(err);
       setError('Error reaching Internet Archive servers. Please try again.');
+      // Otherwise the previous search's results stay on screen under the error,
+      // reading as if they answered the query that just failed.
+      if (!append) {
+        setResults([]);
+        setTotalResults(0);
+        setHiddenNoLength(0);
+      }
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -476,8 +495,16 @@ export default function ArchiveSearchModal({
               </div>
 
               {totalResults > 0 && (
-                <div className="text-zinc-400 font-pixel text-[11px]">
-                  SHOWING {results.length} OF {totalResults.toLocaleString()} SIGNALS
+                <div className="text-right">
+                  <div className="text-zinc-400 font-pixel text-[11px]">
+                    SHOWING {results.length} OF {totalResults.toLocaleString()} SIGNALS
+                  </div>
+                  {durationCategory !== 'all' && (
+                    <div className="text-amber-400/90 font-pixel text-[10px] mt-0.5">
+                      ONLY ITEMS THAT STATE A LENGTH
+                      {hiddenNoLength > 0 ? ` • ${hiddenNoLength} UNREADABLE` : ''}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -753,6 +780,11 @@ export default function ArchiveSearchModal({
                             {item.matchType === 'collection_mention' && (
                               <span className="px-1.5 py-0.5 rounded bg-amber-950/90 border border-amber-500 text-amber-300 font-pixel text-[9px]">
                                 📁 IN ANTHOLOGY / EPISODES
+                              </span>
+                            )}
+                            {item.durationSeconds > 0 && (
+                              <span className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-600 text-zinc-300 font-pixel text-[9px]">
+                                ⏱ {formatRuntime(item.durationSeconds)}
                               </span>
                             )}
                             {item.filesCount > 1 && (

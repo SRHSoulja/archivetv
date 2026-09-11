@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Power,
   Volume2,
@@ -54,6 +54,14 @@ export default function RemoteControl({
 }) {
   const [irBlinking, setIrBlinking] = useState(false);
   const [digitBuffer, setDigitBuffer] = useState('');
+  // The entry this keypad has already tuned. Without it the keypress and the
+  // debounce below both fired, so one press zapped the set twice -- audibly,
+  // and restarting the programme about 1.4s after it had already started.
+  const tunedEntryRef = useRef('');
+  const onSelectChannelByNumberRef = useRef(onSelectChannelByNumber);
+  useEffect(() => {
+    onSelectChannelByNumberRef.current = onSelectChannelByNumber;
+  }, [onSelectChannelByNumber]);
 
   const triggerIr = () => {
     audio.playRemoteBeep();
@@ -66,9 +74,12 @@ export default function RemoteControl({
     const newBuf = (digitBuffer + digit).slice(-2);
     setDigitBuffer(newBuf);
 
+    // Two digits, or a first digit no channel number can start with, is a
+    // complete entry: tune at once rather than making the viewer sit out the
+    // debounce that exists only for "0" and "1".
     if (newBuf.length === 2 || parseInt(newBuf, 10) > 1) {
-      const chNum = newBuf.padStart(2, '0');
-      onSelectChannelByNumber(chNum);
+      tunedEntryRef.current = newBuf;
+      onSelectChannelByNumberRef.current(newBuf.padStart(2, '0'));
       setTimeout(() => setDigitBuffer(''), 1500);
     }
   };
@@ -78,16 +89,16 @@ export default function RemoteControl({
     if (onRestartProgram) onRestartProgram();
   };
 
+  // Completes an entry the keypress could not: a lone "0" or "1" might still be
+  // the first half of a two-digit number, so it waits to see. An entry already
+  // sent above is skipped rather than tuned a second time.
   useEffect(() => {
-    if (digitBuffer) {
-      const t = setTimeout(() => {
-        if (digitBuffer) {
-          onSelectChannelByNumber(digitBuffer.padStart(2, '0'));
-          setDigitBuffer('');
-        }
-      }, 1400);
-      return () => clearTimeout(t);
-    }
+    if (!digitBuffer || tunedEntryRef.current === digitBuffer) return undefined;
+    const t = setTimeout(() => {
+      onSelectChannelByNumberRef.current(digitBuffer.padStart(2, '0'));
+      setDigitBuffer('');
+    }, 1400);
+    return () => clearTimeout(t);
   }, [digitBuffer]);
 
   if (!isOpen) return null;

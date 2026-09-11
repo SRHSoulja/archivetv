@@ -366,6 +366,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                   onRestart={handleRestart}
                   playbackRate={playbackRate}
                   onChangePlaybackRate={onChangePlaybackRate}
+                  activeEngine={activeEngine}
                   onOpenEpisodes={onOpenEpisodes}
                   episodesCount={currentProgram?.availableFiles?.length || 0}
                 />

@@ -58,13 +58,22 @@ Things that are broken. No character work lands well on a buggy base.
 - [x] Share links minted a fresh id, so opening the same link twice duplicated the
       channel. The id is now carried in the link (older links hash their own
       contents), and a shared copy steps off any dial number already in use
-- [ ] Search LENGTH filter is a no-op — `duration` is never requested or mapped
-- [ ] Remote digit entry tunes twice (immediate call plus the debounce timer)
-- [ ] `pendingResumeRef` is last in the seek chain and usually unreachable, because
-      `seekSeconds` is set for every live slot and every post-break resume
-- [ ] `playbackRate` multiplies the whole span since the anchor, so switching rate
-      mid-programme jumps the embed counter
-- [ ] Failed search leaves the previous results rendered under the error banner
+- [x] Search LENGTH filter was a no-op — `duration` was never requested or mapped,
+      and the guard passed every item through. Length now comes from `runtime` /
+      `duration` / `length` (three fields, three formats), the search requires one
+      to be present so the filter does not return an empty page, and every result
+      shows its length
+- [x] Remote digit entry tuned twice — the keypress and the debounce both fired.
+      Measured at two zap flashes per entry before, one after
+- [x] `pendingResumeRef` was last in the seek chain and unreachable, because
+      `seekSeconds` is set for every live slot and every post-break resume. It is
+      checked first now — it is cleared on programme change, so a value in it
+      always means the viewer was on this exact programme moments ago
+- [x] `playbackRate` multiplied the whole span since the anchor, so switching rate
+      mid-programme jumped the embed counter. The embed clock no longer scales at
+      all — archive.org's iframe has no rate API and always plays at 1x — and the
+      speed control is disabled there rather than reporting a speed that is a lie
+- [x] A failed search left the previous results rendered under the error banner
 
 ## Phase 2 — Reach
 

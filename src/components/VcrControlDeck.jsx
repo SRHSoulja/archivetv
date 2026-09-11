@@ -24,6 +24,7 @@ export default function VcrControlDeck({
   onRestart,
   playbackRate = 1,
   onChangePlaybackRate,
+  activeEngine = 'direct',
   onOpenEpisodes,
   episodesCount = 0,
 }) {
@@ -127,7 +128,12 @@ export default function VcrControlDeck({
   };
 
   const rates = [0.75, 1.0, 1.25, 1.5, 2.0];
+  // Speed is set on the local <video>. archive.org's iframe has no cross-origin
+  // API for it, so on the Tube embed the control did nothing but report a speed
+  // the picture was not playing at.
+  const rateLocked = activeEngine === 'embed';
   const cycleRate = () => {
+    if (rateLocked) return;
     audio.playSwitch(true);
     const currentIdx = rates.indexOf(playbackRate);
     const nextRate = rates[(currentIdx + 1) % rates.length];
@@ -274,10 +280,19 @@ export default function VcrControlDeck({
           {/* Playback Speed */}
           <button
             onClick={cycleRate}
-            title="Cycle Playback Speed"
-            className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-amber-300 font-mono text-xs cursor-pointer transition"
+            disabled={rateLocked}
+            title={
+              rateLocked
+                ? 'Playback speed is not available on the Tube embed'
+                : 'Cycle Playback Speed'
+            }
+            className={`px-2.5 py-1.5 rounded-lg border font-mono text-xs transition ${
+              rateLocked
+                ? 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'
+                : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-600 text-amber-300 cursor-pointer'
+            }`}
           >
-            {playbackRate}x
+            {rateLocked ? '1x' : `${playbackRate}x`}
           </button>
 
           {/* Episode Picker (if multi-episode) */}

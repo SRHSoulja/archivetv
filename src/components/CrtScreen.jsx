@@ -362,14 +362,19 @@ const CrtScreen = forwardRef(function CrtScreen(
       const anchor = embedAnchorRef.current;
       if (!anchor) return; // still buffering; counter holds at the seeded offset
       const dur = duration || currentProgram?.duration || 3600;
-      const elapsed = ((performance.now() - anchor.wallStart) / 1000) * playbackRate;
+      // Deliberately NOT scaled by playbackRate. The speed control writes to the
+      // local <video> element; archive.org's iframe never sees it and keeps
+      // playing at 1x. Scaling here multiplied the whole span since the anchor,
+      // so changing speed mid-programme made the counter jump by minutes and
+      // then run at a speed the picture was not.
+      const elapsed = (performance.now() - anchor.wallStart) / 1000;
       const nextTime = Math.min(dur, anchor.base + elapsed);
       setEmbedTime(nextTime);
       onTimeUpdateReportRef.current?.(nextTime, dur, true);
     }, 250);
 
     return () => clearInterval(embedInterval);
-  }, [powerOn, canPlayDirect, embedPlaying, playbackRate, duration, currentProgram?.duration]);
+  }, [powerOn, canPlayDirect, embedPlaying, duration, currentProgram?.duration]);
 
   // NOTE: there is deliberately no 'message' listener here. archive.org's embed
   // emits nothing to the parent -- measured across 16s of confirmed playback,
@@ -521,14 +526,19 @@ const CrtScreen = forwardRef(function CrtScreen(
       const dur = video.duration || currentProgram?.duration || 0;
       if (dur > 0) setDuration(dur);
 
-      if (liveTvMode && currentProgram?.seekSeconds && video.duration) {
+      // pendingResumeRef is checked FIRST because it is only ever set by an
+      // engine switch, and it is cleared on every programme change -- so when it
+      // holds a value, the viewer was watching this exact programme moments ago.
+      // Checking it last meant it was unreachable in practice: live slots and
+      // post-break resumes both carry seekSeconds, which shadowed it and threw
+      // the viewer back to the slot offset on every return from the Tube embed.
+      if (pendingResumeRef.current > 0) {
+        video.currentTime = pendingResumeRef.current;
+        pendingResumeRef.current = 0;
+      } else if (liveTvMode && currentProgram?.seekSeconds && video.duration) {
         video.currentTime = currentProgram.seekSeconds % video.duration;
       } else if (currentProgram?.seekSeconds) {
         video.currentTime = currentProgram.seekSeconds;
-      } else if (pendingResumeRef.current > 0) {
-        // Resume from saved position (e.g. returning from embed mode)
-        video.currentTime = pendingResumeRef.current;
-        pendingResumeRef.current = 0;
       } else {
         video.currentTime = 0;
       }

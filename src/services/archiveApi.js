@@ -39,6 +39,38 @@ export function extractIdentifier(input) {
 }
 
 /**
+ * Length metadata on archive.org is free-form and inconsistently populated.
+ * The same index holds `runtime` as "00:04:59", `duration` as a string of
+ * seconds, and `length` as anything from "06:41 (MM:SS)" to "82 min". Parses
+ * what it can and returns null rather than guessing.
+ */
+export function parseArchiveDuration(value) {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (raw === null || raw === undefined) return null;
+  const str = String(raw).trim();
+  if (!str) return null;
+
+  const clock = str.match(/(\d+):(\d{1,2})(?::(\d{1,2}))?/);
+  if (clock) {
+    const [, a, b, c] = clock;
+    const secs =
+      c === undefined
+        ? Number(a) * 60 + Number(b)
+        : Number(a) * 3600 + Number(b) * 60 + Number(c);
+    return secs > 0 ? secs : null;
+  }
+
+  const minutes = str.match(/^([\d.]+)\s*(?:min|minutes?|m)\b/i);
+  if (minutes) {
+    const secs = Math.round(parseFloat(minutes[1]) * 60);
+    return secs > 0 ? secs : null;
+  }
+
+  const bare = Number(str);
+  return Number.isFinite(bare) && bare > 0 ? bare : null;
+}
+
+/**
  * Searches the entire Internet Archive video database with rich filtering,
  * pagination, decade filters, and collections.
  */
@@ -110,6 +142,15 @@ export async function searchArchive(query, options = {}) {
     const startYear = parseInt(decade, 10);
     const endYear = startYear + 9;
     queryParts.push(`year:[${startYear} TO ${endYear}]`);
+  }
+
+  // Filtering by length has to happen over items that actually state one.
+  // Roughly one archive.org item in twenty does, and the value is a free-form
+  // string in one of three fields, so the range check itself stays client-side
+  // -- but requiring the field up front is what stops the filter returning an
+  // empty page. Searching by length genuinely means searching a smaller corpus.
+  if (durationCategory && durationCategory !== 'all') {
+    queryParts.push('(runtime:[* TO *] OR duration:[* TO *] OR length:[* TO *])');
   }
 
   let cleanKeywords = [];
@@ -215,6 +256,10 @@ export async function searchArchive(query, options = {}) {
         matchType,
         score,
         filesCount,
+        durationSeconds:
+          parseArchiveDuration(doc.runtime) ??
+          parseArchiveDuration(doc.duration) ??
+          parseArchiveDuration(doc.length),
       };
     });
 
@@ -223,10 +268,18 @@ export async function searchArchive(query, options = {}) {
       items.sort((a, b) => b.score - a.score);
     }
 
+    // Applied here rather than in the Solr query: length lives in three fields
+    // with three formats, none of them range-queryable. Items with no length
+    // listed are hidden rather than passed through, or "SHORT" would still be
+    // showing feature films -- the count is reported so that is not a mystery.
+    let hiddenNoLength = 0;
     if (durationCategory && durationCategory !== 'all') {
       items = items.filter((item) => {
-        if (!item.duration) return true;
-        const mins = item.duration / 60;
+        if (!item.durationSeconds) {
+          hiddenNoLength += 1;
+          return false;
+        }
+        const mins = item.durationSeconds / 60;
         if (durationCategory === 'short') return mins <= 15;
         if (durationCategory === 'medium') return mins > 15 && mins <= 45;
         if (durationCategory === 'long') return mins > 45;
@@ -234,7 +287,7 @@ export async function searchArchive(query, options = {}) {
       });
     }
 
-    return { total: res.total, items };
+    return { total: res.total, items, hiddenNoLength };
   } catch (err) {
     console.error('Archive search error:', err);
     throw err;
@@ -244,7 +297,8 @@ export async function searchArchive(query, options = {}) {
 async function executeSearch(q, rows, sort, page) {
   const params = new URLSearchParams({
     q,
-    'fl[]': 'identifier,title,year,description,downloads,creator,mediatype,collection,files_count',
+    'fl[]':
+      'identifier,title,year,description,downloads,creator,mediatype,collection,files_count,runtime,length,duration',
     rows: String(rows),
     page: String(page),
     output: 'json',
