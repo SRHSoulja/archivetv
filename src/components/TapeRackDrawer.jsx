@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon, Info, GripVertical, Library, ListVideo } from 'lucide-react';
+import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon, Info, GripVertical, ListVideo } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import {
   getBookmarks,
@@ -38,9 +38,7 @@ export default function TapeRackDrawer({
 }) {
   const dialogRef = useDialog(isOpen);
   const [activeTab, setActiveTab] = useState('channels'); // 'channels' | 'bookmarks'
-  const [viewMode, setViewMode] = useState('boxart'); // 'boxart' | 'cassette' | 'spines'
-  // The tape currently pulled halfway out of the shelf.
-  const [pulledId, setPulledId] = useState(null);
+  const [viewMode, setViewMode] = useState('boxart'); // 'boxart' | 'cassette'
   const [bookmarks, setBookmarks] = useState([]);
   const [infoTape, setInfoTape] = useState(null);
   const [renameDraft, setRenameDraft] = useState('');
@@ -97,14 +95,6 @@ export default function TapeRackDrawer({
   // and believes it has them all.
   const tapeKey = (p) =>
     `${p?.identifier || ''}::${p?.videoFile || p?.videoUrl || ''}`;
-
-  // Real shelves are not colour-coordinated. Derive a stable hue per tape so the
-  // row reads as a collection that accumulated rather than a set that shipped.
-  const spineHueFor = (id) => {
-    let h = 7;
-    for (let i = 0; i < (id || '').length; i += 1) h = (h * 37 + id.charCodeAt(i)) % 360;
-    return h;
-  };
 
   const shownName = (p) => (getCustomTitle(p.identifier) || p.title || '').toLowerCase();
   const shownYear = (p) => getCustomYear(p.identifier) || p.year || '';
@@ -315,15 +305,11 @@ export default function TapeRackDrawer({
         e.preventDefault();
         e.stopPropagation();
         setInfoTape(null);
-      } else if (pulledId) {
-        e.preventDefault();
-        e.stopPropagation();
-        setPulledId(null);
       }
     };
     document.addEventListener('keydown', onKeyDown, true);
     return () => document.removeEventListener('keydown', onKeyDown, true);
-  }, [isOpen, artTape, infoTape, pulledId]);
+  }, [isOpen, artTape, infoTape]);
 
   if (!isOpen) return null;
 
@@ -518,22 +504,6 @@ export default function TapeRackDrawer({
                 <LayoutGrid className="w-3 h-3" />
                 <span>CASSETTES</span>
               </button>
-              <button
-                onClick={() => {
-                  audio.playKnobClick();
-                  setPulledId(null);
-                  setViewMode('spines');
-                }}
-                className={`px-2.5 py-1 rounded-md font-pixel text-[11px] flex items-center gap-1 cursor-pointer transition ${
-                  viewMode === 'spines'
-                    ? 'bg-amber-500 text-black font-bold shadow'
-                    : 'text-zinc-400 hover:text-zinc-200'
-                }`}
-                title="Browse the shelf the way you would at home — spines out, pull one to look at it"
-              >
-                <Library className="w-3 h-3" />
-                <span>SHELF</span>
-              </button>
             </div>
             <div className="flex items-center gap-1 bg-black/60 px-2.5 py-1 rounded-lg border border-zinc-700">
               <span className="text-zinc-400 text-[10px] font-pixel">ORDER:</span>
@@ -627,101 +597,6 @@ export default function TapeRackDrawer({
               <p className="font-mono text-xs max-w-md text-zinc-400">
                 Click the bookmark ribbon button on the VCR control deck (or the star in the Search Explorer)
                 while watching any video to save it to your personal tape collection!
-              </p>
-            </div>
-          ) : viewMode === 'spines' ? (
-            /* The shelf, spines out.
-
-               A grid shows you everything at once, which is useful and is
-               nothing like owning tapes. On a real shelf you see a row of
-               spines, read along them sideways, and pull one out to look at the
-               front -- so that is what this does. Pulling a tape out opens the
-               same detail sheet the grid uses; there is no second surface here. */
-            <div
-              className="vhs-shelf-rail"
-              role="listbox"
-              aria-label="Tape shelf, spines out"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                const ids = sortedList.map(tapeKey);
-                if (ids.length === 0) return;
-                const at = ids.indexOf(pulledId);
-                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-                  e.preventDefault();
-                  const next = e.key === 'ArrowRight'
-                    ? Math.min(ids.length - 1, at + 1)
-                    : Math.max(0, at <= 0 ? 0 : at - 1);
-                  setPulledId(ids[next]);
-                  audio.playKnobClick();
-                  document
-                    .querySelector(`[data-spine-id="${CSS.escape(ids[next])}"]`)
-                    ?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
-                } else if ((e.key === 'Enter' || e.key === ' ') && pulledId) {
-                  e.preventDefault();
-                  const prog = sortedList.find((p) => tapeKey(p) === pulledId);
-                  if (prog) {
-                    setRenameDraft(getCustomTitle(prog.identifier));
-                    setYearDraft(getCustomYear(prog.identifier));
-                    setInfoTape(prog);
-                  }
-                }
-              }}
-            >
-              <div className="vhs-shelf-row">
-                {sortedList.map((prog) => {
-                  if (!prog) return null;
-                  const name = getCustomTitle(prog.identifier) || prog.title || 'UNTITLED';
-                  const year = getCustomYear(prog.identifier) || prog.year || '';
-                  const key = tapeKey(prog);
-                  const pulled = pulledId === key;
-                  const posterSrc =
-                    posterMap[prog.identifier] ||
-                    getCachedPosterSync(prog.title, prog.year, prog.identifier) ||
-                    prog.thumbnailUrl ||
-                    `https://archive.org/services/img/${prog.identifier}`;
-                  return (
-                    <button
-                      type="button"
-                      key={`spine_${activeTab}_${selectedChan?.id || 'ch'}_${key}`}
-                      data-spine-id={key}
-                      role="option"
-                      aria-selected={pulled}
-                      title={`${name}${year ? ` (${year})` : ''}`}
-                      onClick={() => {
-                        audio.playKnobClick();
-                        if (pulled) {
-                          setRenameDraft(getCustomTitle(prog.identifier));
-                          setYearDraft(getCustomYear(prog.identifier));
-                          setInfoTape(prog);
-                        } else {
-                          setPulledId(key);
-                        }
-                      }}
-                      className={`vhs-spine-tape ${pulled ? 'is-pulled' : ''}`}
-                      style={{
-                        '--spine-hue': `${spineHueFor(key)}deg`,
-                        '--spine-lean': `${tiltFor(key)}deg`,
-                      }}
-                    >
-                      <span className="vhs-spine-face">
-                        <span className="vhs-spine-band" />
-                        <span className="vhs-spine-text">{name}</span>
-                        {year ? <span className="vhs-spine-year">{year}</span> : null}
-                      </span>
-                      {pulled && (
-                        <span className="vhs-spine-front">
-                          <img src={posterSrc} alt="" loading="lazy" />
-                          <span className="vhs-spine-front-hint">OPEN</span>
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="vhs-shelf-board" aria-hidden="true" />
-              <div className="vhs-shelf-uprights" aria-hidden="true" />
-              <p className="vhs-shelf-hint">
-                Click a spine to pull it out, again to open it. Arrow keys walk the shelf.
               </p>
             </div>
           ) : viewMode === 'boxart' ? (

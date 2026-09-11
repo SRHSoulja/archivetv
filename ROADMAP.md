@@ -184,12 +184,15 @@ The reason the thing exists. Ordered by sentiment per unit of effort.
       Only on the cabinets you would have plugged a deck into, and it rides the
       fine-tune dial: 3% of frame at rest, 8% and near-opaque once the tracking
       is knocked out. Follows the scanline switch, so CLEAN PICTURE removes it
-- [x] **Browsable shelf.** A third view beside BOX ART and CASSETTES: the tapes
-      stood on a board, spines out, read sideways, each with a seeded colour and
-      lean so a row looks like a collection that accumulated rather than a set
-      that shipped. Click to pull one out and see its cover, click again to open
-      the detail sheet the grid already uses — no second surface. Arrow keys walk
-      the shelf, Enter opens; Escape unwinds sheet → tape → rack
+- [~] **Browsable shelf.** Built as a spines-out view, then removed at the
+      user's direction — correctly. The forward-facing BOX ART mode already *was*
+      the video-store shelving originally asked for: rows of covers standing on
+      wooden boards with contact shadows and a seeded lean. Spines were a third
+      mode that traded readability and a close affordance for a little width.
+      Two real faults in it, both mine: the titles ran vertically at 8–11px and
+      were hard to read, and a second click on a pulled tape *opened* it when it
+      should have pushed it back — the same gesture meaning two different things.
+      Recoverable from git if it is ever wanted as an option
 - [x] Ghosting / multipath — a faint offset double image on a weak aerial, which
       is what reception actually looked like day to day; snow was the extreme
 - [x] Chroma bleed — colour smearing past its edges, why red titles glowed on
