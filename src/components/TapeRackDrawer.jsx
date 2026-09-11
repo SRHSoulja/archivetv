@@ -13,7 +13,11 @@ import {
   getTapeSort,
   setTapeSort,
 } from '../services/archiveApi';
-import { fetchTheatricalPoster, getCachedPosterSync } from '../services/posterService';
+import {
+  fetchTheatricalPoster,
+  getCachedPosterSync,
+  posterLookupSettled,
+} from '../services/posterService';
 import ArtOverridePanel from './ArtOverridePanel';
 import { useDialog } from '../hooks/useDialog';
 
@@ -203,24 +207,33 @@ export default function TapeRackDrawer({
       if (!prog || !prog.identifier) return false;
       if (posterMap[prog.identifier]) return false;
       if (getCachedPosterSync(prog.title, prog.year, prog.identifier)) return false;
+      // Already looked up and found nothing; re-running seven Wikipedia
+      // requests per mount for the same answer is the whole reason this is here.
+      if (posterLookupSettled(prog.title, prog.year, prog.identifier)) return false;
       return true;
     });
 
     if (unCached.length === 0) return;
 
+    // Eight at a time so a big shelf does not open forty connections at once,
+    // but it keeps going: the cap used to be the whole job, so the ninth tape
+    // onwards never got artwork at all.
     const batchLoad = async () => {
-      const updates = {};
-      await Promise.all(
-        unCached.slice(0, 8).map(async (prog) => {
-          try {
-            const p = await fetchTheatricalPoster(prog.title, prog.year, prog.identifier);
-            if (p) updates[prog.identifier] = p;
-          } catch {}
-        })
-      );
-
-      if (isMounted && Object.keys(updates).length > 0) {
-        setPosterMap((prev) => ({ ...prev, ...updates }));
+      for (let i = 0; i < unCached.length; i += 8) {
+        if (!isMounted) return;
+        const updates = {};
+        await Promise.all(
+          unCached.slice(i, i + 8).map(async (prog) => {
+            try {
+              const p = await fetchTheatricalPoster(prog.title, prog.year, prog.identifier);
+              if (p) updates[prog.identifier] = p;
+            } catch {}
+          })
+        );
+        if (!isMounted) return;
+        if (Object.keys(updates).length > 0) {
+          setPosterMap((prev) => ({ ...prev, ...updates }));
+        }
       }
     };
 

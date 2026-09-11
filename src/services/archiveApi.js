@@ -644,13 +644,37 @@ function parseLength(val) {
 /**
  * Saved Bookmarks & Tape Rack Favorites
  */
+// Read far more often than it is written: getCustomTitle falls through to it
+// for every item that has no custom label, and isBookmarked is called once per
+// result card per render. Measured before this cache, one search of 24 results
+// re-read and re-parsed the whole bookmark list 26 times. Held in memory and
+// invalidated on write instead; the app is the only writer in this tab, and
+// another tab's write is picked up through the `storage` event.
+let bookmarksCache = null;
+
 export function getBookmarks() {
+  if (bookmarksCache) return bookmarksCache;
   try {
     const raw = localStorage.getItem(BOOKMARKS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    bookmarksCache = raw ? JSON.parse(raw) : [];
   } catch {
-    return [];
+    bookmarksCache = [];
   }
+  return bookmarksCache;
+}
+
+function writeBookmarks(updated) {
+  bookmarksCache = updated;
+  try {
+    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(updated));
+  } catch {}
+  return updated;
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (e.key === BOOKMARKS_KEY || e.key === null) bookmarksCache = null;
+  });
 }
 
 export function saveBookmark(item) {
@@ -670,19 +694,13 @@ export function saveBookmark(item) {
     },
     ...current,
   ];
-  try {
-    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(updated));
-  } catch {}
-  return updated;
+  return writeBookmarks(updated);
 }
 
 export function removeBookmark(identifier) {
   const current = getBookmarks();
   const updated = current.filter((b) => b.identifier !== identifier);
-  try {
-    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(updated));
-  } catch {}
-  return updated;
+  return writeBookmarks(updated);
 }
 
 // Personal labels, keyed by identifier and kept separate from the item itself
@@ -805,20 +823,45 @@ export function cleanDescription(desc) {
 // demand for the one item someone clicked, and cache it.
 const uploaderCache = new Map();
 
+// The uploader and the full synopsis both live in the same metadata document,
+// and both used to fetch it separately with no timeout and no abort -- so
+// opening one item pulled the same file down twice, and a stalled connection
+// hung until the browser gave up on its own. One fetch, deduplicated while it
+// is in flight, cached after, and abandoned after twelve seconds.
+const metadataDocCache = new Map();
+const metadataInFlight = new Map();
+
+async function fetchItemMetadata(identifier) {
+  if (metadataDocCache.has(identifier)) return metadataDocCache.get(identifier);
+  if (metadataInFlight.has(identifier)) return metadataInFlight.get(identifier);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 12000);
+  const pending = fetch(`https://archive.org/metadata/${identifier}`, {
+    signal: controller.signal,
+  })
+    .then((res) => (res.ok ? res.json() : null))
+    .catch(() => null)
+    .finally(() => {
+      clearTimeout(timer);
+      metadataInFlight.delete(identifier);
+    });
+
+  metadataInFlight.set(identifier, pending);
+  const data = await pending;
+  if (data) metadataDocCache.set(identifier, data);
+  return data;
+}
+
 export async function fetchUploader(identifier) {
   if (!identifier) return '';
   if (uploaderCache.has(identifier)) return uploaderCache.get(identifier);
-  try {
-    const res = await fetch(`https://archive.org/metadata/${identifier}`);
-    if (!res.ok) return '';
-    const data = await res.json();
-    let up = data?.metadata?.uploader || '';
-    if (Array.isArray(up)) up = up[0] || '';
-    uploaderCache.set(identifier, up);
-    return up;
-  } catch {
-    return '';
-  }
+  const data = await fetchItemMetadata(identifier);
+  if (!data) return '';
+  let up = data?.metadata?.uploader || '';
+  if (Array.isArray(up)) up = up[0] || '';
+  uploaderCache.set(identifier, up);
+  return up;
 }
 
 // cleanDescription() caps at 300 chars, and build_channels.py bakes an even
@@ -830,21 +873,16 @@ const fullDescriptionCache = new Map();
 export async function fetchFullDescription(identifier) {
   if (!identifier) return '';
   if (fullDescriptionCache.has(identifier)) return fullDescriptionCache.get(identifier);
-  try {
-    const res = await fetch(`https://archive.org/metadata/${identifier}`);
-    if (!res.ok) return '';
-    const data = await res.json();
-    let desc = data?.metadata?.description || '';
-    if (Array.isArray(desc)) desc = desc.join(' ');
-    const clean = String(desc)
-      .replace(/<[^>]*>?/gm, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    fullDescriptionCache.set(identifier, clean);
-    return clean;
-  } catch {
-    return '';
-  }
+  const data = await fetchItemMetadata(identifier);
+  if (!data) return '';
+  let desc = data?.metadata?.description || '';
+  if (Array.isArray(desc)) desc = desc.join(' ');
+  const clean = String(desc)
+    .replace(/<[^>]*>?/gm, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  fullDescriptionCache.set(identifier, clean);
+  return clean;
 }
 
 export function extractYearFromMetadata(rawYear, title = '', identifier = '') {
@@ -941,7 +979,12 @@ export function safeSetCustomChannels(channels) {
   } catch (err) {
     console.error('LocalStorage quota error while saving custom channels:', err);
     try {
-      // Clear non-critical session caches if quota exceeded
+      // The quota that just blew is localStorage's. This used to clear
+      // sessionStorage, a separate area with its own budget, so the retry was
+      // guaranteed to fail exactly as the first attempt had. Drop the largest
+      // rebuildable thing in localStorage instead -- the poster cache, which is
+      // recovered from the network -- and only then the session metadata.
+      localStorage.removeItem('archivetv_poster_cache_v8');
       for (let i = sessionStorage.length - 1; i >= 0; i--) {
         const k = sessionStorage.key(i);
         if (k && k.startsWith('archivetv_')) {
@@ -1036,7 +1079,11 @@ export function getCustomChannels() {
 
     if (needsMigration) {
       console.info('Optimized legacy custom channels into lightweight format.');
-      safeSetCustomChannels(sanitizedList);
+      // Deferred: this function is called from useState initialisers, so writing
+      // here happens during React's render phase, which is not allowed to have
+      // side effects and can run more than once.
+      const toWrite = sanitizedList;
+      setTimeout(() => safeSetCustomChannels(toWrite), 0);
     }
     return sanitizedList;
   } catch (err) {

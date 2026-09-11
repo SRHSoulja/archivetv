@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Film, Radio } from 'lucide-react';
-import { fetchTheatricalPoster, getCachedPosterSync } from '../services/posterService';
+import { fetchTheatricalPoster, getCachedPosterSync, posterLookupSettled } from '../services/posterService';
 import { fetchFullDescription, getCustomTitle, setCustomTitle } from '../services/archiveApi';
 import { ImagePlus, Pencil, Check as CheckIcon, X as XIcon } from 'lucide-react';
 import ArtOverridePanel from './ArtOverridePanel';
@@ -66,6 +66,8 @@ export default function NowPlayingSleeve({
     const instant = getCachedPosterSync(title, year, identifier);
     setPoster(instant || null);
     if (instant || !identifier) return undefined;
+    // A settled miss means the chain already ran and found nothing.
+    if (posterLookupSettled(title, year, identifier)) return undefined;
 
     fetchTheatricalPoster(title, year, identifier)
       .then((found) => {

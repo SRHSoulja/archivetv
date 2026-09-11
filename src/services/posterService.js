@@ -125,6 +125,29 @@ function loadLocalPosterCache() {
 }
 loadLocalPosterCache();
 
+// A miss is worth remembering too. Without this, every mount re-ran the whole
+// Wikipedia chain -- up to seven requests -- for each item that simply has no
+// article, which is most of the obscure shorts. Stored with a timestamp so a
+// title that gains an article is eventually picked up rather than written off
+// for good.
+const MISS_PREFIX = '__no_poster__:';
+const MISS_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+function isFreshMiss(value) {
+  if (typeof value !== 'string' || !value.startsWith(MISS_PREFIX)) return false;
+  const at = Number(value.slice(MISS_PREFIX.length));
+  return Number.isFinite(at) && Date.now() - at < MISS_TTL_MS;
+}
+
+/** True once a lookup has been attempted and is still worth trusting. */
+export function posterLookupSettled(title, year = '', identifier = '') {
+  const key = identifier || `${title}_${year}`;
+  const v = posterMemoryCache.get(key);
+  if (v === undefined) return false;
+  if (typeof v === 'string' && v.startsWith(MISS_PREFIX)) return isFreshMiss(v);
+  return true;
+}
+
 function saveLocalPosterCache(key, url) {
   posterMemoryCache.set(key, url);
   try {
@@ -179,7 +202,17 @@ export function getCachedPosterSync(title, year = '', identifier = '') {
   if (identifier && posterOverrides[identifier]) return posterOverrides[identifier];
 
   const cacheKey = identifier || `${title}_${year}`;
-  if (posterMemoryCache.has(cacheKey)) return posterMemoryCache.get(cacheKey);
+  if (posterMemoryCache.has(cacheKey)) {
+    const hit = posterMemoryCache.get(cacheKey);
+    // A remembered miss is not a poster; fall through so curated art and the
+    // caller's own thumbnail fallbacks still get their turn.
+    if (typeof hit === 'string' && hit.startsWith(MISS_PREFIX)) {
+      if (isFreshMiss(hit)) return null;
+      posterMemoryCache.delete(cacheKey);
+    } else {
+      return hit;
+    }
+  }
   if (identifier && CURATED_POSTERS[identifier]) return CURATED_POSTERS[identifier];
 
   const lowerTitle = (title || '').toLowerCase();
@@ -298,6 +331,7 @@ export async function fetchTheatricalPoster(title, year = '', identifier = '') {
       ]
     : [`${clean} TV series`, `${clean} film`, clean];
 
+  let networkFailed = false;
   for (const q of searchQueries) {
     try {
       const endpoint = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(
@@ -310,7 +344,10 @@ export async function fetchTheatricalPoster(title, year = '', identifier = '') {
         },
       });
 
-      if (!res.ok) continue;
+      if (!res.ok) {
+        networkFailed = true;
+        continue;
+      }
 
       const data = await res.json();
       const pages = data?.query?.pages;
@@ -326,8 +363,13 @@ export async function fetchTheatricalPoster(title, year = '', identifier = '') {
           }
         }
       }
-    } catch {}
+    } catch {
+      // A network failure is not evidence that no poster exists, so it must not
+      // be remembered as a miss.
+      networkFailed = true;
+    }
   }
 
+  if (!networkFailed) saveLocalPosterCache(cacheKey, MISS_PREFIX + Date.now());
   return null;
 }

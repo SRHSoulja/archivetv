@@ -70,7 +70,6 @@ const CrtScreen = forwardRef(function CrtScreen(
   // Direct candidate streams & graceful fallback state
   const [candidateIndex, setCandidateIndex] = useState(0);
   const [streamFailedAll, setStreamFailedAll] = useState(false);
-  const [embedTime, setEmbedTime] = useState(0);
   const [embedPlaying, setEmbedPlaying] = useState(true);
   const [embedReady, setEmbedReady] = useState(false);
   // archive.org's embed ignores autoplay=1 -- it loads nothing until the viewer
@@ -89,10 +88,6 @@ const CrtScreen = forwardRef(function CrtScreen(
   const embedPlayingRef = useRef(true);
 
   useEffect(() => {
-    embedTimeRef.current = embedTime;
-  }, [embedTime]);
-
-  useEffect(() => {
     embedPlayingRef.current = embedPlaying;
   }, [embedPlaying]);
 
@@ -104,7 +99,6 @@ const CrtScreen = forwardRef(function CrtScreen(
     embedTimeRef.current = start;
     setEmbedReady(false);
     setEmbedStarted(false);
-    setEmbedTime(start);
     setEmbedSeed((prev) => ({ start, nonce: prev.nonce + 1 }));
   }, []);
 
@@ -369,7 +363,10 @@ const CrtScreen = forwardRef(function CrtScreen(
       // then run at a speed the picture was not.
       const elapsed = (performance.now() - anchor.wallStart) / 1000;
       const nextTime = Math.min(dur, anchor.base + elapsed);
-      setEmbedTime(nextTime);
+      // Held in a ref rather than state: the counter it feeds lives in the
+      // parent, and this ticks four times a second. As state it re-rendered the
+      // whole screen at 4Hz to update a value no JSX here ever read.
+      embedTimeRef.current = nextTime;
       onTimeUpdateReportRef.current?.(nextTime, dur, true);
     }, 250);
 
@@ -765,7 +762,6 @@ const CrtScreen = forwardRef(function CrtScreen(
               // Chrome is up, but the video is still parked until the viewer
               // clicks; the clock anchors on that, not here.
               embedTimeRef.current = embedSeed.start;
-              setEmbedTime(embedSeed.start);
             }}
           />
         </div>

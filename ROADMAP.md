@@ -132,16 +132,30 @@ Quality-of-life. The app currently punishes anyone not on a wide desktop with a 
 
 ## Phase 4 — Performance
 
-- [ ] `getCustomTitle` does a localStorage read + `JSON.parse` inside a sort
-      comparator, and the memo is defeated by new array identities each render
-- [ ] Poster lookups never cache misses — every mount re-runs up to seven Wikipedia
-      requests for items that have no article
-- [ ] Poster batch is capped at 8 and never re-runs, so items 9+ never get art
-- [ ] `isBookmarked` re-parses localStorage per result card per render
-- [ ] `embedTime` state is written 4×/s and read nowhere in JSX
-- [ ] `getCustomChannels` can write to localStorage during render-phase init
-- [ ] No `AbortController` on the metadata/uploader/description fetches
-- [ ] localStorage quota recovery purges `sessionStorage` — a different storage area
+- [x] `getCustomTitle` fell through to a localStorage read + `JSON.parse` for
+      every item without a custom label, including inside a sort comparator. The
+      bookmark list it reads is held in memory now and invalidated on write
+- [x] Poster lookups never cached misses — measured at 28 Wikipedia requests for
+      a four-tape shelf, seven per item, repeated on every open. A settled miss
+      is remembered for a week (a network failure is not recorded as one). Same
+      shelf, second open: 1 request
+- [x] Poster batch was capped at 8 and never re-ran, so the ninth tape onwards
+      never got art. It still goes eight at a time, but it now goes all the way
+- [x] `isBookmarked` re-parsed localStorage per result card per render. Measured
+      over one 24-result search: 26 reads before, 0 after
+- [x] `embedTime` state was written 4×/s and read nowhere in JSX — it re-rendered
+      the whole screen four times a second to update a value only a ref needed
+- [x] `getCustomChannels` could write to localStorage during render-phase init;
+      the migration write is deferred out of render now
+- [x] No `AbortController` on the metadata/uploader/description fetches, and the
+      uploader and the synopsis each pulled the same document separately. One
+      shared fetch now, deduplicated in flight, cached after, abandoned at 12s
+- [x] localStorage quota recovery purged `sessionStorage` — a different storage
+      area with its own budget, so the retry was certain to fail the same way.
+      It drops the rebuildable poster cache from localStorage first now
+- [x] Found while measuring: the saved picture settings were read and parsed by
+      an IIFE in App's component body, so the root component re-read the blob on
+      every render — eight times during boot, twice more per interaction
 
 ## Phase 5 — Character
 
