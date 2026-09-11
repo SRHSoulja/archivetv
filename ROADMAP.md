@@ -128,7 +128,44 @@ The reason the thing exists. Ordered by sentiment per unit of effort.
 - [ ] Channel-change banner — the most-seen piece of cable-era TV furniture
 - [ ] Digital-era failure mode: macroblocking and frozen frames rather than snow,
       for the 90s/2000s cabinets. Digital *fails*, it does not degrade
-- [ ] Broadcast ritual — sign-off, test patterns, station idents
+- [ ] Broadcast ritual. Researched separately; recorded below because half of it
+      is already built and the rest needs to dodge some well-worn myths
+
+### Broadcast ritual — what exists, what's missing, what to avoid
+
+**Already built.** `calculateLiveTvSlot` is a genuine wall-clock scheduler: it
+derives the slot from `Date.now()`, returns `seekSeconds` so you join a programme
+already in progress, and offsets each channel by its number so they are not in
+lockstep. Those were the top two recommendations of the research, and they are
+done. The real gap is that `liveTvMode` defaults to `false`, so the most
+broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
+
+- [ ] Consider live TV as the default, or a first-run choice between
+      "join in progress" and "start from the beginning"
+- [ ] Dayparting against real hours. The schedule currently loops continuously
+      with no notion of morning, primetime or late night
+- [ ] Sign-on/sign-off, with the 15–20 minute test-pattern pre-roll that preceded
+      sign-on. FCC § 73.1740 explicitly treats patterns and slides as *not*
+      broadcasting — the regulator formalised the "transmitter on, nothing
+      happening" state this app wants to portray
+- [ ] Top-of-hour station ID
+- [ ] Late-night texture drift — ad character changes as the night wears on. The
+      August 1984 Commercial TV Deregulation Order (98 F.C.C.2d 1075) removed the
+      per-hour ad ceiling and the public-affairs obligation at a stroke, which is
+      the hinge between "channel signs off" and "infomercials until dawn"
+
+**Researched and deliberately not building:**
+
+- **EBS two-tone alert.** Anachronistic before 1976, and the FCC's own 1994 order
+  documents that weekly testing desensitised the public — which is exactly what
+  would happen to anyone using this
+- **Clock idents.** Exceptionally rare in American television; a US-set simulation
+  should not have one
+- **"There is nothing wrong with your television set."** That is *The Outer
+  Limits*, not a real broadcast caption
+- **UK breakdown captions and US technical-difficulties audio.** Unsourced
+  folklore with no archival record. If we want that beat, design it fresh rather
+  than reproducing something that never existed
 - [ ] Reel parity with channels: spot reordering, import/export, share links
 
 ---
