@@ -116,6 +116,10 @@ export default function App() {
   });
   const [playbackRate, setPlaybackRate] = useState(1);
   const [activeEngine, setActiveEngine] = useState('direct'); // 'direct' | 'embed'
+  // Set when the screen reports that every direct stream candidate failed, so
+  // the PLAYER control can say the direct player is not an option here rather
+  // than bouncing the viewer straight back to the embed.
+  const [directUnavailable, setDirectUnavailable] = useState(false);
   const [controlsHidden, setControlsHidden] = useState(false); // Immersive mode: hide VCR deck
 
   // Persist user settings
@@ -273,6 +277,11 @@ export default function App() {
 
     return prog;
   }, [adBreak, activeExplicitProgram, currentChannel, baseProgram, liveTvMode, currentPrograms, channelEpisodesMap]);
+
+  // A new programme gets a fresh chance at the direct player.
+  useEffect(() => {
+    setDirectUnavailable(false);
+  }, [currentProgram?.identifier, currentProgram?.videoUrl]);
 
   useEffect(() => {
     currentProgramRef.current = currentProgram;
@@ -570,6 +579,8 @@ export default function App() {
         return;
       }
       if (typeof newEngine === 'string') {
+        // Only the screen's stream-failure path passes an engine by name.
+        if (newEngine === 'embed') setDirectUnavailable(true);
         setActiveEngine(newEngine);
       } else {
         setActiveEngine((prev) => (prev === 'direct' ? 'embed' : 'direct'));
@@ -927,6 +938,7 @@ export default function App() {
           activeEngine={activeEngine}
           onEngineChange={handleEngineChange}
           onToggleEngine={() => handleEngineChange()}
+          directUnavailable={directUnavailable}
           onPlaybackStateChange={setIsPlaying}
           onPlaybackProgress={handlePlaybackProgress}
           interstitial={

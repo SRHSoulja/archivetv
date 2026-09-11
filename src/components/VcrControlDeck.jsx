@@ -25,6 +25,8 @@ export default function VcrControlDeck({
   playbackRate = 1,
   onChangePlaybackRate,
   activeEngine = 'direct',
+  onToggleEngine,
+  directUnavailable = false,
   onOpenEpisodes,
   episodesCount = 0,
 }) {
@@ -277,6 +279,37 @@ export default function VcrControlDeck({
 
         {/* Right: Rate & Features */}
         <div className="flex items-center gap-2">
+          {/* Which player is driving the tube. The direct player is ours -- it
+              scrubs, reports its position and can be interrupted for a break.
+              The Tube embed is archive.org's own, which plays things our
+              decoder cannot, at the cost of all of that. */}
+          {onToggleEngine && (
+            <button
+              onClick={() => {
+                if (activeEngine === 'embed' && directUnavailable) return;
+                audio.playSwitch(true);
+                onToggleEngine();
+              }}
+              disabled={activeEngine === 'embed' && directUnavailable}
+              title={
+                activeEngine === 'embed'
+                  ? directUnavailable
+                    ? 'This tape has no stream our player can decode — the Tube embed is the only way to watch it'
+                    : 'Back to the direct player: scrubbing, speed and commercial breaks'
+                  : 'Switch to the archive.org Tube embed — plays formats we cannot, but the position is dead reckoned'
+              }
+              className={`px-2.5 py-1.5 rounded-lg border font-pixel text-[10px] tracking-wider transition ${
+                activeEngine === 'embed'
+                  ? directUnavailable
+                    ? 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'
+                    : 'bg-purple-950/80 hover:bg-purple-900 border-purple-600/70 text-purple-200 cursor-pointer'
+                  : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-600 text-zinc-300 cursor-pointer'
+              }`}
+            >
+              {activeEngine === 'embed' ? 'TUBE' : 'DIRECT'}
+            </button>
+          )}
+
           {/* Playback Speed */}
           <button
             onClick={cycleRate}

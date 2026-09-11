@@ -74,6 +74,11 @@ Things that are broken. No character work lands well on a buggy base.
       all — archive.org's iframe has no rate API and always plays at 1x — and the
       speed control is disabled there rather than reporting a speed that is a lie
 - [x] A failed search left the previous results rendered under the error banner
+- [x] Nothing in the UI could switch players. Once a programme fell back to the
+      Tube embed there was no way back to the direct player, so the whole
+      CRT↔Embed handoff was machinery with no switch attached. The VCR deck now
+      carries a DIRECT / TUBE control, disabled with an explanation when the
+      tape has no stream the browser can decode
 
 ## Phase 2 — Reach
 
