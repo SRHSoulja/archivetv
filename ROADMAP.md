@@ -171,9 +171,12 @@ The reason the thing exists. Ordered by sentiment per unit of effort.
       Only on the cabinets you would have plugged a deck into, and it rides the
       fine-tune dial: 3% of frame at rest, 8% and near-opaque once the tracking
       is knocked out. Follows the scanline switch, so CLEAN PICTURE removes it
-- [ ] **Browsable shelf.** Move from a grid to something you move *through* —
-      spines you flip past, pulling a tape out to read the back. The shelf styling
-      already exists; this is the interaction layer on top
+- [x] **Browsable shelf.** A third view beside BOX ART and CASSETTES: the tapes
+      stood on a board, spines out, read sideways, each with a seeded colour and
+      lean so a row looks like a collection that accumulated rather than a set
+      that shipped. Click to pull one out and see its cover, click again to open
+      the detail sheet the grid already uses — no second surface. Arrow keys walk
+      the shelf, Enter opens; Escape unwinds sheet → tape → rack
 - [x] Ghosting / multipath — a faint offset double image on a weak aerial, which
       is what reception actually looked like day to day; snow was the extreme
 - [x] Chroma bleed — colour smearing past its edges, why red titles glowed on

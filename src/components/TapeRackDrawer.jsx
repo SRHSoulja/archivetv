@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon, Info, GripVertical } from 'lucide-react';
+import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon, Info, GripVertical, Library } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import {
   getBookmarks,
@@ -32,7 +32,9 @@ export default function TapeRackDrawer({
 }) {
   const dialogRef = useDialog(isOpen);
   const [activeTab, setActiveTab] = useState('channels'); // 'channels' | 'bookmarks'
-  const [viewMode, setViewMode] = useState('boxart'); // 'boxart' | 'cassette'
+  const [viewMode, setViewMode] = useState('boxart'); // 'boxart' | 'cassette' | 'spines'
+  // The tape currently pulled halfway out of the shelf.
+  const [pulledId, setPulledId] = useState(null);
   const [bookmarks, setBookmarks] = useState([]);
   const [infoTape, setInfoTape] = useState(null);
   const [renameDraft, setRenameDraft] = useState('');
@@ -80,6 +82,22 @@ export default function TapeRackDrawer({
     return (((h % 7) - 3) * 0.22).toFixed(2);
   };
 
+  // A channel is often one archive.org item broken into episodes, so every
+  // programme on it shares an identifier -- sixteen Lone Ranger episodes all
+  // answer to `theloneranger_201705`. Anything that has to tell one tape from
+  // another needs the file as well, or it addresses the first of the sixteen
+  // and believes it has them all.
+  const tapeKey = (p) =>
+    `${p?.identifier || ''}::${p?.videoFile || p?.videoUrl || ''}`;
+
+  // Real shelves are not colour-coordinated. Derive a stable hue per tape so the
+  // row reads as a collection that accumulated rather than a set that shipped.
+  const spineHueFor = (id) => {
+    let h = 7;
+    for (let i = 0; i < (id || '').length; i += 1) h = (h * 37 + id.charCodeAt(i)) % 360;
+    return h;
+  };
+
   const shownName = (p) => (getCustomTitle(p.identifier) || p.title || '').toLowerCase();
   const shownYear = (p) => getCustomYear(p.identifier) || p.year || '';
   const yearOf = (p) => {
@@ -99,8 +117,13 @@ export default function TapeRackDrawer({
       return list.sort((a, b) => (yearOf(a) ?? Infinity) - (yearOf(b) ?? Infinity));
     if (sortMode === 'custom') {
       const at = (p) => {
-        const i = orderIds.indexOf(p.identifier);
-        return i === -1 ? Number.MAX_SAFE_INTEGER : i;
+        // Arrangements saved before tapes were keyed by file hold bare
+        // identifiers. Fall back to those so an existing shelf is not silently
+        // scrambled; it is rewritten in the new form on the next drag.
+        const i = orderIds.indexOf(tapeKey(p));
+        if (i !== -1) return i;
+        const legacy = orderIds.indexOf(p?.identifier);
+        return legacy === -1 ? Number.MAX_SAFE_INTEGER : legacy;
       };
       return list.sort((a, b) => at(a) - at(b));
     }
@@ -112,7 +135,7 @@ export default function TapeRackDrawer({
   // result on release -- you can see where it will land before letting go.
   const previewMove = (targetId, sourceId = dragId) => {
     if (!sourceId || sourceId === targetId) return;
-    const ids = sortedList.map((p) => p.identifier);
+    const ids = sortedList.map(tapeKey);
     const from = ids.indexOf(sourceId);
     const to = ids.indexOf(targetId);
     if (from === -1 || to === -1) return;
@@ -176,7 +199,7 @@ export default function TapeRackDrawer({
       // screen. Writing just the visible ids would drop every other channel's
       // arrangement, so splice the new sequence into the positions those items
       // already occupy and leave everything else untouched.
-      const visible = sortedList.map((p) => p.identifier);
+      const visible = sortedList.map(tapeKey);
       const visibleSet = new Set(visible);
       const stored = getTapeOrder();
       const merged = [];
@@ -267,6 +290,32 @@ export default function TapeRackDrawer({
     setCopiedId(identifier);
     setTimeout(() => setCopiedId(null), 2000);
   };
+
+  // The rack stacks its own panels on top of itself: the art tool sits over the
+  // detail sheet, which sits over the shelf. App's Escape handler only knows
+  // about the rack, so without this one press closed the whole thing from under
+  // whatever you were reading. Innermost first, and only then let it through.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKeyDown = (e) => {
+      if (e.key !== 'Escape') return;
+      if (artTape) {
+        e.preventDefault();
+        e.stopPropagation();
+        setArtTape(null);
+      } else if (infoTape) {
+        e.preventDefault();
+        e.stopPropagation();
+        setInfoTape(null);
+      } else if (pulledId) {
+        e.preventDefault();
+        e.stopPropagation();
+        setPulledId(null);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => document.removeEventListener('keydown', onKeyDown, true);
+  }, [isOpen, artTape, infoTape, pulledId]);
 
   if (!isOpen) return null;
 
@@ -400,6 +449,22 @@ export default function TapeRackDrawer({
                 <LayoutGrid className="w-3 h-3" />
                 <span>CASSETTES</span>
               </button>
+              <button
+                onClick={() => {
+                  audio.playKnobClick();
+                  setPulledId(null);
+                  setViewMode('spines');
+                }}
+                className={`px-2.5 py-1 rounded-md font-pixel text-[11px] flex items-center gap-1 cursor-pointer transition ${
+                  viewMode === 'spines'
+                    ? 'bg-amber-500 text-black font-bold shadow'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+                title="Browse the shelf the way you would at home — spines out, pull one to look at it"
+              >
+                <Library className="w-3 h-3" />
+                <span>SHELF</span>
+              </button>
             </div>
             <div className="flex items-center gap-1 bg-black/60 px-2.5 py-1 rounded-lg border border-zinc-700">
               <span className="text-zinc-400 text-[10px] font-pixel">ORDER:</span>
@@ -480,6 +545,101 @@ export default function TapeRackDrawer({
                 while watching any video to save it to your personal tape collection!
               </p>
             </div>
+          ) : viewMode === 'spines' ? (
+            /* The shelf, spines out.
+
+               A grid shows you everything at once, which is useful and is
+               nothing like owning tapes. On a real shelf you see a row of
+               spines, read along them sideways, and pull one out to look at the
+               front -- so that is what this does. Pulling a tape out opens the
+               same detail sheet the grid uses; there is no second surface here. */
+            <div
+              className="vhs-shelf-rail"
+              role="listbox"
+              aria-label="Tape shelf, spines out"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                const ids = sortedList.map(tapeKey);
+                if (ids.length === 0) return;
+                const at = ids.indexOf(pulledId);
+                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                  e.preventDefault();
+                  const next = e.key === 'ArrowRight'
+                    ? Math.min(ids.length - 1, at + 1)
+                    : Math.max(0, at <= 0 ? 0 : at - 1);
+                  setPulledId(ids[next]);
+                  audio.playKnobClick();
+                  document
+                    .querySelector(`[data-spine-id="${CSS.escape(ids[next])}"]`)
+                    ?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+                } else if ((e.key === 'Enter' || e.key === ' ') && pulledId) {
+                  e.preventDefault();
+                  const prog = sortedList.find((p) => tapeKey(p) === pulledId);
+                  if (prog) {
+                    setRenameDraft(getCustomTitle(prog.identifier));
+                    setYearDraft(getCustomYear(prog.identifier));
+                    setInfoTape(prog);
+                  }
+                }
+              }}
+            >
+              <div className="vhs-shelf-row">
+                {sortedList.map((prog) => {
+                  if (!prog) return null;
+                  const name = getCustomTitle(prog.identifier) || prog.title || 'UNTITLED';
+                  const year = getCustomYear(prog.identifier) || prog.year || '';
+                  const key = tapeKey(prog);
+                  const pulled = pulledId === key;
+                  const posterSrc =
+                    posterMap[prog.identifier] ||
+                    getCachedPosterSync(prog.title, prog.year, prog.identifier) ||
+                    prog.thumbnailUrl ||
+                    `https://archive.org/services/img/${prog.identifier}`;
+                  return (
+                    <button
+                      type="button"
+                      key={`spine_${activeTab}_${selectedChan?.id || 'ch'}_${key}`}
+                      data-spine-id={key}
+                      role="option"
+                      aria-selected={pulled}
+                      title={`${name}${year ? ` (${year})` : ''}`}
+                      onClick={() => {
+                        audio.playKnobClick();
+                        if (pulled) {
+                          setRenameDraft(getCustomTitle(prog.identifier));
+                          setYearDraft(getCustomYear(prog.identifier));
+                          setInfoTape(prog);
+                        } else {
+                          setPulledId(key);
+                        }
+                      }}
+                      className={`vhs-spine-tape ${pulled ? 'is-pulled' : ''}`}
+                      style={{
+                        '--spine-hue': `${spineHueFor(key)}deg`,
+                        '--spine-lean': `${tiltFor(key)}deg`,
+                      }}
+                    >
+                      <span className="vhs-spine-face">
+                        <span className="vhs-spine-band" />
+                        <span className="vhs-spine-text">{name}</span>
+                        {year ? <span className="vhs-spine-year">{year}</span> : null}
+                      </span>
+                      {pulled && (
+                        <span className="vhs-spine-front">
+                          <img src={posterSrc} alt="" loading="lazy" />
+                          <span className="vhs-spine-front-hint">OPEN</span>
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="vhs-shelf-board" aria-hidden="true" />
+              <div className="vhs-shelf-uprights" aria-hidden="true" />
+              <p className="vhs-shelf-hint">
+                Click a spine to pull it out, again to open it. Arrow keys walk the shelf.
+              </p>
+            </div>
           ) : viewMode === 'boxart' ? (
             /* Authentic VHS Box Art / Movie Poster Slipcovers Grid */
             <div
@@ -497,10 +657,10 @@ export default function TapeRackDrawer({
                   <div
                     key={`shelf_${activeTab}_${selectedChan?.id || 'ch'}_${prog.identifier || 'prog'}_${prog.videoFile || prog.videoUrl || ''}`}
                     className="vhs-shelf-cell"
-                    style={{ '--tilt': `${tiltFor(prog.identifier)}deg` }}
+                    style={{ '--tilt': `${tiltFor(tapeKey(prog))}deg` }}
                   >
                   <div
-                    data-tape-id={prog.identifier}
+                    data-tape-id={tapeKey(prog)}
                     onClick={() => {
                       if (activeTab === 'bookmarks') {
                         audio.playSwitch(true);
@@ -517,7 +677,7 @@ export default function TapeRackDrawer({
                     className={`group relative bg-[#181614] border-2 rounded-xl vhs-box-shadow transition-all duration-200 flex flex-col overflow-hidden select-none ${
                       sortMode === 'custom' ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
                     } ${
-                      dragId === prog.identifier
+                      dragId === tapeKey(prog)
                         ? 'opacity-40 scale-95 border-amber-400'
                         : 'border-[#45372b] hover:border-amber-400 hover:-translate-y-1'
                     }`}
@@ -528,7 +688,7 @@ export default function TapeRackDrawer({
                         aria-label={`Drag to reposition ${getCustomTitle(prog.identifier) || prog.title}`}
                         title="Drag to reposition this tape"
                         onClick={(e) => e.stopPropagation()}
-                        onPointerDown={(e) => startReorder(prog.identifier, e)}
+                        onPointerDown={(e) => startReorder(tapeKey(prog), e)}
                         className="absolute top-1.5 right-1.5 z-30 p-1.5 rounded-md bg-black/85 border border-amber-500/70 text-amber-300 shadow cursor-grab active:cursor-grabbing touch-none"
                       >
                         <GripVertical className="w-3.5 h-3.5" />
