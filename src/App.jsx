@@ -3,6 +3,7 @@ import NavbarHeader from './components/NavbarHeader';
 import TvBoxCabinet from './components/TvBoxCabinet';
 import RemoteControl from './components/RemoteControl';
 import NowPlayingSleeve from './components/NowPlayingSleeve';
+import { isDiscEra } from './components/MediaLoadOverlay';
 import PictureSettingsModal from './components/PictureSettingsModal';
 import CommercialBreaksModal from './components/CommercialBreaksModal';
 import {
@@ -127,6 +128,11 @@ export default function App() {
   // the PLAYER control can say the direct player is not an option here rather
   // than bouncing the viewer straight back to the embed.
   const [directUnavailable, setDirectUnavailable] = useState(false);
+  // The moment a tape goes in. Set only when something is deliberately loaded --
+  // from the shelf, the search results, a share link -- never on a channel
+  // change, or a second and a half of mechanism would sit between the viewer
+  // and every press of CH+.
+  const [mediaLoad, setMediaLoad] = useState(null);
   const [controlsHidden, setControlsHidden] = useState(false); // Immersive mode: hide VCR deck
 
   // Persist user settings
@@ -599,6 +605,11 @@ export default function App() {
   const handlePlayDirectItem = useCallback(
     (resolvedItem) => {
       triggerChannelZap();
+      if (resolvedItem?.title) {
+        setMediaLoad({ title: resolvedItem.title, at: Date.now() });
+        if (isDiscEra(cabinetStyle)) audio.playDiscLoad();
+        else audio.playTapeLoad();
+      }
       setActiveExplicitProgram({
         ...resolvedItem,
         isAuxiliary: true,
@@ -611,7 +622,7 @@ export default function App() {
         setActiveEngine('direct');
       }
     },
-    [triggerChannelZap]
+    [triggerChannelZap, cabinetStyle]
   );
 
   const handleCustomTapePlay = useCallback(
@@ -954,6 +965,8 @@ export default function App() {
           onEngineChange={handleEngineChange}
           onToggleEngine={() => handleEngineChange()}
           directUnavailable={directUnavailable}
+          mediaLoad={mediaLoad}
+          onMediaLoadDone={() => setMediaLoad(null)}
           onPlaybackStateChange={setIsPlaying}
           onPlaybackProgress={handlePlaybackProgress}
           interstitial={

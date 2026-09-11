@@ -161,11 +161,16 @@ Quality-of-life. The app currently punishes anyone not on a wide desktop with a 
 
 The reason the thing exists. Ordered by sentiment per unit of effort.
 
-- [ ] **Tape insert animation.** A cassette sliding into the deck when you load a
-      tape, with the mechanical clunk already synthesised in `soundEffects`.
-      Era-aware: cassette on the 70s/80s cabinets, a disc tray on the 90s portable
-- [ ] **Head-switching noise** — the torn band at the very bottom of a VHS frame.
-      Highest nostalgia-per-line in the whole list
+- [x] **Tape insert animation.** A cassette drawn into the deck when you load a
+      tape; a disc tray on the later sets. The clunk was *not* already in
+      `soundEffects` as this plan claimed — `playKnobClick` is a rotary knob —
+      so the load sounds were written: motor, carriage seating, head drum
+      spinning up for VHS, and a quieter tray/latch/spindle for the disc era.
+      It fires only on a deliberate load, never on a channel change
+- [x] **Head-switching noise** — the torn band at the very bottom of a VHS frame.
+      Only on the cabinets you would have plugged a deck into, and it rides the
+      fine-tune dial: 3% of frame at rest, 8% and near-opaque once the tracking
+      is knocked out. Follows the scanline switch, so CLEAN PICTURE removes it
 - [ ] **Browsable shelf.** Move from a grid to something you move *through* —
       spines you flip past, pulling a tape out to read the back. The shelf styling
       already exists; this is the interaction layer on top

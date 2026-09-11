@@ -55,6 +55,8 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
     onChangePlaybackRate,
     activeEngine = 'direct',
     directUnavailable = false,
+    mediaLoad = null,
+    onMediaLoadDone,
     onEngineChange,
     onToggleEngine,
     onPlaybackStateChange,
@@ -346,6 +348,8 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                   contrast={contrast}
                   eraTintEnabled={eraTintEnabled}
                   interstitial={interstitial}
+                  mediaLoad={mediaLoad}
+                  onMediaLoadDone={onMediaLoadDone}
                   activeEngine={activeEngine}
                   onEngineChange={onEngineChange || onToggleEngine}
                   onTimeUpdateReport={handleTimeUpdateReport}

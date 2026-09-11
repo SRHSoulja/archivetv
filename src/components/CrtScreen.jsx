@@ -10,6 +10,7 @@ import React, {
 import { Radio, VolumeX, Maximize2, Minimize2 } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { getCanonicalEpisodeKey } from '../services/archiveApi';
+import MediaLoadOverlay from './MediaLoadOverlay';
 
 const CrtScreen = forwardRef(function CrtScreen(
   {
@@ -38,6 +39,8 @@ const CrtScreen = forwardRef(function CrtScreen(
     onEngineChange,
     onTimeUpdateReport,
     cabinetStyle = 'woodgrain',
+    mediaLoad = null,
+    onMediaLoadDone,
   },
   ref
 ) {
@@ -675,6 +678,9 @@ const CrtScreen = forwardRef(function CrtScreen(
     return f;
   };
 
+  // Only the sets you would have plugged a VCR into get tape artefacts.
+  const isTapeEra = cabinetStyle === 'woodgrain' || cabinetStyle === 'trinitron';
+
   const eraCurvatureClass = curvatureEnabled
     ? cabinetStyle === 'trinitron'
       ? 'crt-style-trinitron'
@@ -878,6 +884,25 @@ const CrtScreen = forwardRef(function CrtScreen(
         />
       )}
 
+      {/* 5a. Head-switching noise.
+
+           The torn band along the very bottom of a VHS frame: the point in the
+           rotation where one head handed over to the other, below the part of
+           the picture a TV actually showed. It was never visible on a broadcast,
+           only on tape, so it is gated to the cabinets that would have had a
+           deck under them -- and it rides the tracking dial, because misaligned
+           tracking is exactly what pushed it up into view.
+           Follows the scanline switch, so CLEAN PICTURE takes it off too. */}
+      {powerOn && scanlinesEnabled && isTapeEra && (
+        <div
+          className="crt-head-switch pointer-events-none z-20"
+          style={{
+            height: `${3 + Math.min(5, Math.abs(trackingOffset) / 5)}%`,
+            opacity: 0.5 + Math.min(0.45, Math.abs(trackingOffset) / 40),
+          }}
+        />
+      )}
+
       {/* 5b. Sony Trinitron Aperture Grille Vertical Slits */}
       {powerOn && cabinetStyle === 'trinitron' && (
         <div className="absolute inset-0 crt-aperture-grille opacity-50 pointer-events-none z-20" />
@@ -935,6 +960,15 @@ const CrtScreen = forwardRef(function CrtScreen(
             <Maximize2 className="w-4 h-4" />
           )}
         </button>
+      )}
+
+      {/* 7b. Loading a tape, or a disc on the later sets */}
+      {powerOn && (
+        <MediaLoadOverlay
+          load={mediaLoad}
+          cabinetStyle={cabinetStyle}
+          onDone={onMediaLoadDone}
+        />
       )}
 
       {/* 8. Channel Switch "Zap" Flash */}

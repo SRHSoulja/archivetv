@@ -479,3 +479,282 @@ textarea {
   -webkit-user-select: auto;
   user-select: auto;
 }
+
+/* ---------------------------------------------------------------------------
+   Loading a tape (or a disc)
+
+   Plays over the tube for a second and a half. The point is the pause, not the
+   mechanism: you pushed the tape in and the machine took over for a moment.
+   Sits under the OSD and the interstitial so nothing important is covered.
+   --------------------------------------------------------------------------- */
+
+.media-load-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 28;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  background: radial-gradient(ellipse at center, rgba(6, 8, 7, 0.82), rgba(2, 3, 3, 0.97));
+  pointer-events: none;
+  transition: opacity 260ms ease-out;
+}
+
+.media-load-stage-out {
+  opacity: 0;
+}
+
+.media-load-caption {
+  font-family: 'Silkscreen', monospace;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  color: #ffb000;
+  text-shadow: 0 0 10px rgba(255, 176, 0, 0.55);
+  animation: media-load-blink 900ms steps(1, end) infinite;
+}
+
+@keyframes media-load-blink {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0.25; }
+}
+
+/* --- VHS cassette ------------------------------------------------------- */
+
+.media-load-cassette {
+  animation: media-load-insert 1240ms cubic-bezier(0.3, 0.85, 0.25, 1) forwards;
+  transform-origin: 50% 100%;
+}
+
+/* Pushed in from above, met with resistance, then drawn down and seated --
+   which is why the last third is slower than the first. */
+@keyframes media-load-insert {
+  0%   { transform: translateY(-150%) rotateX(34deg) scale(1.06); opacity: 0; }
+  22%  { transform: translateY(-14%) rotateX(16deg) scale(1.03); opacity: 1; }
+  40%  { transform: translateY(2%) rotateX(8deg) scale(1); }
+  52%  { transform: translateY(-3%) rotateX(8deg) scale(1); }
+  72%  { transform: translateY(10%) rotateX(2deg) scale(0.985); }
+  100% { transform: translateY(16%) rotateX(0deg) scale(0.97); }
+}
+
+.media-load-cassette-body {
+  position: relative;
+  width: min(58vw, 260px);
+  aspect-ratio: 16 / 10;
+  border-radius: 6px;
+  background: linear-gradient(160deg, #2b2b2f 0%, #17171a 46%, #0d0d0f 100%);
+  border: 1px solid #3c3c42;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.8),
+    0 18px 34px rgba(0, 0, 0, 0.75);
+  display: flex;
+  flex-direction: column;
+  padding: 7%;
+  gap: 6%;
+}
+
+.media-load-cassette-label {
+  height: 38%;
+  border-radius: 2px;
+  background: linear-gradient(#f4efe2, #ddd5c2);
+  border: 1px solid #b9b1a0;
+  display: flex;
+  align-items: center;
+  padding: 0 6%;
+  /* Never applied straight, by anyone, ever */
+  transform: rotate(-0.8deg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.media-load-cassette-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: clamp(7px, 1.6vw, 11px);
+  letter-spacing: 0.06em;
+  color: #2a2620;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.media-load-cassette-window {
+  flex: 1;
+  border-radius: 3px;
+  background: linear-gradient(#0a0a0c, #131316);
+  border: 1px solid #46464d;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.9);
+}
+
+.media-load-reel {
+  width: 26%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, #5a4a3a 0 32%, #241d16 33% 70%, #3a2f24 71% 100%);
+  border: 1px solid #6b5a48;
+  animation: media-load-spin 1.6s linear infinite;
+}
+
+.media-load-reel-right {
+  animation-duration: 2.4s;
+}
+
+@keyframes media-load-spin {
+  to { transform: rotate(360deg); }
+}
+
+.media-load-cassette-notch {
+  position: absolute;
+  right: 9%;
+  bottom: -3px;
+  width: 14%;
+  height: 5px;
+  border-radius: 0 0 2px 2px;
+  background: #0a0a0c;
+  border: 1px solid #3c3c42;
+  border-top: none;
+}
+
+/* --- Disc tray ---------------------------------------------------------- */
+
+.media-load-tray {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: media-load-tray-close 1440ms cubic-bezier(0.25, 0.9, 0.3, 1) forwards;
+}
+
+/* Out, settle, then drawn back in -- the tray always paused before it moved */
+@keyframes media-load-tray-close {
+  0%   { transform: translateY(46%) scale(1.04); opacity: 0; }
+  16%  { transform: translateY(6%) scale(1.02); opacity: 1; }
+  46%  { transform: translateY(0) scale(1); }
+  62%  { transform: translateY(0) scale(1); }
+  100% { transform: translateY(20%) scale(0.9); opacity: 0.92; }
+}
+
+.media-load-disc {
+  position: relative;
+  width: min(42vw, 176px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    conic-gradient(
+      from 210deg,
+      #7fe3ff 0deg, #b9a6ff 40deg, #ffd39b 80deg, #9effc4 130deg,
+      #8fd0ff 190deg, #e0a6ff 250deg, #ffe6a6 300deg, #7fe3ff 360deg
+    );
+  box-shadow:
+    inset 0 0 26px rgba(255, 255, 255, 0.35),
+    0 14px 30px rgba(0, 0, 0, 0.7);
+  animation: media-load-spin 2.6s linear infinite;
+}
+
+.media-load-disc-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 38%);
+}
+
+.media-load-disc-hub {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 26%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, #0a0c0d 0 42%, #2b3033 43% 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.media-load-tray-lip {
+  margin-top: -6%;
+  width: min(52vw, 218px);
+  height: 12px;
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(#26262a, #101012);
+  border: 1px solid #3c3c42;
+  border-top: none;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.65);
+}
+
+.media-load-disc-title {
+  margin-top: 0.75rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: clamp(8px, 1.6vw, 11px);
+  letter-spacing: 0.1em;
+  color: #cfe9ff;
+  opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-load-cassette,
+  .media-load-tray,
+  .media-load-reel,
+  .media-load-disc {
+    animation: none;
+  }
+  .media-load-caption {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Head-switching noise
+
+   On a VHS frame the bottom few lines are torn: that is where the rotating
+   head drum handed over, and it fell below the area a television overscanned
+   away. You only ever saw it on a tape played back on something that showed the
+   full frame -- which is exactly the situation this app is in.
+   --------------------------------------------------------------------------- */
+
+.crt-head-switch {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  mix-blend-mode: screen;
+  background:
+    /* the torn lines themselves, offset horizontally from each other */
+    repeating-linear-gradient(
+      to bottom,
+      rgba(210, 225, 235, 0.55) 0px,
+      rgba(210, 225, 235, 0.55) 1px,
+      rgba(0, 0, 0, 0) 1px,
+      rgba(0, 0, 0, 0) 3px
+    ),
+    /* a chroma smear, because the colour signal lost lock first */
+    linear-gradient(
+      to right,
+      rgba(255, 90, 140, 0.18) 0%,
+      rgba(120, 220, 255, 0.14) 34%,
+      rgba(255, 210, 120, 0.16) 68%,
+      rgba(160, 130, 255, 0.12) 100%
+    );
+  background-size: 100% 3px, 220% 100%;
+  filter: blur(0.4px);
+  animation: crt-head-switch-jitter 220ms steps(3, end) infinite;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* The tear never sat still -- it shivered a pixel or two per field */
+@keyframes crt-head-switch-jitter {
+  0%   { transform: translateX(-1.2%); background-position: 0 0, 0 0; }
+  33%  { transform: translateX(1.6%); background-position: 0 -1px, -18% 0; }
+  66%  { transform: translateX(-0.6%); background-position: 0 1px, 12% 0; }
+  100% { transform: translateX(1.1%); background-position: 0 0, -6% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-head-switch {
+    animation: none;
+  }
+}

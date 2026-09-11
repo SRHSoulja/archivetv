@@ -219,6 +219,138 @@ class RetroAudioEngine {
     osc.stop(t + 0.45);
   }
 
+  /**
+   * A cassette being drawn into a VCR.
+   *
+   * Three movements, because that is what the machine actually did: the loading
+   * motor pulling the carriage down, the clunk of it seating, and then the head
+   * drum spinning up to speed behind it. The whole thing runs about 1.4s, which
+   * is roughly how long a real deck took.
+   */
+  playTapeLoad() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    // 1. Loading motor: filtered noise that slides down as the carriage drops.
+    const motorLen = 0.7;
+    const buf = this.ctx.createBuffer(1, this.ctx.sampleRate * motorLen, this.ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i += 1) d[i] = (Math.random() * 2 - 1) * 0.4;
+    const motor = this.ctx.createBufferSource();
+    motor.buffer = buf;
+    const motorFilter = this.ctx.createBiquadFilter();
+    motorFilter.type = 'bandpass';
+    motorFilter.frequency.setValueAtTime(900, t);
+    motorFilter.frequency.exponentialRampToValueAtTime(280, t + motorLen);
+    motorFilter.Q.value = 3.5;
+    const motorGain = this.ctx.createGain();
+    motorGain.gain.setValueAtTime(0.0001, t);
+    motorGain.gain.exponentialRampToValueAtTime(0.16, t + 0.09);
+    motorGain.gain.setValueAtTime(0.16, t + motorLen - 0.12);
+    motorGain.gain.exponentialRampToValueAtTime(0.0001, t + motorLen);
+    motor.connect(motorFilter);
+    motorFilter.connect(motorGain);
+    motorGain.connect(this.masterGain);
+    motor.start(t);
+    motor.stop(t + motorLen);
+
+    // 2. The clunk of the carriage seating: a short low thud with a click on top.
+    const thudAt = t + motorLen - 0.02;
+    const thud = this.ctx.createOscillator();
+    const thudGain = this.ctx.createGain();
+    thud.type = 'triangle';
+    thud.frequency.setValueAtTime(150, thudAt);
+    thud.frequency.exponentialRampToValueAtTime(42, thudAt + 0.13);
+    thudGain.gain.setValueAtTime(0.35, thudAt);
+    thudGain.gain.exponentialRampToValueAtTime(0.0001, thudAt + 0.18);
+    thud.connect(thudGain);
+    thudGain.connect(this.masterGain);
+    thud.start(thudAt);
+    thud.stop(thudAt + 0.18);
+
+    // 3. Head drum spinning up, which is what you actually heard last.
+    const drumAt = thudAt + 0.06;
+    const drum = this.ctx.createOscillator();
+    const drumGain = this.ctx.createGain();
+    drum.type = 'sawtooth';
+    drum.frequency.setValueAtTime(38, drumAt);
+    drum.frequency.exponentialRampToValueAtTime(96, drumAt + 0.55);
+    const drumFilter = this.ctx.createBiquadFilter();
+    drumFilter.type = 'lowpass';
+    drumFilter.frequency.value = 420;
+    drumGain.gain.setValueAtTime(0.0001, drumAt);
+    drumGain.gain.exponentialRampToValueAtTime(0.09, drumAt + 0.2);
+    drumGain.gain.exponentialRampToValueAtTime(0.0001, drumAt + 0.7);
+    drum.connect(drumFilter);
+    drumFilter.connect(drumGain);
+    drumGain.connect(this.masterGain);
+    drum.start(drumAt);
+    drum.stop(drumAt + 0.7);
+  }
+
+  /**
+   * A disc tray closing, for the sets that would have had one.
+   *
+   * Quieter and smoother than the VCR on purpose -- the whole character of the
+   * optical era was that the mechanism stopped announcing itself. A tray motor,
+   * a small latch click, then the spindle winding up to speed.
+   */
+  playDiscLoad() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    const trayLen = 0.85;
+    const buf = this.ctx.createBuffer(1, this.ctx.sampleRate * trayLen, this.ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i += 1) d[i] = (Math.random() * 2 - 1) * 0.3;
+    const tray = this.ctx.createBufferSource();
+    tray.buffer = buf;
+    const trayFilter = this.ctx.createBiquadFilter();
+    trayFilter.type = 'bandpass';
+    trayFilter.frequency.value = 620;
+    trayFilter.Q.value = 6;
+    const trayGain = this.ctx.createGain();
+    trayGain.gain.setValueAtTime(0.0001, t);
+    trayGain.gain.exponentialRampToValueAtTime(0.07, t + 0.12);
+    trayGain.gain.setValueAtTime(0.07, t + trayLen - 0.15);
+    trayGain.gain.exponentialRampToValueAtTime(0.0001, t + trayLen);
+    tray.connect(trayFilter);
+    trayFilter.connect(trayGain);
+    trayGain.connect(this.masterGain);
+    tray.start(t);
+    tray.stop(t + trayLen);
+
+    const clickAt = t + trayLen - 0.04;
+    const click = this.ctx.createOscillator();
+    const clickGain = this.ctx.createGain();
+    click.type = 'square';
+    click.frequency.setValueAtTime(2400, clickAt);
+    clickGain.gain.setValueAtTime(0.05, clickAt);
+    clickGain.gain.exponentialRampToValueAtTime(0.0001, clickAt + 0.035);
+    click.connect(clickGain);
+    clickGain.connect(this.masterGain);
+    click.start(clickAt);
+    click.stop(clickAt + 0.035);
+
+    const spinAt = clickAt + 0.05;
+    const spin = this.ctx.createOscillator();
+    const spinGain = this.ctx.createGain();
+    spin.type = 'sine';
+    spin.frequency.setValueAtTime(180, spinAt);
+    spin.frequency.exponentialRampToValueAtTime(1150, spinAt + 0.6);
+    spinGain.gain.setValueAtTime(0.0001, spinAt);
+    spinGain.gain.exponentialRampToValueAtTime(0.035, spinAt + 0.25);
+    spinGain.gain.exponentialRampToValueAtTime(0.0001, spinAt + 0.72);
+    spin.connect(spinGain);
+    spinGain.connect(this.masterGain);
+    spin.start(spinAt);
+    spin.stop(spinAt + 0.72);
+  }
+
   // Continuous TV snow static (when untuned or antenna weak)
   startStatic(level = 0.25) {
     if (!this.enabled) return;
