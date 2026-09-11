@@ -298,6 +298,10 @@ export default function App() {
       setActiveExplicitProgram({
         ...brk.resumeProgram,
         seekSeconds: brk.resumeSeconds,
+        // Marks this as the schedule's own programme put back after a break,
+        // not an out-of-schedule pick. Without it the ending below merely
+        // clears the slot and the same programme starts over.
+        resumedFromBreak: true,
       });
     }
   }, []);
@@ -540,8 +544,16 @@ export default function App() {
     }
 
     if (activeExplicitProgram) {
+      const wasResumedFromBreak =
+        activeExplicitProgram.resumedFromBreak && !activeExplicitProgram.isAuxiliary;
       setActiveExplicitProgram(null);
       setActiveEngine('direct');
+      // Clearing alone drops back to the same programme at seekSeconds 0, so it
+      // would play twice and only advance on its second ending. A programme put
+      // back after a break should move on exactly as the schedule would.
+      if (wasResumedFromBreak && currentPrograms.length > 1) {
+        setCurrentProgramIndex((prev) => (prev + 1) % currentPrograms.length);
+      }
     } else if (currentPrograms.length > 1) {
       setCurrentProgramIndex((prev) => (prev + 1) % currentPrograms.length);
       setActiveEngine('direct');
