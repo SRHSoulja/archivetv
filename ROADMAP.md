@@ -256,7 +256,11 @@ broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
 - **UK breakdown captions and US technical-difficulties audio.** Unsourced
   folklore with no archival record. If we want that beat, design it fresh rather
   than reproducing something that never existed
-- [ ] Reel parity with channels: spot reordering, import/export, share links
+- [x] Reel parity with channels: spot reordering, import/export, share links.
+      A reel you curated is worth the same as a line-up you curated. Share links
+      carry a stable id derived from the contents, so opening one twice updates
+      the reel instead of adding a second — the lesson the channel links taught
+      the hard way earlier in this list
 
 ---
 

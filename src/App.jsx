@@ -9,6 +9,8 @@ import CommercialBreaksModal from './components/CommercialBreaksModal';
 import {
   getAdSets,
   getAdConfig,
+  setAdConfig,
+  decodeSharedReel,
   resolveChannelAds,
   scheduleNextBreak,
   pickSpots,
@@ -240,6 +242,17 @@ export default function App() {
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
+      const sharedReel = params.get('shareReel');
+      if (sharedReel) {
+        const reel = decodeSharedReel(sharedReel);
+        if (reel) {
+          const cfg = getAdConfig();
+          setAdConfig({ ...cfg, setId: reel.id, enabled: true });
+          setAdConfigState({ ...cfg, setId: reel.id, enabled: true });
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+
       const sharedData = params.get('shareChannel') || params.get('importChannel');
       if (sharedData) {
         const decoded = decodeSharedChannel(sharedData);

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Radio, Plus, Trash2, Check , Megaphone } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Radio, Plus, Trash2, Check, Megaphone, Share2, Download, Upload } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { resolvePlayableItem, searchArchive } from '../services/archiveApi';
 import { useDialog } from '../hooks/useDialog';
@@ -8,8 +8,12 @@ import {
   createAdSet,
   addSpotsToSet,
   removeSpotFromSet,
+  reorderSpotsInSet,
   renameAdSet,
   deleteAdSet,
+  exportAdSet,
+  importAdSet,
+  encodeReelForShare,
   getAdConfig,
   setAdConfig,
   MIN_PROGRAMME_SECONDS,
@@ -24,6 +28,62 @@ export default function CommercialBreaksModal({
   onTestBreak,
 }) {
   const dialogRef = useDialog(isOpen);
+  const fileInputRef = useRef(null);
+  const [reelNotice, setReelNotice] = useState(null);
+
+  const notify = (text) => {
+    setReelNotice(text);
+    setTimeout(() => setReelNotice(null), 3500);
+  };
+
+  const handleExportReel = (set) => {
+    const payload = exportAdSet(set);
+    if (!payload) return;
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(set.name || 'reel').replace(/[^a-z0-9]+/gi, '_').toLowerCase()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportReel = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const set = importAdSet(String(ev.target.result));
+        if (!set) throw new Error('no usable spots in that file');
+        setSets(getAdSets());
+        notify(`Imported "${set.name}" — ${set.spots.length} spots.`);
+      } catch (err) {
+        notify(`Could not import that file: ${err.message || 'unreadable'}`);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const handleShareReel = (set) => {
+    const encoded = encodeReelForShare(set);
+    if (!encoded) {
+      notify('Could not build a link for that reel.');
+      return;
+    }
+    const url = `${window.location.origin}${window.location.pathname}?shareReel=${encoded}`;
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(url)
+        .then(() => notify(`Share link for "${set.name}" copied.`))
+        .catch(() => window.prompt('Copy this reel link:', url));
+    } else {
+      window.prompt('Copy this reel link:', url);
+    }
+  };
   const [sets, setSets] = useState([]);
   const [config, setConfig] = useState(() => getAdConfig());
   const [sourceId, setSourceId] = useState('');
@@ -260,7 +320,30 @@ export default function CommercialBreaksModal({
 
         {/* reels */}
         <div className="mt-4 pt-3 border-t border-zinc-800">
-          <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">YOUR REELS</span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">YOUR REELS</span>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-1 px-2 py-1 rounded-md border border-zinc-700 bg-zinc-900/70 text-zinc-300 hover:border-amber-500/60 hover:text-amber-200 font-pixel text-[9px] tracking-wider cursor-pointer transition"
+              title="Load a reel someone exported"
+            >
+              <Upload className="w-3 h-3" />
+              IMPORT REEL
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={handleImportReel}
+              className="hidden"
+            />
+          </div>
+          {reelNotice && (
+            <p className="mt-1.5 text-[10px] text-amber-300 bg-amber-950/40 border border-amber-700/50 rounded px-2 py-1">
+              {reelNotice}
+            </p>
+          )}
           {sets.length === 0 && (
             <p className="mt-1 text-[11px] text-zinc-400">
               None yet. Paste an archive.org identifier below to build one.
@@ -328,6 +411,24 @@ export default function CommercialBreaksModal({
                   </button>
                   <button
                     type="button"
+                    onClick={() => handleShareReel(s)}
+                    className="shrink-0 p-1 rounded text-teal-400 hover:text-teal-200 cursor-pointer"
+                    title="Copy a share link for this reel"
+                    aria-label={`Share ${s.name}`}
+                  >
+                    <Share2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleExportReel(s)}
+                    className="shrink-0 p-1 rounded text-zinc-300 hover:text-white cursor-pointer"
+                    title="Download this reel as JSON"
+                    aria-label={`Export ${s.name}`}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => {
                       const next = deleteAdSet(s.id);
                       setSets(next);
@@ -358,6 +459,26 @@ export default function CommercialBreaksModal({
                         <span className="shrink-0 text-[10px] text-zinc-400 font-mono">
                           {formatSpotLength(spot.duration)}
                         </span>
+                        <button
+                          type="button"
+                          disabled={i === 0}
+                          onClick={() => setSets(reorderSpotsInSet(s.id, i, i - 1))}
+                          className="shrink-0 px-1 text-zinc-400 hover:text-amber-300 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer font-mono text-[11px]"
+                          title="Move this spot earlier in the reel"
+                          aria-label={`Move ${spot.title} earlier`}
+                        >
+                          ▲
+                        </button>
+                        <button
+                          type="button"
+                          disabled={i === s.spots.length - 1}
+                          onClick={() => setSets(reorderSpotsInSet(s.id, i, i + 1))}
+                          className="shrink-0 px-1 text-zinc-400 hover:text-amber-300 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer font-mono text-[11px]"
+                          title="Move this spot later in the reel"
+                          aria-label={`Move ${spot.title} later`}
+                        >
+                          ▼
+                        </button>
                         <button
                           type="button"
                           onClick={() => setSets(removeSpotFromSet(s.id, i))}
