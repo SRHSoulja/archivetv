@@ -37,6 +37,7 @@ import {
   sanitizeProgram,
 } from '../services/archiveApi';
 import { audio } from '../services/soundEffects';
+import { useDialog } from '../hooks/useDialog';
 
 export default function ChannelCustomizerModal({
   isOpen,
@@ -45,6 +46,7 @@ export default function ChannelCustomizerModal({
   onTuneChannel,
   initialDroppedUrl = '',
 }) {
+  const dialogRef = useDialog(isOpen);
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState(initialDroppedUrl ? 'drop' : 'lineup');
   const [customChannels, setCustomChannels] = useState([]);
@@ -621,7 +623,12 @@ export default function ChannelCustomizerModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 md:p-6 select-none animate-in fade-in duration-200">
-      <div className="relative w-full max-w-5xl h-[88vh] bg-[#121117] border-4 border-teal-600/70 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-zinc-200">
+      <div ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Channel studio"
+        className="relative w-full max-w-5xl h-[88vh] bg-[#121117] border-4 border-teal-600/70 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-zinc-200">
         {/* Top Studio Header */}
         <div className="bg-gradient-to-r from-teal-950 via-[#152a28] to-teal-950 p-3 md:p-4 border-b-2 border-teal-600/50 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -639,6 +646,7 @@ export default function ChannelCustomizerModal({
           </div>
 
           <button
+            aria-label="Close channel studio"
             onClick={() => {
               audio.playKnobClick();
               onClose();

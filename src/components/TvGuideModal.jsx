@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Play, Tv, Search, Sliders } from 'lucide-react';
 import { audio } from '../services/soundEffects';
+import { useDialog } from '../hooks/useDialog';
 
 export default function TvGuideModal({
   isOpen,
@@ -10,6 +11,7 @@ export default function TvGuideModal({
   onSelectChannel,
   onOpenChannelStudio,
 }) {
+  const dialogRef = useDialog(isOpen);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('ALL');
 
@@ -35,7 +37,12 @@ export default function TvGuideModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 md:p-6 select-none animate-in fade-in duration-200">
-      <div className="relative w-full max-w-5xl h-[85vh] bg-[#0c142c] border-4 border-[#2b4c8f] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white font-sans">
+      <div ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="TV guide"
+        className="relative w-full max-w-5xl h-[85vh] bg-[#0c142c] border-4 border-[#2b4c8f] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white font-sans">
         {/* Vintage Prevue Guide Blue Header */}
         <div className="bg-gradient-to-r from-[#17306b] via-[#214b9c] to-[#17306b] p-3 md:p-4 border-b-2 border-[#3d6ec7] flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -70,6 +77,7 @@ export default function TvGuideModal({
             )}
 
             <button
+            aria-label="Close TV guide"
               onClick={() => {
                 audio.playKnobClick();
                 onClose();

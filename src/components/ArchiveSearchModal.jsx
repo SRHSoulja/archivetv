@@ -28,6 +28,7 @@ import {
   fetchUploader,
 } from '../services/archiveApi';
 import { audio } from '../services/soundEffects';
+import { useDialog } from '../hooks/useDialog';
 
 function formatRuntime(seconds) {
   const s = Math.round(seconds);
@@ -43,6 +44,7 @@ export default function ArchiveSearchModal({
   onPlayDirectItem,
   onOpenChannelStudio,
 }) {
+  const dialogRef = useDialog(isOpen);
   const [activeTab, setActiveTab] = useState('search');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -264,7 +266,12 @@ export default function ArchiveSearchModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 md:p-6 select-none animate-in fade-in duration-200">
-      <div className="relative w-full max-w-6xl h-[90vh] bg-[#121117] border-4 border-amber-600/70 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-[#dedede]">
+      <div ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Archive search"
+        className="relative w-full max-w-6xl h-[90vh] bg-[#121117] border-4 border-amber-600/70 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-[#dedede]">
         {/* Top Header */}
         <div className="bg-gradient-to-r from-amber-950 via-[#211712] to-amber-950 p-3 md:p-4 border-b-2 border-amber-600/50 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -292,6 +299,7 @@ export default function ArchiveSearchModal({
             </button>
 
             <button
+            aria-label="Close archive search"
               onClick={() => {
                 audio.playKnobClick();
                 onClose();

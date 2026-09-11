@@ -11,3 +11,13 @@
     font-family: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   }
 }
+
+/* Keyboard focus has to be visible. Ten inputs and buttons set
+   `focus:outline-none` and put nothing back, which left anyone navigating by
+   keyboard with no idea where they were. Declared after the Tailwind layers so
+   it outranks that utility, and scoped to :focus-visible so a mouse click does
+   not paint a ring. */
+:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+}

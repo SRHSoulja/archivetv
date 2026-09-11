@@ -26,9 +26,17 @@ function stripHtml(raw) {
     .trim();
 }
 
-export default function NowPlayingSleeve({ currentProgram, currentChannel, powerOn, gutters }) {
+export default function NowPlayingSleeve({
+  currentProgram,
+  currentChannel,
+  powerOn,
+  gutters,
+  // Owned by App so it joins the Escape stack and stops the set's hotkeys
+  // firing through it, the same as every other panel.
+  sheetOpen,
+  onSheetOpenChange,
+}) {
   const panelRef = useRef(null);
-  const [panelWidth, setPanelWidth] = useState(0);
   const identifier = currentProgram?.identifier || '';
   const seriesTitle = currentProgram?.seriesTitle || '';
   const fullTitle = currentProgram?.title || '';
@@ -40,6 +48,7 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
   const [artFailed, setArtFailed] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [artToolOpen, setArtToolOpen] = useState(false);
+
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState('');
   const [titleVersion, setTitleVersion] = useState(0);
@@ -80,13 +89,6 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
     }
   });
 
-  useLayoutEffect(() => {
-    const el = panelRef.current;
-    if (!el) return;
-    const w = el.getBoundingClientRect().width;
-    if (w && Math.abs(w - panelWidth) > 1) setPanelWidth(w);
-  });
-
   useEffect(() => {
     setFullBlurb('');
     const short = stripHtml(currentProgram?.description);
@@ -106,8 +108,6 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
 
   if (!powerOn || !currentProgram) return null;
 
-  const fits = Boolean(gutters?.ready) && panelWidth > 0 && gutters.width >= panelWidth + 24;
-
   // Fill the gutter instead of sitting at a hardcoded width, but stay bounded by
   // the height too: the sleeve is mostly a 2:3 poster, so its height runs at
   // ~1.5x its width plus roughly 250px of header, label and synopsis. Solving
@@ -121,6 +121,11 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
   const gutterCap = Math.max(0, (gutters?.width || 0) - 40);
   const heightCap = Math.max(0, (bandH - 270) / 1.5);
   const sleeveWidth = Math.max(180, Math.min(gutterCap, heightCap, 340));
+
+  // Derived from the width we are about to ask for, not measured off the
+  // rendered element: the sleeve no longer renders at all when it does not fit,
+  // so measuring it to decide whether it fits could never become true again.
+  const fits = Boolean(gutters?.ready) && gutters.width >= sleeveWidth + 24;
 
   const episode =
     seriesTitle && fullTitle.startsWith(`${seriesTitle} - `)
@@ -139,25 +144,22 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
   const episodeCount = currentProgram.availableFiles?.length || 0;
   const runtime = formatRuntime(currentProgram.duration);
 
-  return (
-    <div
-      className="sleeve-stage select-none"
-      style={{
-        position: 'fixed',
-        zIndex: 40,
-        top: gutters?.ready ? `${bandCenterY}px` : '50%',
-        left: gutters?.ready ? `${gutters.leftCenter}px` : '-9999px',
-        transform: 'translate(-50%, -50%)',
-        visibility: fits ? 'visible' : 'hidden',
-      }}
-    >
+  // Below roughly 1280px the gutter cannot hold the sleeve, and it used to just
+  // vanish -- taking the synopsis, the rename field and the ART tool with it,
+  // on every laptop, tablet and phone. When it does not fit it becomes a
+  // NOW PLAYING tab that opens the same card over the middle of the screen.
+  const card = (
       <div
         ref={panelRef}
-        style={{
-          position: 'relative',
-          width: `${sleeveWidth}px`,
-          maxHeight: bandH ? `${bandH}px` : undefined,
-        }}
+        style={
+          fits
+            ? {
+                position: 'relative',
+                width: `${sleeveWidth}px`,
+                maxHeight: bandH ? `${bandH}px` : undefined,
+              }
+            : { position: 'relative', width: '100%', maxHeight: '86vh' }
+        }
         className=" bg-gradient-to-b from-[#2a292e] via-[#1c1b20] to-[#121115] rounded-3xl p-4 shadow-2xl border-2 border-zinc-700/80 flex flex-col overflow-hidden">
         {/* Header strip, mirroring the remote's */}
         <div className="w-full shrink-0 flex items-center justify-between pb-3 border-b border-zinc-700/60">
@@ -349,6 +351,47 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
           />
         )}
       </div>
-    </div>
+  );
+
+  if (fits) {
+    return (
+      <div
+        className="sleeve-stage select-none"
+        style={{
+          position: 'fixed',
+          zIndex: 40,
+          top: gutters?.ready ? `${bandCenterY}px` : '50%',
+          left: gutters?.ready ? `${gutters.leftCenter}px` : '-9999px',
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        {card}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => onSheetOpenChange?.(true)}
+        className="sleeve-tab fixed left-4 bottom-6 z-40 flex items-center gap-2 px-3 py-2 rounded-xl bg-[#1c1b20]/95 border-2 border-zinc-700/80 text-zinc-200 shadow-2xl cursor-pointer hover:border-amber-500/60 transition"
+        title="Now playing — synopsis, rename and box art"
+      >
+        <Film className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+        <span className="font-pixel text-[10px] tracking-wider">NOW PLAYING</span>
+      </button>
+
+      {sheetOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 select-none"
+          onClick={() => onSheetOpenChange?.(false)}
+        >
+          <div className="w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+            {card}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

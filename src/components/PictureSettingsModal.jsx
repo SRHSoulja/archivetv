@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Sliders, RotateCcw } from 'lucide-react';
 import { audio } from '../services/soundEffects';
+import { useDialog } from '../hooks/useDialog';
 
 const COLOR_MODES = [
   { id: 'color', label: 'COLOR' },
@@ -81,6 +82,7 @@ export default function PictureSettingsModal({
   colorMode,
   onColorModeChange,
 }) {
+  const dialogRef = useDialog(isOpen);
   if (!isOpen) return null;
 
   const applyPreset = (preset) => {
@@ -108,6 +110,11 @@ export default function PictureSettingsModal({
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Picture settings"
         className="relative w-full max-w-md max-h-[88vh] overflow-y-auto retro-scroll bg-[#141211] border-2 border-amber-600/70 rounded-2xl p-5 shadow-2xl text-zinc-300"
         onClick={(e) => e.stopPropagation()}
       >

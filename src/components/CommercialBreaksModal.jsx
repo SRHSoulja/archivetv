@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Radio, Plus, Trash2, Check } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { resolvePlayableItem, searchArchive } from '../services/archiveApi';
+import { useDialog } from '../hooks/useDialog';
 import {
   getAdSets,
   createAdSet,
@@ -22,6 +23,7 @@ export default function CommercialBreaksModal({
   onConfigChange,
   onTestBreak,
 }) {
+  const dialogRef = useDialog(isOpen);
   const [sets, setSets] = useState([]);
   const [config, setConfig] = useState(() => getAdConfig());
   const [sourceId, setSourceId] = useState('');
@@ -141,6 +143,11 @@ export default function CommercialBreaksModal({
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Commercial breaks"
         className="relative w-full max-w-lg max-h-[88vh] overflow-y-auto retro-scroll bg-[#141211] border-2 border-amber-600/70 rounded-2xl p-5 shadow-2xl text-zinc-300"
         onClick={(e) => e.stopPropagation()}
       >

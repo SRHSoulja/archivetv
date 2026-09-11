@@ -77,6 +77,8 @@ export default function App() {
   })();
   const [pictureOpen, setPictureOpen] = useState(false);
   const [breaksOpen, setBreaksOpen] = useState(false);
+  // The now-playing sleeve becomes a panel when the gutter cannot hold it.
+  const [sleeveSheetOpen, setSleeveSheetOpen] = useState(false);
   const [scanlinesEnabled, setScanlinesEnabled] = useState(savedPicture.scanlines ?? true);
   const [curvatureEnabled, setCurvatureEnabled] = useState(savedPicture.curvature ?? true);
   const [eraTintEnabled, setEraTintEnabled] = useState(savedPicture.eraTint ?? true);
@@ -730,6 +732,7 @@ export default function App() {
     [aboutOpen, setAboutOpen],
     [pictureOpen, setPictureOpen],
     [breaksOpen, setBreaksOpen],
+    [sleeveSheetOpen, setSleeveSheetOpen],
     [customizerOpen, setCustomizerOpen],
     [searchOpen, setSearchOpen],
     [tapeRackOpen, setTapeRackOpen],
@@ -740,13 +743,16 @@ export default function App() {
   // Keyboard Navigation & Scrubbing Listener
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
-
       const key = e.key;
+      const inField = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName);
 
       // Escape closes the topmost panel. Nothing else reaches the set while one
       // is open -- arrow keys were changing channel behind an open tape rack,
       // and `p` was powering the television off underneath it.
+      //
+      // It is checked BEFORE the form-field guard on purpose: the search box
+      // takes focus the moment its panel opens, so guarding Escape away left no
+      // way out of the panel people type in most.
       if (key === 'Escape') {
         for (const [open, setOpen] of blockingModals) {
           if (open) {
@@ -757,6 +763,7 @@ export default function App() {
         }
         return;
       }
+      if (inField) return;
       if (anyModalOpen) return;
 
       if (key === 'ArrowUp') {
@@ -990,6 +997,8 @@ export default function App() {
         currentChannel={displayChannel}
         powerOn={powerOn}
         gutters={gutters}
+        sheetOpen={sleeveSheetOpen}
+        onSheetOpenChange={setSleeveSheetOpen}
       />
 
       <RemoteControl

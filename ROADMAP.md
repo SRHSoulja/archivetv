@@ -93,13 +93,19 @@ Quality-of-life. The app currently punishes anyone not on a wide desktop with a 
       `overflow-x-hidden`. Measured: up to 7 of 12 controls cut off between 640px
       and 950px, and 6 removed outright below 640px. The bar wraps now and sheds
       only its labels — 12 of 12 visible, 0 clipped, from 1600px down to 390px
-- [ ] The sleeve vanishes with no fallback, taking rename and the ART tool with it.
-      The remote already has a corner fallback; the sleeve should too
+- [x] The sleeve vanished with no fallback below ~1280px — every laptop, tablet
+      and phone — taking the synopsis, rename and the ART tool with it. It
+      becomes a NOW PLAYING tab that opens the same card over the screen, and
+      that panel joins the Escape stack like every other
 - [x] `select-none` on `<body>` made the whole app uncopyable — including the
       archive.org identifiers it constantly asks you to paste around. Gone from
       the body; text-bearing elements opt back in, the chrome stays undraggable
-- [ ] Dialog semantics: no `role="dialog"`, no focus trap, no focus restore, seven
-      unnamed close buttons, and ten `focus:outline-none` with nothing put back
+- [x] Dialog semantics: no `role="dialog"`, no focus trap, no focus restore, seven
+      unnamed close buttons, and ten `focus:outline-none` with nothing put back.
+      All nine panels now carry role, `aria-modal` and a name, share one focus
+      hook, and there is a visible focus ring again. Escape also works from
+      inside a text field, which it did not — so the search panel, the one you
+      type in most, had no keyboard way out
 - [x] Hint text at `zinc-500`/`zinc-600` failed contrast on the dark ground —
       measured 2.3–2.5:1 for zinc-600 and 3.7–4.0:1 for zinc-500 against the four
       panel grounds, where small text needs 4.5:1. Prose moved to zinc-400 (7:1+);

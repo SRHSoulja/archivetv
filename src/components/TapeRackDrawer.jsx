@@ -15,6 +15,7 @@ import {
 } from '../services/archiveApi';
 import { fetchTheatricalPoster, getCachedPosterSync } from '../services/posterService';
 import ArtOverridePanel from './ArtOverridePanel';
+import { useDialog } from '../hooks/useDialog';
 
 export default function TapeRackDrawer({
   isOpen,
@@ -25,6 +26,7 @@ export default function TapeRackDrawer({
   onCustomTapePlay,
   onPlayDirectItem,
 }) {
+  const dialogRef = useDialog(isOpen);
   const [activeTab, setActiveTab] = useState('channels'); // 'channels' | 'bookmarks'
   const [viewMode, setViewMode] = useState('boxart'); // 'boxart' | 'cassette'
   const [bookmarks, setBookmarks] = useState([]);
@@ -232,7 +234,12 @@ export default function TapeRackDrawer({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 md:p-6 select-none animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl h-[80vh] bg-[#1a1715] border-4 border-[#3d2c20] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-[#e3ded9]">
+      <div ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Tape shelf"
+        className="relative w-full max-w-4xl h-[80vh] bg-[#1a1715] border-4 border-[#3d2c20] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-[#e3ded9]">
         {/* VCR Tape Rack Header */}
         <div className="woodgrain-pattern p-4 border-b-2 border-[#523d2e] flex items-center justify-between">
           <div className="flex items-center gap-3">

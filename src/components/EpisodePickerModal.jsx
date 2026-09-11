@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Play, Clock, Search, Film } from 'lucide-react';
 import { audio } from '../services/soundEffects';
+import { useDialog } from '../hooks/useDialog';
 
 export default function EpisodePickerModal({
   isOpen,
@@ -8,6 +9,7 @@ export default function EpisodePickerModal({
   currentProgram,
   onSelectEpisode,
 }) {
+  const dialogRef = useDialog(isOpen);
   const [filterText, setFilterText] = useState('');
 
   if (!isOpen || !currentProgram?.availableFiles || currentProgram.availableFiles.length === 0) {
@@ -34,7 +36,12 @@ export default function EpisodePickerModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 select-none animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-[#141217] border-2 border-blue-600/70 rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden text-zinc-200">
+      <div ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Episode picker"
+        className="relative w-full max-w-2xl bg-[#141217] border-2 border-blue-600/70 rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden text-zinc-200">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-950 via-[#19223d] to-blue-950 p-4 border-b-2 border-blue-600/50 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -52,6 +59,7 @@ export default function EpisodePickerModal({
           </div>
 
           <button
+            aria-label="Close episode picker"
             onClick={onClose}
             className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-zinc-300 cursor-pointer"
           >

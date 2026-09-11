@@ -139,6 +139,7 @@ export default function RemoteControl({
           </div>
 
           <button
+            aria-label="Hide the remote"
             onClick={onClose}
             className="text-zinc-500 hover:text-zinc-300 p-1 rounded cursor-pointer"
             title="Close Remote"

@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Tv, ShieldCheck, ExternalLink, Scale, Heart } from 'lucide-react';
 import { audio } from '../services/soundEffects';
+import { useDialog } from '../hooks/useDialog';
 
 function GithubIcon({ className = 'w-4 h-4' }) {
   return (
@@ -15,11 +16,17 @@ function GithubIcon({ className = 'w-4 h-4' }) {
 }
 
 export default function AboutModal({ isOpen, onClose }) {
+  const dialogRef = useDialog(isOpen);
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 select-none animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl bg-[#141211] border-2 border-amber-600/70 rounded-2xl p-5 md:p-6 shadow-2xl text-zinc-300 font-sans">
+      <div ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="About ArchiveTV"
+        className="relative w-full max-w-xl bg-[#141211] border-2 border-amber-600/70 rounded-2xl p-5 md:p-6 shadow-2xl text-zinc-300 font-sans">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4">
           <div className="flex items-center gap-2.5">
@@ -36,6 +43,7 @@ export default function AboutModal({ isOpen, onClose }) {
             </div>
           </div>
           <button
+            aria-label="Close about"
             onClick={() => {
               audio.playKnobClick();
               onClose();
