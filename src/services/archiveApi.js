@@ -234,6 +234,12 @@ export async function searchArchive(query, options = {}) {
         }
       }
 
+      // NOT an episode count. `files_count` is every file in the item --
+      // thumbnails, subtitle tracks, torrents, metadata, derivatives. The Bee
+      // and PuppyCat item reports 82 of them and contains exactly one
+      // programme, so the card was promising 62 episodes that do not exist.
+      // Kept only as a hint that an item is worth opening; the real count comes
+      // from resolvePlayableItem, which reads the actual file list.
       const filesCount = parseInt(doc.files_count, 10) || 1;
 
       const title = doc.title || doc.identifier.replace(/[-_]/g, ' ');
@@ -470,13 +476,37 @@ export async function resolvePlayableItem(inputIdentifier) {
     const meta = data?.metadata || {};
 
     const allVideoExts = ['.mp4', '.m4v', '.webm', '.ogv', '.mov', '.mkv', '.avi', '.flv', '.wmv'];
+
+    // Everything here is a sidecar, never a programme. This list exists because
+    // the format test below used to match a bare "video", and archive.org labels
+    // a .vtt subtitle track "Web Video Text Tracks" -- so every subtitle in an
+    // item was offered as an episode. One Bee and PuppyCat item has 82 files:
+    // two real videos (the same programme as .mp4 and .webm) and five subtitle
+    // tracks, and the picker listed six things to watch.
+    const NON_VIDEO_EXTS = [
+      '.vtt', '.srt', '.sub', '.ass', '.ssa', '.smil', '.txt', '.json', '.xml',
+      '.torrent', '.sqlite', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp',
+      '.pdf', '.epub', '.zip', '.gz', '.md5', '.sha1', '.nfo', '.cue', '.log',
+      '.csv', '.mp3', '.flac', '.wav', '.ogg', '.m4a', '.m3u', '.srt.txt',
+    ];
+    const NON_VIDEO_FORMATS = /text track|subtitle|caption|thumb|metadata|torrent|json|item tile|spectrogram|waveform|archive bittorrent/i;
+
     const candidateFiles = files.filter((f) => {
       if (!f?.name) return false;
       const lower = f.name.toLowerCase();
-      const hasExt = allVideoExts.some((ext) => lower.endsWith(ext));
       const formatStr = (f.format || '').toLowerCase();
-      const hasFormat = /mpeg4|h\.264|webm|video|512kb/i.test(formatStr);
-      return (hasExt || hasFormat) && !lower.endsWith('_thumb.jpg') && !lower.endsWith('.xml');
+
+      // Hard rejects first, so nothing gets in on a loose format match.
+      if (NON_VIDEO_EXTS.some((ext) => lower.endsWith(ext))) return false;
+      if (NON_VIDEO_FORMATS.test(formatStr)) return false;
+
+      const hasExt = allVideoExts.some((ext) => lower.endsWith(ext));
+      // No bare `video` here either: the word turns up in plenty of formats that
+      // are not one. A real container name or a known derivative tag only.
+      const hasFormat = /mpeg4|mpeg2|h\.264|h264|webm|matroska|quicktime|windows media|divx|xvid|ogg video|512kb/i.test(
+        formatStr
+      );
+      return hasExt || hasFormat;
     });
 
     // Filter strictly for browser-playable HTML5 video formats

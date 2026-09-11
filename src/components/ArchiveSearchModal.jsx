@@ -798,8 +798,11 @@ export default function ArchiveSearchModal({
                               </span>
                             )}
                             {item.filesCount > 1 && (
-                              <span className="px-1.5 py-0.5 rounded bg-blue-950/80 border border-blue-500/80 text-blue-300 font-pixel text-[9px]">
-                                📺 {item.filesCount} EPISODES
+                              <span
+                                className="px-1.5 py-0.5 rounded bg-blue-950/80 border border-blue-500/80 text-blue-300 font-pixel text-[9px]"
+                                title="How many files archive.org holds for this item — artwork, subtitles and alternate encodings included. The real episode count appears once you open it."
+                              >
+                                📦 {item.filesCount} FILES
                               </span>
                             )}
                           </div>

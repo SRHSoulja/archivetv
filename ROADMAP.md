@@ -319,6 +319,17 @@ broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
       belongs (the guide is the thing that says what is on, and this decides
       what is on), and bound to `V`
 
+- [x] Subtitle tracks were offered as episodes. The file filter accepted
+      anything whose archive.org format string matched a bare `video`, and
+      archive.org labels a `.vtt` subtitle "Web Video Text Tracks". One Bee and
+      PuppyCat item has 82 files — two real videos (the same programme as .mp4
+      and .webm) and five subtitle tracks — and the picker listed six things to
+      watch, five of which were captions with a fabricated 30:00 runtime
+- [x] The search card's "N EPISODES" badge came from `files_count`, which counts
+      every file in the item: artwork, subtitles, torrents, metadata,
+      derivatives. That same item advertised 62 episodes and contains exactly
+      one programme. The badge reads FILES now and says what it means
+
 ## Known-imperfect, stated plainly
 
 - Episode counts are wrong on films with multiple cuts — counts `availableFiles`,
