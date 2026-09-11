@@ -41,19 +41,23 @@ Things that are broken. No character work lands well on a buggy base.
       reel are `.AVI`; unplayable spots are now filtered out, and a spot that
       fails mid-break skips itself
 - [x] Spot lengths were in the data but never rendered
-- [ ] Autoplay-blocked recovery undoes itself in the same tick — the effect resets
-      `video.muted = false` and clears the flag before paint, so the
-      "click to unmute" prompt never appears and there is no recovery path
-- [ ] A break makes the programme play twice: the resumed programme is restored as
-      an explicit programme, so its ending falls through to the base programme at
-      `seekSeconds: 0` instead of advancing. Also unpins live TV permanently
-- [ ] Stale `targetChannelId` after a channel delete — adds silently no-op behind
+- [x] Autoplay-blocked recovery undid itself in the same tick — the effect reset
+      `video.muted = false` and cleared the flag before paint, so the
+      "click to unmute" prompt never appeared and there was no recovery path
+- [x] A break made the programme play twice: the resumed programme was restored as
+      an explicit programme, so its ending fell through to the base programme at
+      `seekSeconds: 0` instead of advancing
+- [x] Stale `targetChannelId` after a channel delete — adds silently no-op'd behind
       a success banner
-- [ ] Curated channel ids leak into `customChannels`-only lookups: `EDIT (n)` on a
-      shipped channel can load a *different* channel, and Move Up / Remove then
-      operate on it
-- [ ] The edit pencil forks a shipped channel on open; CANCEL does not undo it
-- [ ] Share links mint a fresh id, so opening the same link twice duplicates the channel
+- [x] Curated channel ids leaked into `customChannels`-only lookups: `EDIT (n)` on a
+      shipped channel loaded a *different* channel, and Move Up / Remove then
+      operated on it. The editor, both TARGET DIAL pickers and the selection now
+      resolve against the whole dial, and forking happens on the first change
+- [x] The edit pencil forked a shipped channel on open and CANCEL did not undo it;
+      the fork now happens on save
+- [x] Share links minted a fresh id, so opening the same link twice duplicated the
+      channel. The id is now carried in the link (older links hash their own
+      contents), and a shared copy steps off any dial number already in use
 - [ ] Search LENGTH filter is a no-op — `duration` is never requested or mapped
 - [ ] Remote digit entry tunes twice (immediate call plus the debounce timer)
 - [ ] `pendingResumeRef` is last in the seek chain and usually unreachable, because

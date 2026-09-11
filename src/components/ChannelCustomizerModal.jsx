@@ -139,8 +139,8 @@ export default function ChannelCustomizerModal({
     const full = getChannelLineup();
     setCustomChannels(customs);
     setAllChannels(full);
-    if (!selectedChannelId && customs.length > 0) {
-      setSelectedChannelId(customs[0].id);
+    if (!selectedChannelId) {
+      setSelectedChannelId(customs[0]?.id || full[0]?.id || null);
     }
     if (!targetChannelId && customs.length > 0) {
       setTargetChannelId(customs[0].id);
@@ -271,9 +271,15 @@ export default function ChannelCustomizerModal({
           chanName = `CH ${createdChan.number} (${createdChan.name})`;
         }
       } else {
-        const nextList = addProgramToChannel(ensureEditableChannel(targetChanId), programsToAdd);
+        // Adding to a shipped channel forks it, which mints a NEW id. Resolve
+        // once and use that id for the write, the lookup and the selection --
+        // reusing the original id here looked up a channel that no longer
+        // exists and reported the add against the wrong one.
+        const editableId = ensureEditableChannel(targetChanId);
+        const nextList = addProgramToChannel(editableId, programsToAdd);
         setCustomChannels(nextList);
-        const chan = nextList.find((c) => c.id === targetChanId);
+        if (editableId !== targetChanId) setTargetChannelId(editableId);
+        const chan = nextList.find((c) => c.id === editableId);
         chanName = chan ? `CH ${chan.number}` : 'Channel';
       }
 
@@ -304,16 +310,14 @@ export default function ChannelCustomizerModal({
 
   const handleEditChannel = (ch) => {
     audio.playKnobClick();
-    const editableId = ensureEditableChannel(ch.id);
-    const list = getCustomChannels();
-    setCustomChannels(list);
-    setAllChannels(getChannelLineup());
-    const target = list.find((c) => c.id === editableId) || ch;
-    setEditingChannelId(editableId);
-    setNewChannelName(target.name || '');
-    setNewChannelCallsign(target.callsign || '');
-    setNewChannelBadge(target.badge || 'CUSTOM');
-    setNewChannelColor(target.themeColor || '#d97706');
+    // Deliberately does NOT fork. Opening the rename form on a shipped channel
+    // used to mint a copy immediately, which CANCEL then left behind on the
+    // dial. The fork happens on save instead -- see handleCreateChannel.
+    setEditingChannelId(ch.id);
+    setNewChannelName(ch.name || '');
+    setNewChannelCallsign(ch.callsign || '');
+    setNewChannelBadge(ch.badge || 'CUSTOM');
+    setNewChannelColor(ch.themeColor || '#d97706');
     setIsCreatingNew(true);
   };
 
@@ -338,13 +342,22 @@ export default function ChannelCustomizerModal({
 
     // saveCustomChannel merges into the existing record, so an edit must NOT
     // pass programs or it would wipe the line-up it is renaming.
-    const next = editingChannelId
-      ? saveCustomChannel({ id: editingChannelId, ...fields })
-      : saveCustomChannel({
-          ...fields,
-          description: `User curated channel from the Internet Archive.`,
-          programs: [],
-        });
+    let next;
+    if (editingChannelId) {
+      const editableId = ensureEditableChannel(editingChannelId);
+      next = saveCustomChannel({ id: editableId, ...fields });
+      if (editableId !== editingChannelId) {
+        // The shipped channel was forked by this save; follow it.
+        setSelectedChannelId((prev) => (prev === editingChannelId ? editableId : prev));
+        setTargetChannelId((prev) => (prev === editingChannelId ? editableId : prev));
+      }
+    } else {
+      next = saveCustomChannel({
+        ...fields,
+        description: `User curated channel from the Internet Archive.`,
+        programs: [],
+      });
+    }
 
     setCustomChannels(next);
     setAllChannels(getChannelLineup());
@@ -425,9 +438,11 @@ export default function ChannelCustomizerModal({
       }
     } else {
       // Add to existing custom channel
-      const nextList = addProgramToChannel(ensureEditableChannel(targetChannelId), programsToAdd);
+      const editableId = ensureEditableChannel(targetChannelId);
+      const nextList = addProgramToChannel(editableId, programsToAdd);
       setCustomChannels(nextList);
-      const chan = nextList.find((c) => c.id === targetChannelId);
+      if (editableId !== targetChannelId) setTargetChannelId(editableId);
+      const chan = nextList.find((c) => c.id === editableId);
       chanName = chan ? `CH ${chan.number}` : 'Channel';
     }
 
@@ -543,13 +558,29 @@ export default function ChannelCustomizerModal({
       if (selectedChannelId === channelId) {
         setSelectedChannelId(remaining[0]?.id || null);
       }
+      // targetChannelId was left pointing at the deleted channel, so the next
+      // add wrote nowhere while still reporting success.
+      if (targetChannelId === channelId) {
+        setTargetChannelId(remaining[0]?.id || 'NEW_CHANNEL');
+      }
       if (onChannelsUpdated) onChannelsUpdated();
     }
   };
 
+  // Editing a shipped channel's line-up forks it on the first change. The
+  // selection has to follow that new id or the editor snaps to another channel.
+  const followFork = (channelId) => {
+    const editableId = ensureEditableChannel(channelId);
+    if (editableId !== channelId) {
+      setSelectedChannelId((prev) => (prev === channelId ? editableId : prev));
+      setTargetChannelId((prev) => (prev === channelId ? editableId : prev));
+    }
+    return editableId;
+  };
+
   const handleRemoveProgram = (channelId, progIdx) => {
     audio.playSwitch(false);
-    const updated = removeProgramFromChannel(ensureEditableChannel(channelId), progIdx);
+    const updated = removeProgramFromChannel(followFork(channelId), progIdx);
     setCustomChannels(updated);
     setAllChannels(getChannelLineup());
     if (onChannelsUpdated) onChannelsUpdated();
@@ -557,7 +588,7 @@ export default function ChannelCustomizerModal({
 
   const handleMoveProgram = (channelId, fromIdx, toIdx) => {
     audio.playKnobClick();
-    const updated = reorderProgramsInChannel(ensureEditableChannel(channelId), fromIdx, toIdx);
+    const updated = reorderProgramsInChannel(followFork(channelId), fromIdx, toIdx);
     setCustomChannels(updated);
     setAllChannels(getChannelLineup());
     if (onChannelsUpdated) onChannelsUpdated();
@@ -580,7 +611,11 @@ export default function ChannelCustomizerModal({
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const selectedCustomChannel = customChannels.find((c) => c.id === selectedChannelId) || customChannels[0];
+  // Resolved against the whole dial. Looking only at customChannels meant a
+  // shipped channel id fell through to `customChannels[0]`, so EDIT on one
+  // channel silently opened -- and then modified -- a different one.
+  const selectedCustomChannel =
+    allChannels.find((c) => c.id === selectedChannelId) || customChannels[0] || allChannels[0];
 
   if (!isOpen) return null;
 
@@ -995,7 +1030,7 @@ export default function ChannelCustomizerModal({
                     className="bg-[#14121a] text-amber-400 font-pixel text-xs rounded-lg px-2.5 py-1.5 border border-zinc-700 focus:outline-none focus:border-teal-400 cursor-pointer"
                   >
                     <option value="NEW_CHANNEL">+ CREATE NEW CHANNEL</option>
-                    {customChannels.map((c) => (
+                    {allChannels.map((c) => (
                       <option key={c.id} value={c.id}>
                         CH {c.number}: {c.name} ({c.programs?.length || 0} shows)
                       </option>
@@ -1360,7 +1395,7 @@ export default function ChannelCustomizerModal({
                       className="w-full bg-black/80 border border-zinc-700 focus:border-teal-400 rounded-xl px-3 py-2 text-sm text-teal-300 font-pixel cursor-pointer"
                     >
                       <option value="NEW_CHANNEL">+ CREATE AS BRAND NEW CHANNEL</option>
-                      {customChannels.map((c) => (
+                      {allChannels.map((c) => (
                         <option key={c.id} value={c.id}>
                           CH {c.number} • {c.name} ({c.programs?.length || 0} videos)
                         </option>
@@ -1511,7 +1546,7 @@ export default function ChannelCustomizerModal({
         {/* TAB 3: Channel Program & Schedule Editor */}
         {activeTab === 'editor' && (
           <div className="flex-1 overflow-y-auto p-4 md:p-6 retro-scroll bg-[#0e0d14] space-y-5">
-            {customChannels.length === 0 ? (
+            {allChannels.length === 0 ? (
               <div className="text-center py-20 text-zinc-500 font-pixel text-xs space-y-3">
                 <Tv className="w-12 h-12 mx-auto text-zinc-700" />
                 <div>NO CUSTOM CHANNELS CREATED YET.</div>
@@ -1533,7 +1568,7 @@ export default function ChannelCustomizerModal({
                       onChange={(e) => setSelectedChannelId(e.target.value)}
                       className="bg-[#181622] border-2 border-teal-500/70 text-teal-300 font-pixel text-xs rounded-xl px-3 py-2 cursor-pointer focus:outline-none"
                     >
-                      {customChannels.map((c) => (
+                      {allChannels.map((c) => (
                         <option key={c.id} value={c.id}>
                           CH {c.number} • {c.name} ({c.programs?.length || 0} programs)
                         </option>

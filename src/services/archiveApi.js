@@ -1160,6 +1160,9 @@ export function encodeChannelForShare(channel) {
   try {
     const clean = sanitizeChannel(channel);
     const compact = {
+      // Carried so re-opening the same link updates the channel instead of
+      // minting a second copy of it. See decodeSharedChannel.
+      sid: clean.id,
       n: clean.name,
       num: clean.number,
       c: clean.callsign,
@@ -1180,6 +1183,32 @@ export function encodeChannelForShare(channel) {
   }
 }
 
+// djb2. Only needs to be deterministic and collision-resistant enough to tell
+// two shared channels apart.
+function hashString(str) {
+  let h = 5381;
+  for (let i = 0; i < str.length; i += 1) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
+}
+
+// A shared copy of a channel keeps its own dial number where it can, but must
+// not land on a number something else already occupies -- two channels reading
+// "CH 04" makes digit tuning ambiguous. Re-importing an updated link keeps the
+// number already assigned rather than walking further up the dial each time.
+function resolveSharedNumber(sharedId, wanted) {
+  const lineup = getChannelLineup();
+  const mine = lineup.find((c) => c.id === sharedId);
+  if (mine) return mine.number;
+  const taken = new Set(lineup.map((c) => String(c.number).padStart(2, '0')));
+  let num = String(wanted).padStart(2, '0');
+  let n = parseInt(num, 10) || 14;
+  while (taken.has(num) && n < 99) {
+    n += 1;
+    num = String(n).padStart(2, '0');
+  }
+  return num;
+}
+
 /**
  * Decodes a shared channel from a URL parameter.
  */
@@ -1188,6 +1217,12 @@ export function decodeSharedChannel(encoded) {
     const jsonStr = decodeURIComponent(escape(atob(decodeURIComponent(encoded))));
     const compact = JSON.parse(jsonStr);
     if (!compact || !compact.n) return null;
+
+    // Stable, derived from the link rather than the clock: opening the same
+    // share link twice used to add the channel twice. Links minted before
+    // `sid` existed fall back to a hash of their own contents, which is
+    // equally stable for a given link.
+    const sharedId = `shared_${compact.sid || hashString(jsonStr)}`;
 
     const programs = (compact.p || []).map((p) => ({
       identifier: p.i || '',
@@ -1206,9 +1241,9 @@ export function decodeSharedChannel(encoded) {
     }));
 
     return sanitizeChannel({
-      id: `shared_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      id: sharedId,
       name: compact.n,
-      number: compact.num || '14',
+      number: resolveSharedNumber(sharedId, compact.num || '14'),
       callsign: compact.c || `K-CUS`,
       badge: compact.b || 'CUSTOM',
       description: compact.d || 'Shared broadcast channel from the Internet Archive.',
