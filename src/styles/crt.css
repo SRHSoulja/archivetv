@@ -450,3 +450,32 @@
     padding: 16px 10px 4px;
   }
 }
+
+/* The interface is chrome-heavy, so `select-none` on the cabinet, the remote and
+   every panel keeps drag-select out of things that are not text. The content
+   inside them is a different matter: titles, descriptions and archive.org
+   identifiers exist to be copied, and the app repeatedly asks you to paste one
+   somewhere. Text-bearing elements and anything marked .selectable opt back in. */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+li,
+dd,
+td,
+code,
+pre,
+blockquote,
+.selectable {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+input,
+textarea {
+  -webkit-user-select: auto;
+  user-select: auto;
+}

@@ -84,24 +84,31 @@ Things that are broken. No character work lands well on a buggy base.
 
 Quality-of-life. The app currently punishes anyone not on a wide desktop with a mouse.
 
-- [ ] **Escape closes modals, and hotkeys stop firing through them.** Today arrow
-      keys change channel behind an open tape rack, `p` powers the set off and `t`
-      closes the rack you are reading. One shared fix
-- [ ] BREAKS is unreachable below 640px — one entry point, `hidden sm:flex`, no
-      hotkey, no remote or cabinet button
-- [ ] Navbar zoom ladder stops at 1050px and then clips silently under
-      `overflow-x-hidden`; roughly 950px→640px loses the right-hand cluster
+- [x] **Escape closes modals, and hotkeys stop firing through them.** Arrow keys
+      used to change channel behind an open tape rack, `p` powered the set off and
+      `t` closed the rack you were reading
+- [x] BREAKS was unreachable below 640px — one entry point, `hidden sm:flex`, no
+      hotkey. It keeps its place at every width now and answers to `B`
+- [x] Navbar zoom ladder stopped at 1050px and then clipped silently under
+      `overflow-x-hidden`. Measured: up to 7 of 12 controls cut off between 640px
+      and 950px, and 6 removed outright below 640px. The bar wraps now and sheds
+      only its labels — 12 of 12 visible, 0 clipped, from 1600px down to 390px
 - [ ] The sleeve vanishes with no fallback, taking rename and the ART tool with it.
       The remote already has a corner fallback; the sleeve should too
-- [ ] `select-none` on `<body>` makes the whole app uncopyable — including the
-      archive.org identifiers it constantly asks you to paste around
+- [x] `select-none` on `<body>` made the whole app uncopyable — including the
+      archive.org identifiers it constantly asks you to paste around. Gone from
+      the body; text-bearing elements opt back in, the chrome stays undraggable
 - [ ] Dialog semantics: no `role="dialog"`, no focus trap, no focus restore, seven
       unnamed close buttons, and ten `focus:outline-none` with nothing put back
-- [ ] Hint text at `zinc-500`/`zinc-600` fails contrast on the dark ground — the
-      most instructional copy in the app is the least legible
+- [x] Hint text at `zinc-500`/`zinc-600` failed contrast on the dark ground —
+      measured 2.3–2.5:1 for zinc-600 and 3.7–4.0:1 for zinc-500 against the four
+      panel grounds, where small text needs 4.5:1. Prose moved to zinc-400 (7:1+);
+      icons, separators and disabled states left alone. Zero failures across the
+      main screen, tapes, channels, breaks, guide and picture
 - [ ] Tape drag-reorder is mouse-only and hidden behind the sixth option of a
       dropdown; needs touch support and a visible grip
-- [ ] Hotkey list omits `?` and `Shift+F` and describes `F` wrongly
+- [x] Hotkey list omitted `?`, `Esc` and `Shift+F`, and described `F` wrongly —
+      it fullscreens the picture, not the site
 
 ## Phase 3 — Coherence
 

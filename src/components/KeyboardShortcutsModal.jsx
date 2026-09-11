@@ -23,9 +23,13 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }) {
     { key: 'S', desc: 'Open Deep Archive Search & Explorer' },
     { key: 'T', desc: 'Open VHS Cassette Tape Shelf' },
     { key: 'R', desc: 'Toggle Handheld Infrared Remote' },
+    { key: 'B', desc: 'Open Commercial Breaks & Reel Builder' },
     { key: 'A', desc: 'Cycle Aspect Ratio (Auto / 4:3 / 16:9)' },
-    { key: 'F', desc: 'Toggle Fullscreen Mode' },
+    { key: 'F', desc: 'Fullscreen the Picture Only' },
+    { key: 'Shift + F', desc: 'Fullscreen the Whole Set (F11 does this too)' },
     { key: 'H', desc: 'Toggle Immersive Mode (Hide/Show Controls)' },
+    { key: '?', desc: 'Open This Hotkey List' },
+    { key: 'Esc', desc: 'Close Whatever Panel Is On Top' },
   ];
 
   return (
@@ -63,7 +67,7 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }) {
           ))}
         </div>
 
-        <div className="mt-4 pt-3 border-t border-zinc-800 text-center font-pixel text-[11px] text-zinc-500">
+        <div className="mt-4 pt-3 border-t border-zinc-800 text-center font-pixel text-[11px] text-zinc-400">
           PRO-TIP: DRAG THE VCR SCRUB BAR OR ANTENNAS ON SCREEN!
         </div>
       </div>

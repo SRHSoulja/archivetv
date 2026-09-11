@@ -295,7 +295,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                       : 'bg-zinc-900 border border-zinc-700'
                   }`}
                 />
-                <span className="font-pixel text-[10px] text-zinc-500">
+                <span className="font-pixel text-[10px] text-zinc-400">
                   {cabinetStyle === 'trinitron' ? 'STANDBY' : 'PWR'}
                 </span>
               </div>
@@ -387,7 +387,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                 className={`w-full py-1 mt-1 rounded-lg font-pixel text-[10px] cursor-pointer transition-all flex items-center justify-center gap-1 ${
                   controlsHidden
                     ? 'bg-amber-950/60 hover:bg-amber-900/80 border border-amber-500/40 text-amber-300'
-                    : 'bg-zinc-900/60 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-500 hover:text-zinc-300'
+                    : 'bg-zinc-900/60 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-400 hover:text-zinc-200'
                 }`}
               >
                 {controlsHidden ? '▲ SHOW CONTROLS [H]' : '▼ IMMERSIVE MODE [H]'}
@@ -514,7 +514,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                         <div className="w-1 h-2 bg-amber-400 rounded-full" />
                       </div>
                     </button>
-                    <span className="mt-1 text-[9px] font-pixel text-zinc-500">
+                    <span className="mt-1 text-[9px] font-pixel text-zinc-400">
                       {trackingOffset === 0
                         ? 'LOCKED'
                         : `${trackingOffset > 0 ? '+' : ''}${trackingOffset}`}
@@ -619,7 +619,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                     <Power className="w-4 h-4 mb-0.5" />
                     <span>{powerOn ? 'ON' : 'OFF'}</span>
                   </button>
-                  <span className="font-pixel text-[9px] text-zinc-500 mt-1">MAIN POWER</span>
+                  <span className="font-pixel text-[9px] text-zinc-400 mt-1">MAIN POWER</span>
                 </div>
 
                 <div
@@ -657,7 +657,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                     } ${powerOn && !muted && volume > 0 ? 'animate-pulse' : 'opacity-0'}`}
                   />
                   <span className={`absolute font-pixel text-[9px] tracking-wider z-10 ${
-                    cabinetStyle === 'trinitron' ? 'text-zinc-500' : 'text-zinc-600'
+                    cabinetStyle === 'trinitron' ? 'text-zinc-400' : 'text-zinc-400'
                   }`}>
                     {cabinetStyle === 'trinitron'
                       ? 'APERTURE STEREO'

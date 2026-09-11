@@ -132,7 +132,7 @@ export default function ArtOverridePanel({ identifier, title, year, onClose, onA
             </div>
             <div>
               <h3 className="font-pixel text-amber-400 text-sm font-bold tracking-wide">BOX ART</h3>
-              <p className="font-mono text-[10px] text-zinc-500 break-all leading-tight">
+              <p className="font-mono text-[10px] text-zinc-400 break-all leading-tight">
                 {identifier}
               </p>
             </div>
@@ -151,7 +151,7 @@ export default function ArtOverridePanel({ identifier, title, year, onClose, onA
           Paste an image URL to preview it here. It is checked by loading it, so the verdict is
           what the sleeve will really do.
         </p>
-        <p className="mt-2 text-[11px] leading-relaxed text-zinc-500">
+        <p className="mt-2 text-[11px] leading-relaxed text-zinc-400">
           Best sources are{' '}
           <a
             href="https://commons.wikimedia.org/w/index.php?search=film+poster&title=Special:MediaSearch&type=image"
@@ -271,7 +271,7 @@ export default function ArtOverridePanel({ identifier, title, year, onClose, onA
           </div>
         </div>
 
-        <p className="mt-4 pt-3 border-t border-zinc-800 text-[11px] leading-relaxed text-zinc-500">
+        <p className="mt-4 pt-3 border-t border-zinc-800 text-[11px] leading-relaxed text-zinc-400">
           Saved in this browser only &mdash; nothing you do here affects other viewers. Suggesting
           opens a prefilled issue containing the exact line to add.
         </p>

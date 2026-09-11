@@ -207,7 +207,7 @@ export default function NowPlayingSleeve({ currentProgram, currentChannel, power
             ) : (
               <div className="flex flex-col items-center gap-2 px-3 text-center">
                 <Radio className="w-7 h-7 text-zinc-700" />
-                <span className="font-pixel text-[9px] text-zinc-600 leading-relaxed">
+                <span className="font-pixel text-[9px] text-zinc-400 leading-relaxed">
                   NO SLEEVE ART
                 </span>
               </div>

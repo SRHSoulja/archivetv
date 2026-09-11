@@ -149,7 +149,7 @@ export default function RemoteControl({
 
         {/* Channel Digital Readout Display */}
         <div className="w-full my-2.5 bg-[#060b08] rounded-xl p-2.5 border-2 border-zinc-800 shadow-[inset_0_2px_8px_rgba(0,0,0,0.9)] flex flex-col font-vcr">
-          <div className="flex items-center justify-between text-[10px] font-pixel text-zinc-500 pb-1 border-b border-zinc-900/80">
+          <div className="flex items-center justify-between text-[10px] font-pixel text-zinc-400 pb-1 border-b border-zinc-900/80">
             <span className="tracking-wider text-zinc-400">RC-TUNER</span>
             <div className="flex items-center gap-1.5">
               {muted && <span className="text-amber-400 font-bold">MUTE</span>}

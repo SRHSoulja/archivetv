@@ -912,7 +912,7 @@ export default function ChannelCustomizerModal({
                       <div className="text-[11px] font-mono text-zinc-400 bg-black/50 p-2 rounded-lg border border-zinc-800/80 mb-3 flex items-center justify-between">
                         <span>{progCount} SCHEDULED BROADCAST{progCount !== 1 ? 'S' : ''}</span>
                         {progCount > 0 && ch.programs[0]?.title && (
-                          <span className="text-zinc-500 truncate max-w-[180px]">
+                          <span className="text-zinc-400 truncate max-w-[180px]">
                             NOW: {ch.programs[0].title}
                           </span>
                         )}
@@ -1101,7 +1101,7 @@ export default function ChannelCustomizerModal({
 
               {/* Quick Preset Signals */}
               <div className="flex items-center gap-1.5 overflow-x-auto retro-scroll pb-1">
-                <span className="text-[10px] font-pixel text-zinc-500 shrink-0">SIGNALS:</span>
+                <span className="text-[10px] font-pixel text-zinc-400 shrink-0">SIGNALS:</span>
                 {searchPresets.map((preset) => (
                   <button
                     key={preset}
@@ -1146,7 +1146,7 @@ export default function ChannelCustomizerModal({
 
             {/* Empty or Error State */}
             {searchError && !searchLoading && (
-              <div className="text-center py-12 text-zinc-500 font-pixel text-xs">
+              <div className="text-center py-12 text-zinc-400 font-pixel text-xs">
                 {searchError}
               </div>
             )}
@@ -1300,7 +1300,7 @@ export default function ChannelCustomizerModal({
               </div>
 
               <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-400">
-                <span className="font-pixel text-[10px] text-zinc-500">FORMATS SUPPORTED:</span>
+                <span className="font-pixel text-[10px] text-zinc-400">FORMATS SUPPORTED:</span>
                 <span>archive.org/details/..., /embed/..., /download/..., or raw identifier</span>
               </div>
             </div>
@@ -1497,12 +1497,12 @@ export default function ChannelCustomizerModal({
                                     }}
                                     className="w-3.5 h-3.5 text-teal-500 rounded cursor-pointer shrink-0"
                                   />
-                                  <span className="font-mono text-zinc-500 shrink-0">#{file.originalIndex + 1}</span>
+                                  <span className="font-mono text-zinc-400 shrink-0">#{file.originalIndex + 1}</span>
                                   <span className="font-bold truncate text-zinc-200">
                                     {file.displayName || file.name}
                                   </span>
                                   {file.duration > 0 && (
-                                    <span className="font-mono text-[10px] text-zinc-500 shrink-0">
+                                    <span className="font-mono text-[10px] text-zinc-400 shrink-0">
                                       ({Math.round(file.duration / 60)}m)
                                     </span>
                                   )}
@@ -1547,7 +1547,7 @@ export default function ChannelCustomizerModal({
         {activeTab === 'editor' && (
           <div className="flex-1 overflow-y-auto p-4 md:p-6 retro-scroll bg-[#0e0d14] space-y-5">
             {allChannels.length === 0 ? (
-              <div className="text-center py-20 text-zinc-500 font-pixel text-xs space-y-3">
+              <div className="text-center py-20 text-zinc-400 font-pixel text-xs space-y-3">
                 <Tv className="w-12 h-12 mx-auto text-zinc-700" />
                 <div>NO CUSTOM CHANNELS CREATED YET.</div>
                 <button
@@ -1619,7 +1619,7 @@ export default function ChannelCustomizerModal({
                     </div>
 
                     {(!selectedCustomChannel.programs || selectedCustomChannel.programs.length === 0) && (
-                      <div className="text-center py-16 bg-[#181622] rounded-2xl border border-zinc-800 text-zinc-500 font-pixel text-xs">
+                      <div className="text-center py-16 bg-[#181622] rounded-2xl border border-zinc-800 text-zinc-400 font-pixel text-xs">
                         THIS CHANNEL HAS NO VIDEOS SCHEDULED YET. CLICK "ADD VIDEO BY URL" ABOVE TO ADD TAPES!
                       </div>
                     )}

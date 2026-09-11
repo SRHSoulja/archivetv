@@ -817,6 +817,9 @@ export default function App() {
       } else if (key.toLowerCase() === 'r') {
         e.preventDefault();
         setRemoteOpen((r) => !r);
+      } else if (key.toLowerCase() === 'b') {
+        e.preventDefault();
+        setBreaksOpen((b) => !b);
       } else if (key.toLowerCase() === 'backspace' || key.toLowerCase() === 'home') {
         e.preventDefault();
         handleRestartProgram();
@@ -1081,7 +1084,7 @@ export default function App() {
       />
 
       {/* Footer Info Bar */}
-      <footer className="w-full bg-[#100e0d] border-t border-zinc-900 px-4 py-2 text-center text-xs font-mono text-zinc-500 flex flex-col sm:flex-row items-center justify-between gap-2 select-none">
+      <footer className="w-full bg-[#100e0d] border-t border-zinc-900 px-4 py-2 text-center text-xs font-mono text-zinc-400 flex flex-col sm:flex-row items-center justify-between gap-2 select-none">
         <div className="flex items-center gap-2 font-pixel text-[11px]">
           <span className="text-amber-500 font-bold">ARCHIVETV</span>
           <span>•</span>

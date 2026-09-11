@@ -153,7 +153,7 @@ export default function CommercialBreaksModal({
               <h3 className="font-pixel text-amber-400 text-sm font-bold tracking-wide">
                 COMMERCIAL BREAKS
               </h3>
-              <p className="text-[10px] text-zinc-500 leading-tight">
+              <p className="text-[10px] text-zinc-400 leading-tight">
                 Build a reel, then let it interrupt the programme
               </p>
             </div>
@@ -211,7 +211,7 @@ export default function CommercialBreaksModal({
                 onChange={(e) => push({ ...config, everyMinutes: Number(e.target.value) || 12 })}
                 className="w-16 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1 text-xs text-zinc-100 outline-none"
               />
-              <span className="text-[10px] text-zinc-500">min</span>
+              <span className="text-[10px] text-zinc-400">min</span>
             </div>
           </label>
           <label className="block">
@@ -238,13 +238,13 @@ export default function CommercialBreaksModal({
         >
           PLAY A BREAK NOW
         </button>
-        <p className="mt-1.5 text-[10px] leading-relaxed text-zinc-600">
+        <p className="mt-1.5 text-[10px] leading-relaxed text-zinc-400">
           Waiting for a real one takes a while: the first break lands roughly{' '}
           {config.everyMinutes} minutes past the 90 second mark, so on a default setting that is
           about {Math.round((config.everyMinutes * 60 + 90) / 60)} minutes into a programme.
         </p>
 
-        <p className="mt-2 text-[10px] leading-relaxed text-zinc-600">
+        <p className="mt-2 text-[10px] leading-relaxed text-zinc-400">
           Timing is jittered by up to 20% so breaks do not land like clockwork, and never within 90
           seconds of either end. Programmes under {Math.round(MIN_PROGRAMME_SECONDS / 60)} minutes
           are left alone, and breaks are skipped entirely on the Tube embed, whose position cannot
@@ -255,7 +255,7 @@ export default function CommercialBreaksModal({
         <div className="mt-4 pt-3 border-t border-zinc-800">
           <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">YOUR REELS</span>
           {sets.length === 0 && (
-            <p className="mt-1 text-[11px] text-zinc-600">
+            <p className="mt-1 text-[11px] text-zinc-400">
               None yet. Paste an archive.org identifier below to build one.
             </p>
           )}
@@ -294,7 +294,7 @@ export default function CommercialBreaksModal({
                       <span className="block font-pixel text-[11px] text-zinc-200 truncate">
                         {s.name}
                       </span>
-                      <span className="block text-[10px] text-zinc-500">
+                      <span className="block text-[10px] text-zinc-400">
                         {s.spots.length} spots
                         {s.spots.length > 0 &&
                           ` \u00b7 ${new Set(s.spots.map((x) => x.identifier)).size} tapes`}
@@ -336,7 +336,7 @@ export default function CommercialBreaksModal({
                 {expandedSetId === s.id && (
                   <div className="px-3 pb-2 max-h-40 overflow-y-auto retro-scroll">
                     {s.spots.length === 0 && (
-                      <p className="text-[10px] text-zinc-600">
+                      <p className="text-[10px] text-zinc-400">
                         Empty. Load a tape below and add spots to it.
                       </p>
                     )}
@@ -348,7 +348,7 @@ export default function CommercialBreaksModal({
                         <span className="flex-1 min-w-0 truncate text-[10px] text-zinc-400">
                           {spot.title}
                         </span>
-                        <span className="shrink-0 text-[10px] text-zinc-500 font-mono">
+                        <span className="shrink-0 text-[10px] text-zinc-400 font-mono">
                           {formatSpotLength(spot.duration)}
                         </span>
                         <button
@@ -409,7 +409,7 @@ export default function CommercialBreaksModal({
               ))}
             </select>
 
-            <p className="mt-1.5 text-[10px] leading-relaxed text-zinc-600">
+            <p className="mt-1.5 text-[10px] leading-relaxed text-zinc-400">
               Pick a reel here to give this channel its own adverts, so a horror
               channel and a cartoon channel need not share.
             </p>
@@ -464,7 +464,7 @@ export default function CommercialBreaksModal({
                   className="w-full text-left px-2 py-1.5 hover:bg-zinc-900/70 cursor-pointer"
                 >
                   <span className="block text-[11px] text-zinc-200 truncate">{r.title}</span>
-                  <span className="block text-[10px] text-zinc-500">
+                  <span className="block text-[10px] text-zinc-400">
                     {r.year || 'Vintage'} &middot;{' '}
                     <span className={r.filesCount > 1 ? 'text-amber-400' : ''}>
                       {r.filesCount > 1 ? `${r.filesCount} spots inside` : 'single item'}
@@ -476,7 +476,7 @@ export default function CommercialBreaksModal({
           )}
 
           <details className="mt-2">
-            <summary className="text-[10px] text-zinc-600 cursor-pointer hover:text-zinc-400">
+            <summary className="text-[10px] text-zinc-400 cursor-pointer hover:text-zinc-400">
               or paste an archive.org identifier
             </summary>
             <div className="flex gap-2 mt-1.5">
@@ -550,7 +550,7 @@ export default function CommercialBreaksModal({
                     <span className="flex-1 min-w-0 truncate text-zinc-300">
                       {f.displayName || f.name}
                     </span>
-                    <span className="shrink-0 text-[10px] text-zinc-500 font-mono">
+                    <span className="shrink-0 text-[10px] text-zinc-400 font-mono">
                       {formatSpotLength(f.duration)}
                     </span>
                   </label>
@@ -571,7 +571,7 @@ export default function CommercialBreaksModal({
           )}
         </div>
 
-        <p className="mt-4 pt-3 border-t border-zinc-800 text-[10px] leading-relaxed text-zinc-600">
+        <p className="mt-4 pt-3 border-t border-zinc-800 text-[10px] leading-relaxed text-zinc-400">
           Reels are stored in this browser only. Build them from public domain or openly licensed
           material on archive.org &mdash; the same standard the rest of the dial holds to.
         </p>

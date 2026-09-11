@@ -45,7 +45,7 @@ export default function NavbarHeader({
   onToggleFullscreen,
 }) {
   return (
-    <header className="nav-stage w-full bg-[#141210]/90 backdrop-blur-md border-b border-zinc-800/80 px-4 py-2.5 flex items-center justify-between gap-4 select-none z-30 sticky top-0">
+    <header className="nav-stage w-full bg-[#141210]/90 backdrop-blur-md border-b border-zinc-800/80 px-3 sm:px-4 py-2.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 select-none z-30 sticky top-0">
       {/* Brand & Logo */}
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg border border-amber-400/40">
@@ -72,25 +72,25 @@ export default function NavbarHeader({
           <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
           <span className="text-amber-400 font-pixel font-bold">CH {currentChannel.number}</span>
           <span className="text-zinc-300 truncate max-w-[160px]">{currentChannel.name}</span>
-          <span className="text-[10px] text-zinc-500 bg-zinc-800 px-1.5 py-0.5 rounded font-pixel">
+          <span className="text-[10px] text-zinc-400 bg-zinc-800 px-1.5 py-0.5 rounded font-pixel">
             {currentChannel.callsign}
           </span>
         </div>
       )}
 
       {/* Right Controls & Quick Actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 min-w-0">
         {/* TV Guide Button */}
         <button
           onClick={() => {
             audio.playKnobClick();
             onOpenGuide();
           }}
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-blue-950/80 hover:bg-blue-900 border border-blue-600/50 text-blue-200 rounded-lg font-pixel text-xs cursor-pointer transition shadow"
+          className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-blue-950/80 hover:bg-blue-900 border border-blue-600/50 text-blue-200 rounded-lg font-pixel text-xs cursor-pointer transition shadow"
           title="Open Electronic Program Guide"
         >
           <List className="w-3.5 h-3.5" />
-          <span>GUIDE</span>
+          <span className="hidden sm:inline">GUIDE</span>
         </button>
 
         {/* Deep Archive Search */}
@@ -99,11 +99,11 @@ export default function NavbarHeader({
             audio.playKnobClick();
             onOpenSearch();
           }}
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-amber-950/80 hover:bg-amber-900 border border-amber-600/50 text-amber-200 rounded-lg font-pixel text-xs cursor-pointer transition shadow"
+          className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-amber-950/80 hover:bg-amber-900 border border-amber-600/50 text-amber-200 rounded-lg font-pixel text-xs cursor-pointer transition shadow"
           title="Search all videos on Archive.org"
         >
           <Search className="w-3.5 h-3.5" />
-          <span>SEARCH</span>
+          <span className="hidden sm:inline">SEARCH</span>
         </button>
 
         {/* VCR / Tapes */}
@@ -112,11 +112,11 @@ export default function NavbarHeader({
             audio.playKnobClick();
             onOpenTapeRack();
           }}
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-600/50 text-emerald-200 rounded-lg font-pixel text-xs cursor-pointer transition shadow"
+          className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-600/50 text-emerald-200 rounded-lg font-pixel text-xs cursor-pointer transition shadow"
           title="Open VHS Cassette Rack"
         >
           <Film className="w-3.5 h-3.5" />
-          <span>TAPES</span>
+          <span className="hidden sm:inline">TAPES</span>
         </button>
 
         {/* Channel Studio & Customizer */}
@@ -125,11 +125,11 @@ export default function NavbarHeader({
             audio.playKnobClick();
             if (onOpenChannelStudio) onOpenChannelStudio();
           }}
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-teal-950/80 hover:bg-teal-900 border border-teal-600/50 text-teal-200 rounded-lg font-pixel text-xs cursor-pointer transition shadow"
+          className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-teal-950/80 hover:bg-teal-900 border border-teal-600/50 text-teal-200 rounded-lg font-pixel text-xs cursor-pointer transition shadow"
           title="Open Channel Studio & Customizer"
         >
           <Sliders className="w-3.5 h-3.5 text-teal-400" />
-          <span>CHANNELS</span>
+          <span className="hidden sm:inline">CHANNELS</span>
         </button>
 
         {/* Commercial Breaks */}
@@ -138,11 +138,11 @@ export default function NavbarHeader({
             audio.playKnobClick();
             onOpenBreaks();
           }}
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-amber-950/80 hover:bg-amber-900 border border-amber-600/50 text-amber-200 rounded-lg font-pixel text-xs cursor-pointer transition shadow"
+          className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-amber-950/80 hover:bg-amber-900 border border-amber-600/50 text-amber-200 rounded-lg font-pixel text-xs cursor-pointer transition shadow"
           title="Commercial breaks - build a reel of spots and set how often it interrupts"
         >
           <Radio className="w-3.5 h-3.5 text-amber-400" />
-          <span>BREAKS</span>
+          <span className="hidden sm:inline">BREAKS</span>
         </button>
 
         {/* Cabinet Style Selector Dropdown */}
@@ -152,7 +152,7 @@ export default function NavbarHeader({
             audio.playSwitch(true);
             onSelectCabinetStyle(e.target.value);
           }}
-          className="bg-zinc-800 border border-zinc-700 text-zinc-200 font-pixel text-xs px-2.5 py-1.5 rounded-lg cursor-pointer focus:outline-none focus:border-amber-500"
+          className="bg-zinc-800 border border-zinc-700 text-zinc-200 font-pixel text-xs px-1.5 sm:px-2.5 py-1.5 rounded-lg cursor-pointer focus:outline-none focus:border-amber-500 max-w-[92px] sm:max-w-none"
           title="Select CRT Cabinet Style"
         >
           <option value="woodgrain">70s Woodgrain</option>
@@ -218,7 +218,7 @@ export default function NavbarHeader({
           href="https://github.com/SRHSoulja/archivetv"
           target="_blank"
           rel="noopener noreferrer"
-          className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-400 hover:text-white cursor-pointer transition hidden sm:flex items-center justify-center"
+          className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-400 hover:text-white cursor-pointer transition flex items-center justify-center"
           title="ArchiveTV on GitHub (Open Source)"
         >
           <GithubIcon className="w-4 h-4" />

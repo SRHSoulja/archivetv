@@ -329,7 +329,7 @@ export default function TapeRackDrawer({
               </button>
             </div>
             <div className="flex items-center gap-1 bg-black/60 px-2.5 py-1 rounded-lg border border-zinc-700">
-              <span className="text-zinc-500 text-[10px] font-pixel">ORDER:</span>
+              <span className="text-zinc-400 text-[10px] font-pixel">ORDER:</span>
               <select
                 value={sortMode}
                 onChange={(e) => {
@@ -352,7 +352,7 @@ export default function TapeRackDrawer({
               <span className="font-pixel text-[10px] text-amber-400/90">DRAG TO ARRANGE</span>
             )}
 
-            <div className="font-mono text-zinc-500 text-[11px] hidden md:block">
+            <div className="font-mono text-zinc-400 text-[11px] hidden md:block">
               {activeTab === 'bookmarks' ? `${bookmarks.length} TAPES SAVED` : 'SELECT TAPE'}
             </div>
           </div>
@@ -383,7 +383,7 @@ export default function TapeRackDrawer({
         {/* Cassette Tapes Grid */}
         <div className="flex-1 overflow-y-auto p-5 retro-scroll bg-[#151311]">
           {activeTab === 'bookmarks' && bookmarks.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center p-8 text-center text-zinc-500">
+            <div className="h-full flex flex-col items-center justify-center p-8 text-center text-zinc-400">
               <Bookmark className="w-12 h-12 mb-3 text-zinc-600 stroke-1" />
               <div className="font-pixel text-amber-400 text-base mb-1">NO BOOKMARKED TAPES YET</div>
               <p className="font-mono text-xs max-w-md text-zinc-400">
@@ -734,7 +734,7 @@ export default function TapeRackDrawer({
               </button>
             </div>
 
-            <div className="mt-3 shrink-0 flex flex-wrap gap-x-4 gap-y-1 font-pixel text-[10px] text-zinc-500">
+            <div className="mt-3 shrink-0 flex flex-wrap gap-x-4 gap-y-1 font-pixel text-[10px] text-zinc-400">
               <span>YEAR: <span className="text-amber-300">{infoTape.year || 'VINTAGE'}</span></span>
               {infoTape.duration ? (
                 <span>RUNTIME: <span className="text-amber-300">{Math.round(infoTape.duration / 60)} MIN</span></span>
@@ -746,12 +746,12 @@ export default function TapeRackDrawer({
               ) : null}
             </div>
 
-            <p className="mt-2 shrink-0 font-mono text-[10px] text-zinc-500 break-all">
+            <p className="mt-2 shrink-0 font-mono text-[10px] text-zinc-400 break-all">
               {infoTape.identifier}
             </p>
 
             <div className="mt-3 shrink-0">
-                <span className="font-pixel text-[10px] text-zinc-500 tracking-wider">YOUR LABEL</span>
+                <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">YOUR LABEL</span>
                 <div className="flex gap-2 mt-1">
                   <input
                     type="text"
@@ -785,12 +785,12 @@ export default function TapeRackDrawer({
                     </button>
                   )}
                 </div>
-                <p className="mt-1 text-[10px] leading-relaxed text-zinc-600">
+                <p className="mt-1 text-[10px] leading-relaxed text-zinc-400">
                   Renames this tape for you only. Box art still resolves from the original title.
                 </p>
 
                 <div className="mt-3">
-                  <span className="font-pixel text-[10px] text-zinc-500 tracking-wider">YEAR</span>
+                  <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">YEAR</span>
                   <div className="flex gap-2 mt-1">
                     <input
                       type="text"
@@ -825,7 +825,7 @@ export default function TapeRackDrawer({
                       </button>
                     )}
                   </div>
-                  <p className="mt-1 text-[10px] leading-relaxed text-zinc-600">
+                  <p className="mt-1 text-[10px] leading-relaxed text-zinc-400">
                     Archive.org often records the upload year rather than the broadcast year.
                   </p>
                 </div>

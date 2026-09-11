@@ -31,7 +31,7 @@ function Toggle({ label, hint, on, onChange }) {
         >
           {label}
         </span>
-        <span className="block mt-0.5 text-[10px] leading-relaxed text-zinc-500">{hint}</span>
+        <span className="block mt-0.5 text-[10px] leading-relaxed text-zinc-400">{hint}</span>
       </span>
       <span
         className={`shrink-0 mt-0.5 w-9 h-5 rounded-full border-2 flex items-center transition ${
@@ -118,7 +118,7 @@ export default function PictureSettingsModal({
             </div>
             <div>
               <h3 className="font-pixel text-amber-400 text-sm font-bold tracking-wide">PICTURE</h3>
-              <p className="text-[10px] text-zinc-500 leading-tight">
+              <p className="text-[10px] text-zinc-400 leading-tight">
                 Tune or switch off the CRT effects
               </p>
             </div>
@@ -199,7 +199,7 @@ export default function PictureSettingsModal({
           </button>
         </div>
 
-        <p className="mt-3 text-[10px] leading-relaxed text-zinc-600">
+        <p className="mt-3 text-[10px] leading-relaxed text-zinc-400">
           Saved in this browser. Antenna and tracking still affect the picture separately.
         </p>
       </div>

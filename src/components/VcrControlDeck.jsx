@@ -203,7 +203,7 @@ export default function VcrControlDeck({
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-zinc-800/80">
         {/* Left: Tape Counter Vacuum Fluorescent Display */}
         <div className="bg-black/90 px-3 py-1.5 rounded-lg border border-zinc-800 flex items-center gap-2 font-mono">
-          <span className="text-[10px] text-zinc-500 font-pixel">COUNTER</span>
+          <span className="text-[10px] text-zinc-400 font-pixel">COUNTER</span>
           <span className="text-phosphor-green text-sm md:text-base font-bold tracking-widest">
             {formatTime(currentTime)}
           </span>

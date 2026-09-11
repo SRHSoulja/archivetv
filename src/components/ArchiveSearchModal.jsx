@@ -380,7 +380,7 @@ export default function ArchiveSearchModal({
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center gap-1 bg-black/60 px-2.5 py-1.5 rounded-lg border border-zinc-700">
-                  <span className="text-zinc-500 text-[10px] font-pixel">SORT:</span>
+                  <span className="text-zinc-400 text-[10px] font-pixel">SORT:</span>
                   <select
                     value={sortBy}
                     onChange={(e) => {
@@ -399,7 +399,7 @@ export default function ArchiveSearchModal({
                 </div>
 
                 <div className="flex items-center gap-1 bg-black/60 px-2.5 py-1.5 rounded-lg border border-zinc-700">
-                  <span className="text-zinc-500 text-[10px] font-pixel">LENGTH:</span>
+                  <span className="text-zinc-400 text-[10px] font-pixel">LENGTH:</span>
                   <select
                     value={durationCategory}
                     onChange={(e) => {
@@ -510,7 +510,7 @@ export default function ArchiveSearchModal({
             </div>
 
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 retro-scroll">
-              <span className="font-pixel text-[10px] text-zinc-500 whitespace-nowrap">
+              <span className="font-pixel text-[10px] text-zinc-400 whitespace-nowrap">
                 HOT SIGNALS:
               </span>
               {quickSignals.map((preset) => (
@@ -610,7 +610,7 @@ export default function ArchiveSearchModal({
             </div>
 
             {bookmarksList.length === 0 ? (
-              <div className="text-center py-20 text-zinc-500 font-pixel text-xs">
+              <div className="text-center py-20 text-zinc-400 font-pixel text-xs">
                 <Bookmark className="w-12 h-12 mx-auto text-zinc-700 mb-2" />
                 <span>NO TAPES BOOKMARKED YET. CLICK THE BOOKMARK ICON ON ANY VIDEO TO SAVE IT!</span>
               </div>
@@ -700,7 +700,7 @@ export default function ArchiveSearchModal({
             )}
 
             {!loading && !error && results.length === 0 && (
-              <div className="text-center py-20 text-zinc-500 font-pixel text-xs flex flex-col items-center gap-2">
+              <div className="text-center py-20 text-zinc-400 font-pixel text-xs flex flex-col items-center gap-2">
                 <Tv className="w-12 h-12 text-zinc-700 mb-1" />
                 <span>SEARCH ANY MOVIE, SHOW, ACTOR OR CLICK A HOT SIGNAL PRESET ABOVE</span>
               </div>
