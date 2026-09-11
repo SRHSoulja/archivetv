@@ -463,16 +463,38 @@ const CrtScreen = forwardRef(function CrtScreen(
     }
   }, [powerOn, calculatedStatic, muted]);
 
-  // Volume sync
+  const autoplayBlockedRef = useRef(false);
+  const prevMutedRef = useRef(muted);
+
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.volume = muted ? 0 : volume;
-      videoRef.current.muted = muted;
-      if (!muted && autoplayBlocked) {
-        setAutoplayBlocked(false);
-      }
+    autoplayBlockedRef.current = autoplayBlocked;
+  }, [autoplayBlocked]);
+
+  // Volume sync.
+  //
+  // While autoplay is blocked the element is deliberately muted -- that mute is
+  // the only reason playback is legal at all. Writing `muted` back here undoes
+  // it, and with autoplayBlocked previously in the dependency array this effect
+  // re-ran the instant the flag was set and undid the recovery in the same tick,
+  // clearing the prompt before it painted. So leave `muted` alone while blocked,
+  // unless the viewer themselves changes it -- that is a gesture, and honouring
+  // it is exactly what they asked for.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.volume = muted ? 0 : volume;
+
+    const mutedChanged = prevMutedRef.current !== muted;
+    prevMutedRef.current = muted;
+
+    if (!autoplayBlockedRef.current) {
+      video.muted = muted;
+    } else if (mutedChanged) {
+      video.muted = muted;
+      setAutoplayBlocked(false);
     }
-  }, [volume, muted, autoplayBlocked]);
+  }, [volume, muted]);
 
   // Direct video source load with graceful autoplay policy handling & candidate stream rotation
   useEffect(() => {
