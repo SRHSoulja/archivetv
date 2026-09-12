@@ -1349,6 +1349,10 @@ export function importChannelsFromJson(input) {
 /**
  * Encodes a channel into a compact URL-safe string for 1-click sharing.
  */
+// Leaves room for the origin, the path and `?shareChannel=` inside an 8KB
+// request line, with a little slack for a longer host.
+export const SHARE_LINK_MAX = 7600;
+
 export function encodeChannelForShare(channel) {
   try {
     const clean = sanitizeChannel(channel);
@@ -1361,16 +1365,36 @@ export function encodeChannelForShare(channel) {
       c: clean.callsign,
       b: clean.badge,
       d: (clean.description || '').slice(0, 160),
-      p: (clean.programs || []).map((p) => ({
-        i: p.identifier,
-        t: p.title,
-        y: p.year,
-        d: p.duration,
-        vf: p.videoFile,
-        vu: p.videoUrl,
-      })),
+      // `vu` is the single biggest field and is usually reconstructible from
+      // the identifier and the filename -- which decodeSharedChannel already
+      // does. Sending it anyway cost about ninety characters per programme,
+      // and the whole link has to fit in a request line: GitHub Pages answers
+      // 414 past roughly 8KB, so a channel of about 25 programmes was the most
+      // that could be shared at all. Omitting the reconstructible ones roughly
+      // doubles that.
+      p: (clean.programs || []).map((p) => {
+        const derivable =
+          p.identifier &&
+          p.videoFile &&
+          p.videoUrl ===
+            `https://archive.org/download/${p.identifier}/${encodeURIComponent(p.videoFile)}`;
+        return {
+          i: p.identifier,
+          t: p.title,
+          y: p.year,
+          d: p.duration,
+          vf: p.videoFile,
+          ...(derivable ? {} : { vu: p.videoUrl }),
+        };
+      }),
     };
-    return encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(compact)))));
+    const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(compact)))));
+    // Measured against the live host: it answers 414 URI Too Long somewhere
+    // between 7,928 and 8,242 characters of full URL. Past that the recipient
+    // gets an error page instead of the channel, and the sender has no way to
+    // know. Refuse rather than hand over a link that cannot work.
+    if (encoded.length > SHARE_LINK_MAX) return { tooLong: true, length: encoded.length };
+    return encoded;
   } catch {
     return null;
   }

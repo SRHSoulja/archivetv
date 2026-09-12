@@ -377,6 +377,16 @@ broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
 - [x] The Guide named the series rather than the episode on air, which on a
       242-episode slot told you nothing
 
+- [x] Share links silently broke on large channels. The whole channel travels
+      inside the URL, and the live host answers 414 URI Too Long past about 8KB
+      — measured between 7,928 and 8,242 characters — so a channel of more than
+      about 25 programmes produced a link that gave the recipient an error page,
+      with nothing to tell the sender. The biggest field per programme was a
+      video URL the decoder could already reconstruct from the identifier and
+      filename, so it is no longer sent: a 16-programme channel went from 5,068
+      characters to 2,996, and the ceiling roughly doubled to 39. Past that the
+      share button refuses and points at Export, which has no limit
+
 ## Known-imperfect, stated plainly
 
 - Episode counts are wrong on films with multiple cuts — counts `availableFiles`,

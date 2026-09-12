@@ -513,6 +513,16 @@ export default function ChannelCustomizerModal({
       alert('Could not generate share link.');
       return;
     }
+    if (encoded.tooLong) {
+      alert(
+        `"${channel.name}" has too many programmes to fit in a share link — the whole ` +
+          `channel travels inside the URL, and browsers and hosts reject one this long ` +
+          `(the recipient would get an error page instead of your channel).\n\n` +
+          `Use the download button next to Share to export it as a JSON file, which has ` +
+          `no size limit. Whoever you send it to can import it from the CHANNEL LINEUP tab.`
+      );
+      return;
+    }
     const baseUrl = window.location.origin + window.location.pathname;
     const shareUrl = `${baseUrl}?shareChannel=${encoded}`;
 
