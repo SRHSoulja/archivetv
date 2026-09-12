@@ -350,6 +350,16 @@ broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
       Century 21 Calling — rather than war footage), and two films that were
       sitting on two channels at once
 
+- [x] An edited copy of a shipped channel hid updates to it forever, silently.
+      A fork replaces its source in the line-up — correct while the source is
+      unchanged, but when the app ships new programmes on that channel the fork
+      goes on hiding them with nothing to say it is doing so. The only remedy
+      was deleting your copy, which threw away every edit you had made.
+      The line-up now shows `+ N NEW — CLICK TO ADD` on any fork whose source
+      has gained programmes, and clicking appends just those: renames, ordering
+      and deliberate removals are kept. Nobody has to choose between their own
+      customisations and an update
+
 ## Known-imperfect, stated plainly
 
 - Episode counts are wrong on films with multiple cuts — counts `availableFiles`,

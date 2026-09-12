@@ -1081,6 +1081,57 @@ export function forkCuratedChannel(channelId) {
  * Returns the id edits should be written against, forking first when this is a
  * channel that ships with the app.
  */
+/**
+ * Is this an edited copy of a shipped channel that has since been updated?
+ *
+ * A fork replaces the channel it came from in the line-up, permanently and
+ * silently. That is correct while the shipped version is unchanged — but when
+ * the app ships new programmes on that channel, the fork goes on hiding them
+ * with no indication that anything is being hidden. Someone who edited a
+ * channel months ago simply never sees an update to it and has no way to know.
+ */
+export function getForkStatus(channel) {
+  if (!channel?.forkedFrom) return null;
+  const source = curatedData.find((c) => c.id === channel.forkedFrom);
+  if (!source) return null;
+  const mine = (channel.programs || []).length;
+  const shipped = (source.programs || []).length;
+  return {
+    sourceName: source.name,
+    mine,
+    shipped,
+    behind: shipped > mine ? shipped - mine : 0,
+  };
+}
+
+/**
+ * Take the programmes a shipped channel has gained, without losing your edits.
+ *
+ * Before this the only way to see an update to a channel you had edited was to
+ * delete your copy, which threw away every change you had made to it. That is a
+ * choice nobody should have to make: the additions are appended to your own
+ * line-up, your ordering and removals are left alone, and anything you already
+ * have is not duplicated.
+ */
+export function mergeShippedAdditions(channelId) {
+  const custom = getCustomChannels();
+  const mine = custom.find((c) => c.id === channelId);
+  if (!mine?.forkedFrom) return { merged: 0, channels: custom };
+  const source = curatedData.find((c) => c.id === mine.forkedFrom);
+  if (!source) return { merged: 0, channels: custom };
+
+  const key = (p) => `${p?.identifier || ''}::${p?.videoFile || p?.videoUrl || ''}`;
+  const have = new Set((mine.programs || []).map(key));
+  const additions = (source.programs || []).filter((p) => !have.has(key(p)));
+  if (additions.length === 0) return { merged: 0, channels: custom };
+
+  const channels = saveCustomChannel({
+    id: mine.id,
+    programs: [...(mine.programs || []), ...additions.map(sanitizeProgram).filter(Boolean)],
+  });
+  return { merged: additions.length, channels };
+}
+
 export function ensureEditableChannel(channelId) {
   const custom = getCustomChannels();
   if (custom.some((c) => c.id === channelId)) return channelId;

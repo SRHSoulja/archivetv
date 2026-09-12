@@ -159,6 +159,17 @@ directly.
 Adding to a channel that ships with the app makes your own editable copy of it
 first. The original is kept, and deleting your copy restores it.
 
+### When a shipped channel gets new programmes
+
+Your copy replaces the shipped channel on the dial, so when the app adds
+programmes to that channel, your copy goes on showing what it had. It will say
+so: the channel's row in CHANNEL LINEUP grows a **`+ N NEW — CLICK TO ADD`**
+badge.
+
+Clicking it appends only the programmes you do not already have. Your renames,
+your ordering and anything you removed on purpose are all left alone — you never
+have to choose between keeping your edits and getting an update.
+
 ---
 
 ## Building channels

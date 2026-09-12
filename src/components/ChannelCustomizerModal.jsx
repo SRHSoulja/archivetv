@@ -31,6 +31,8 @@ import {
   resolvePlayableItem,
   getChannelLineup,
   ensureEditableChannel,
+  getForkStatus,
+  mergeShippedAdditions,
   searchArchive,
   exportChannelsToJson,
   importChannelsFromJson,
@@ -713,6 +715,15 @@ export default function ChannelCustomizerModal({
         {/* TAB 1: Channel Lineup & Manager */}
         {activeTab === 'lineup' && (
           <div className="flex-1 overflow-y-auto p-4 md:p-6 retro-scroll bg-[#0e0d14] space-y-5">
+            {/* The success banner lived only on the search and drop tabs, so
+                merging an update in from here happened silently. */}
+            {dropSuccessMessage && (
+              <div className="bg-emerald-950/90 border-2 border-emerald-500 text-emerald-300 px-4 py-3 rounded-xl flex items-center gap-2 font-pixel text-xs shadow-lg">
+                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{dropSuccessMessage}</span>
+              </div>
+            )}
+
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-zinc-800 pb-4">
               <div>
                 <h3 className="font-pixel text-teal-400 text-lg font-bold">
@@ -894,12 +905,41 @@ export default function ChannelCustomizerModal({
                             <h4 className="font-bold text-white text-sm md:text-base line-clamp-1">
                               {ch.name}
                             </h4>
-                            <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-400">
+                            <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono text-zinc-400">
                               <span className="text-teal-400 font-bold">{ch.callsign}</span>
                               <span>•</span>
                               <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-pixel">
                                 {ch.badge}
                               </span>
+                              {(() => {
+                                // Your copy is hiding a shipped channel that has
+                                // since gained programmes. Nothing said so before.
+                                const fork = getForkStatus(ch);
+                                if (!fork?.behind) return null;
+                                return (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      audio.playSwitch(true);
+                                      const { merged, channels } = mergeShippedAdditions(ch.id);
+                                      setCustomChannels(channels);
+                                      setAllChannels(getChannelLineup());
+                                      if (onChannelsUpdated) onChannelsUpdated();
+                                      setDropSuccessMessage(
+                                        merged
+                                          ? `✓ Added ${merged} new programme${merged > 1 ? 's' : ''} to CH ${ch.number} — your own edits are untouched.`
+                                          : 'That channel is already up to date.'
+                                      );
+                                      setTimeout(() => setDropSuccessMessage(null), 4000);
+                                    }}
+                                    className="px-1.5 py-0.5 rounded bg-amber-950 border border-amber-600/70 text-amber-300 hover:bg-amber-900 hover:text-amber-100 font-pixel cursor-pointer transition"
+                                    title={`This is your edited copy of a channel that ships with the app, and the shipped version has gained ${fork.behind} programme(s) since — yours has ${fork.mine}, it has ${fork.shipped}. Click to add just the new ones. Your edits, ordering and removals are kept.`}
+                                  >
+                                    + {fork.behind} NEW — CLICK TO ADD
+                                  </button>
+                                );
+                              })()}
                             </div>
                           </div>
                         </div>
