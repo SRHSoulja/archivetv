@@ -373,13 +373,19 @@ export default function TapeRackDrawer({
     );
   };
 
-  const handleTapeClick = (prog, idx) => {
+  const handleTapeClick = (prog) => {
     audio.playSwitch(true);
     if (selectedChan) {
-      const progIdx = idx !== undefined && idx >= 0 ? idx : selectedChan.programs?.findIndex(
-        (p) => p.identifier === prog.identifier || p.videoUrl === prog.videoUrl
-      );
-      onSelectChannel(selectedChan, progIdx >= 0 ? progIdx : 0);
+      // Find the tape in the CHANNEL's own order, not the shelf's. The index
+      // passed in used to be the position on screen, so with the shelf sorted
+      // A-Z or arranged by hand, picking the third tape tuned to the channel's
+      // third programme -- a different one.
+      const progs = selectedChan.programs || [];
+      const progIdx = progs.findIndex((p) => tapeKey(p) === tapeKey(prog));
+      // `true` pins it: without that, live mode replaces the chosen tape with
+      // whatever the wall clock says is on, which is not what picking a tape
+      // off the shelf means.
+      onSelectChannel(selectedChan, progIdx >= 0 ? progIdx : 0, true);
     }
     onClose();
   };
@@ -630,7 +636,7 @@ export default function TapeRackDrawer({
                         }
                         onClose();
                       } else {
-                        handleTapeClick(prog, idx);
+                        handleTapeClick(prog);
                       }
                     }}
                     className={`group relative bg-[#181614] border-2 rounded-xl vhs-box-shadow transition-all duration-200 flex flex-col overflow-hidden select-none ${
@@ -776,7 +782,7 @@ export default function TapeRackDrawer({
                         }
                         onClose();
                       } else {
-                        handleTapeClick(prog, idx);
+                        handleTapeClick(prog);
                       }
                     }}
                     className="group relative bg-[#0d0c0a] border-2 border-zinc-700 hover:border-amber-400 rounded-xl p-3 shadow-lg hover:shadow-amber-500/20 transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden"

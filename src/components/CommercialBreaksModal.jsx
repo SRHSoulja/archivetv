@@ -25,6 +25,7 @@ export default function CommercialBreaksModal({
   isOpen,
   onClose,
   currentChannel,
+  channels = [],
   onConfigChange,
   onTestBreak,
 }) {
@@ -218,7 +219,6 @@ export default function CommercialBreaksModal({
     if (!config.setId) push({ ...config, setId: destinationId });
   };
 
-  const channelOverride = currentChannel?.id ? config.byChannel?.[currentChannel.id] : null;
 
   return (
     <div
@@ -522,50 +522,63 @@ export default function CommercialBreaksModal({
         </div>
 
         {/* per-channel */}
-        {currentChannel?.id && (
+        {channels.length > 0 && (
           <div className="mt-4 pt-3 border-t border-zinc-800">
             <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">
-              THIS CHANNEL &middot; {currentChannel.callsign || currentChannel.name}
+              PER CHANNEL
             </span>
-            {/* One control, three plain meanings. The old inherit/on/off split
-                was ambiguous: with the master switch on, inherit and on did
-                exactly the same thing. */}
-            <select
-              value={
-                !channelOverride
-                  ? 'inherit'
-                  : channelOverride.enabled === false
-                    ? 'off'
-                    : channelOverride.setId || 'default'
-              }
-              onChange={(e) => {
-                const v = e.target.value;
-                const byChannel = { ...(config.byChannel || {}) };
-                if (v === 'inherit') delete byChannel[currentChannel.id];
-                else if (v === 'off') byChannel[currentChannel.id] = { enabled: false };
-                else if (v === 'default')
-                  byChannel[currentChannel.id] = { enabled: true, setId: null };
-                else byChannel[currentChannel.id] = { enabled: true, setId: v };
-                push({ ...config, byChannel });
-              }}
-              className="w-full mt-1.5 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1.5 text-xs text-zinc-300 outline-none cursor-pointer"
-            >
-              <option value="inherit">
-                Follow the switch above ({config.enabled ? 'breaks on' : 'breaks off'})
-              </option>
-              <option value="off">Never break on this channel</option>
-              <option value="default">Always break, using the default reel</option>
-              {sets.map((s) => (
-                <option key={s.id} value={s.id}>
-                  Always break, using: {s.name} ({s.spots.length})
-                </option>
-              ))}
-            </select>
-
-            <p className="mt-1.5 text-[10px] leading-relaxed text-zinc-400">
-              Pick a reel here to give this channel its own adverts, so a horror
-              channel and a cartoon channel need not share.
+            <p className="mt-1 mb-1.5 text-[10px] leading-relaxed text-zinc-400">
+              Give each channel its own adverts, so a horror channel and a cartoon
+              channel need not share. Every channel is listed — you no longer have
+              to tune to one to set it.
             </p>
+            <div className="max-h-56 overflow-y-auto retro-scroll rounded-lg border border-zinc-800 divide-y divide-zinc-800/70">
+              {channels.map((ch) => {
+                const ov = config.byChannel?.[ch.id];
+                const value = !ov
+                  ? 'inherit'
+                  : ov.enabled === false
+                    ? 'off'
+                    : ov.setId || 'default';
+                const isNow = currentChannel?.id === ch.id;
+                return (
+                  <div
+                    key={ch.id}
+                    className={`flex items-center gap-2 px-2 py-1.5 ${isNow ? 'bg-amber-950/30' : ''}`}
+                  >
+                    <span className="shrink-0 w-28 min-w-0 truncate font-pixel text-[10px] text-zinc-300">
+                      <span className="text-amber-400">{ch.number}</span>{' '}
+                      {ch.name}
+                      {isNow && <span className="ml-1 text-[9px] text-amber-500">• ON</span>}
+                    </span>
+                    <select
+                      value={value}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        const byChannel = { ...(config.byChannel || {}) };
+                        if (v === 'inherit') delete byChannel[ch.id];
+                        else if (v === 'off') byChannel[ch.id] = { enabled: false };
+                        else if (v === 'default') byChannel[ch.id] = { enabled: true, setId: null };
+                        else byChannel[ch.id] = { enabled: true, setId: v };
+                        push({ ...config, byChannel });
+                      }}
+                      className="flex-1 min-w-0 bg-black/60 border border-zinc-700 focus:border-amber-500/70 rounded px-1.5 py-1 text-[11px] text-zinc-300 outline-none cursor-pointer"
+                    >
+                      <option value="inherit">
+                        Follow the switch above ({config.enabled ? 'on' : 'off'})
+                      </option>
+                      <option value="off">Never break here</option>
+                      <option value="default">Break, using the default reel</option>
+                      {sets.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          Break, using: {r.name} ({r.spots.length})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 

@@ -416,6 +416,18 @@ export default function App() {
       return episodes && episodes.length > 1 ? { ...prog, availableFiles: episodes } : prog;
     }
 
+    // Only rotate a slot that stands for a whole item. When a channel lists
+    // several programmes from the same item — The Lone Ranger is sixteen slots
+    // sharing one identifier — each slot is already a chosen episode, and
+    // rotating them made every slot resolve to the same wall-clock pick. The
+    // channel then had one programme on it however far you skipped.
+    const slotsFromSameItem = (currentPrograms || []).filter(
+      (p) => p.identifier === prog.identifier
+    ).length;
+    if (slotsFromSameItem > 1) {
+      return { ...prog, availableFiles: episodes };
+    }
+
     // A channel slot that is really a whole series should not play episode one
     // for ever. "Popeye the Sailor: The Complete Series" is 242 episodes behind
     // a single slot, and the other 241 were reachable only through the picker.
@@ -497,9 +509,32 @@ export default function App() {
     }
   }, []);
 
-  // Shared by the timed trigger and the "play one now" test button.
   // When the spot now on screen began, in wall-clock terms.
   const clipStartedRef = useRef(null);
+
+  /**
+   * Changing channel abandons any break in progress.
+   *
+   * A break belongs to the channel that was interrupted -- reels are chosen per
+   * channel -- so carrying one across the dial is wrong twice over: the viewer
+   * keeps watching the old channel's adverts, and when the break finishes
+   * `resumeFromBreak` restores the old channel's programme over the new one.
+   * Abandoned rather than resumed: there is nothing to go back to.
+   */
+  useEffect(() => {
+    if (breakWatchdogRef.current) {
+      clearTimeout(breakWatchdogRef.current);
+      breakWatchdogRef.current = null;
+    }
+    if (adBreakRef.current) {
+      adBreakRef.current = null;
+      setAdBreak(null);
+    }
+    nextBreakRef.current = null;
+    clipStartedRef.current = null;
+  }, [currentChannelIndex]);
+
+  // Shared by the timed trigger and the "play one now" test button.
 
   const advanceBreak = useCallback(() => {
     const brk = adBreakRef.current;
@@ -677,14 +712,25 @@ export default function App() {
     setCurrentProgramIndex(0);
   }, [channels.length, triggerChannelZap]);
 
+  /**
+   * @param pinProgram  play exactly this programme rather than joining the
+   *                    channel. Picking a tape off the shelf means "play this
+   *                    one"; in live mode the wall-clock slot would otherwise
+   *                    replace it immediately with whatever is on. Tuning from
+   *                    the Guide leaves it false, so a channel still joins in
+   *                    progress the way it should.
+   */
   const handleSelectChannel = useCallback(
-    (channel, programIndex = 0) => {
+    (channel, programIndex = 0, pinProgram = false) => {
       const idx = channels.findIndex(
         (c) => c.number === channel.number || c.id === channel.id
       );
       if (idx !== -1) {
         triggerChannelZap();
-        setActiveExplicitProgram(null);
+        const wanted = channel.programs?.[programIndex >= 0 ? programIndex : 0];
+        setActiveExplicitProgram(
+          pinProgram && wanted ? { ...wanted, seekSeconds: 0 } : null
+        );
         setActiveEngine('direct');
         setCurrentChannelIndex(idx);
         setCurrentProgramIndex(programIndex >= 0 ? programIndex : 0);
@@ -1306,6 +1352,7 @@ export default function App() {
         isOpen={breaksOpen}
         onClose={() => setBreaksOpen(false)}
         currentChannel={currentChannel}
+        channels={channels}
         onConfigChange={setAdConfigState}
         onTestBreak={handleTestBreak}
       />
