@@ -313,8 +313,20 @@ export default function ChannelCustomizerModal({
     handleInspect(item.identifier, searchQuery.trim());
   };
 
+  const channelNameRef = useRef(null);
+
   const handleEditChannel = (ch) => {
     audio.playKnobClick();
+    // The form is above the channel list, so pressing the pencil on a card
+    // further down opened it somewhere the viewer could not see. Focusing the
+    // name field scrolls it into view and puts the cursor where it is needed.
+    requestAnimationFrame(() => {
+      const el = channelNameRef.current;
+      if (!el) return;
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      el.focus();
+      el.select?.();
+    });
     // Deliberately does NOT fork. Opening the rename form on a shipped channel
     // used to mint a copy immediately, which CANCEL then left behind on the
     // dial. The fork happens on save instead -- see handleCreateChannel.
@@ -814,6 +826,7 @@ export default function ChannelCustomizerModal({
                     </label>
                     <input
                       type="text"
+                      ref={channelNameRef}
                       value={newChannelName}
                       onChange={(e) => setNewChannelName(e.target.value)}
                       placeholder="e.g. GODZILLA MARATHON"
