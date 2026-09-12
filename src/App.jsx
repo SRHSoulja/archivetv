@@ -360,14 +360,67 @@ export default function App() {
 
     if (!prog) return null;
 
-    if ((!prog.availableFiles || prog.availableFiles.length <= 1) && prog.identifier && channelEpisodesMap[prog.identifier]) {
-      return {
-        ...prog,
-        availableFiles: channelEpisodesMap[prog.identifier],
-      };
+    const episodes =
+      prog.availableFiles && prog.availableFiles.length > 1
+        ? prog.availableFiles
+        : (prog.identifier && channelEpisodesMap[prog.identifier]) || null;
+
+    // Rotate only where the files are genuinely separate programmes.
+    //
+    // archive.org items often hold the same film at several qualities, and the
+    // canonical-episode grouping cannot always tell those apart: Elephants Dream
+    // resolves to three "episodes" that are really ed_1024, ed_hd and friends,
+    // and rotating them produced "Elephants Dream - ed hd". Counted across the
+    // whole line-up, everything with 2-5 entries was quality variants of one
+    // film and everything with 6+ was a real series, so that is where the line
+    // goes. The episode picker still lists every file either way.
+    const SERIES_THRESHOLD = 6;
+    if (!episodes || episodes.length < SERIES_THRESHOLD) {
+      return episodes && episodes.length > 1 ? { ...prog, availableFiles: episodes } : prog;
     }
 
-    return prog;
+    // A channel slot that is really a whole series should not play episode one
+    // for ever. "Popeye the Sailor: The Complete Series" is 242 episodes behind
+    // a single slot, and the other 241 were reachable only through the picker.
+    //
+    // Which one airs is derived from the wall clock, seeded by the item so two
+    // series on the same channel do not move in lockstep. That makes it
+    // deterministic rather than random — tuning in twice in the same minute
+    // gives the same episode — and in live mode it is genuinely "what is on".
+    // An explicitly chosen episode is left completely alone.
+    if (activeExplicitProgram) {
+      return { ...prog, availableFiles: episodes };
+    }
+
+    let seed = 0;
+    for (let i = 0; i < (prog.identifier || '').length; i += 1) {
+      seed = (seed * 31 + prog.identifier.charCodeAt(i)) % 100000;
+    }
+    const turnoverMs = 20 * 60 * 1000; // a fresh pick every twenty minutes
+    const idx = Math.abs(Math.floor(Date.now() / turnoverMs) + seed) % episodes.length;
+    const ep = episodes[idx];
+    if (!ep?.videoUrl) return { ...prog, availableFiles: episodes };
+
+    const baseTitle = prog.seriesTitle || (prog.title || '').split(' - ')[0] || prog.title;
+    // Do not prefix a label that already names the series: an episode called
+    // "Superman E07 - Electric Earthquake" on a series called "Superman" was
+    // coming out as "Superman - Superman E07 - Electric Earthquake".
+    const label = (ep.displayName || '').trim();
+    const episodeTitle = !label
+      ? prog.title
+      : label.toLowerCase().startsWith(String(baseTitle).toLowerCase().slice(0, 8))
+      ? label
+      : `${baseTitle} - ${label}`;
+    return {
+      ...prog,
+      availableFiles: episodes,
+      seriesTitle: baseTitle,
+      title: episodeTitle,
+      videoFile: ep.name || prog.videoFile,
+      videoUrl: ep.videoUrl,
+      candidateStreamUrls: ep.candidateStreamUrls || [ep.videoUrl],
+      duration: ep.duration || prog.duration,
+    };
   }, [adBreak, activeExplicitProgram, currentChannel, baseProgram, liveTvMode, currentPrograms, channelEpisodesMap]);
 
   // A new programme gets a fresh chance at the direct player.
@@ -789,8 +842,16 @@ export default function App() {
         if (byFile !== -1) return byFile;
       }
     }
+    // In live mode the programme actually on air comes from the wall clock, not
+    // from `currentProgramIndex` — that state stays where it was put and is not
+    // advanced by the scheduler. Reading it here made the Guide claim programme
+    // one was airing while the set played whatever the clock had chosen.
+    if (liveTvMode && progs.length > 1) {
+      return calculateLiveTvSlot(currentChannel).programIndex;
+    }
+
     return currentProgramIndex;
-  }, [currentChannel, activeExplicitProgram, currentProgramIndex]);
+  }, [currentChannel, activeExplicitProgram, currentProgramIndex, liveTvMode]);
 
   /**
    * Skip to the next or previous programme.
@@ -1248,6 +1309,7 @@ export default function App() {
         channels={channels}
         currentChannel={displayChannel}
         currentProgramIndex={airingProgramIndex}
+        currentProgramTitle={currentProgram?.title || ''}
         liveTvMode={liveTvMode}
         onToggleLiveTv={handleToggleLiveTv}
         onSelectChannel={handleSelectChannel}

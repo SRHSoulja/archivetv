@@ -10,6 +10,7 @@ export default function TvGuideModal({
   channels = [],
   currentChannel,
   currentProgramIndex = 0,
+  currentProgramTitle = '',
   liveTvMode = false,
   onToggleLiveTv,
   onSelectChannel,
@@ -280,7 +281,19 @@ export default function TvGuideModal({
                               <span>{Math.round(currentProg.duration / 60)} MIN</span>
                             </div>
                             <div className="font-bold text-white truncate group-hover:text-yellow-300">
-                              {currentProg.title} {currentProg.year ? `(${currentProg.year})` : ''}
+                              {/* On the channel you are watching, name the episode
+                                  actually on air rather than the series it sits in
+                                  — a slot like "Popeye: The Complete Series" is 242
+                                  episodes, and saying so tells you nothing. */}
+                              {(() => {
+                                const shown = (isCurrent && currentProgramTitle) || currentProg.title;
+                                // An episode label often carries its own year, and
+                                // appending the series year gave "... (1942) (1941)".
+                                const hasYear = /\((?:1[89]|20)\d\d\)/.test(shown);
+                                return hasYear || !currentProg.year
+                                  ? shown
+                                  : `${shown} (${currentProg.year})`;
+                              })()}
                             </div>
                           </div>
                         </div>

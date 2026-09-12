@@ -360,6 +360,23 @@ broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
       and deliberate removals are kept. Nobody has to choose between their own
       customisations and an update
 
+- [x] The Guide disagreed with the set in live mode. The programme actually on
+      air comes from the wall-clock scheduler, but the airing index still read
+      `currentProgramIndex` — state the scheduler never advances — so the Guide
+      claimed programme one while the set played whatever the clock had chosen
+- [x] A channel slot that is a whole series played its first episode for ever.
+      "Popeye the Sailor: The Complete Series" is 242 episodes behind one slot
+      and 241 of them were reachable only through the picker. Which episode airs
+      is now derived from the wall clock, seeded per item so two series on a
+      channel do not move in lockstep — deterministic, not random. Verified: four
+      different Popeye episodes across four clock times.
+      Gated at six or more files, because items with 2–5 are almost always the
+      same film at several qualities; rotating those produced titles like
+      "Elephants Dream - ed hd". Counted across the whole line-up before
+      choosing the threshold
+- [x] The Guide named the series rather than the episode on air, which on a
+      242-episode slot told you nothing
+
 ## Known-imperfect, stated plainly
 
 - Episode counts are wrong on films with multiple cuts — counts `availableFiles`,
