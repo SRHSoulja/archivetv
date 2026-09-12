@@ -60,7 +60,7 @@ export default function AboutModal({ isOpen, onClose }) {
           {/* Summary Box */}
           <div className="p-3.5 bg-zinc-900/90 border border-zinc-800 rounded-xl space-y-2">
             <p className="font-mono text-zinc-200">
-              <strong className="text-amber-400">ArchiveTV</strong> is an open-source, client-side web application simulating vintage CRT televisions and VCR decks to experience classic public domain movies, TV shows, serials, and broadcasts.
+              <strong className="text-amber-400">ArchiveTV</strong> is an open-source, client-side web application simulating vintage CRT televisions and VCR decks to experience classic public domain and openly licensed movies, TV shows, serials, and broadcasts.
             </p>
           </div>
 
@@ -75,6 +75,9 @@ export default function AboutModal({ isOpen, onClose }) {
             </p>
             <p className="text-zinc-300 text-[11px]">
               <strong>Direct Client Streaming:</strong> All media streams, metadata, and thumbnails are queried directly by your browser from the official public servers of the <a href="https://archive.org" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline hover:text-amber-300">Internet Archive (archive.org)</a> under public domain, Creative Commons, or open access archival metadata.
+            </p>
+            <p className="text-zinc-300 text-[11px]">
+              <strong>Channels You Build:</strong> Anything added through Channel Studio, the tape deck, or a commercial reel is your own selection, assembled and played back in your own browser. The curated dial is screened for public domain or open licensing; what you add beyond it is yours to choose, and the public domain, Creative Commons and open access collections are where to stay.
             </p>
             <p className="text-zinc-300 text-[11px]">
               <strong>Privacy:</strong> All bookmarks, custom dials, and preferences are strictly saved in your browser&apos;s local storage.
