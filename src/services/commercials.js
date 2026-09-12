@@ -137,11 +137,39 @@ export function importAdSet(payload) {
 // Same scheme the channel share links use: base64 of a compact payload, with a
 // stable id derived from the contents so opening a link twice does not mint two
 // reels. Channel links learned that the hard way.
-export function encodeReelForShare(set) {
+// Same treatment as channel links: a reel is repetitive too -- one identifier
+// across dozens of spots -- so the payload is deflated before it goes into the
+// URL. Links minted before this are plain base64 and carry no `z`.
+const COMPRESSED_PREFIX = 'z';
+
+async function deflateToBase64(text) {
+  if (typeof CompressionStream === 'undefined') return null;
+  const stream = new Blob([new TextEncoder().encode(text)])
+    .stream()
+    .pipeThrough(new CompressionStream('deflate-raw'));
+  const buf = new Uint8Array(await new Response(stream).arrayBuffer());
+  let binary = '';
+  for (let i = 0; i < buf.length; i += 1) binary += String.fromCharCode(buf[i]);
+  return btoa(binary);
+}
+
+async function inflateFromBase64(b64) {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  return new Response(stream).text();
+}
+
+export async function encodeReelForShare(set) {
   try {
     const payload = exportAdSet(set);
     if (!payload) return null;
-    return encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(payload)))));
+    const json = JSON.stringify(payload);
+    const packed = await deflateToBase64(json);
+    return packed
+      ? encodeURIComponent(COMPRESSED_PREFIX + packed)
+      : encodeURIComponent(btoa(unescape(encodeURIComponent(json))));
   } catch {
     return null;
   }
@@ -153,9 +181,12 @@ function hashString(str) {
   return (h >>> 0).toString(36);
 }
 
-export function decodeSharedReel(encoded) {
+export async function decodeSharedReel(encoded) {
   try {
-    const json = decodeURIComponent(escape(atob(decodeURIComponent(encoded))));
+    const raw = decodeURIComponent(encoded);
+    const json = raw.startsWith(COMPRESSED_PREFIX)
+      ? await inflateFromBase64(raw.slice(COMPRESSED_PREFIX.length))
+      : decodeURIComponent(escape(atob(raw)));
     const data = JSON.parse(json);
     if (!data || !Array.isArray(data.spots)) return null;
     const id = `shared_${hashString(json)}`;

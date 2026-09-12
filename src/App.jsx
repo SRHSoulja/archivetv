@@ -257,19 +257,22 @@ export default function App() {
       const params = new URLSearchParams(window.location.search);
       const sharedReel = params.get('shareReel');
       if (sharedReel) {
-        const reel = decodeSharedReel(sharedReel);
-        if (reel) {
-          const cfg = getAdConfig();
-          setAdConfig({ ...cfg, setId: reel.id, enabled: true });
-          setAdConfigState({ ...cfg, setId: reel.id, enabled: true });
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
+        decodeSharedReel(sharedReel)
+          .then((reel) => {
+            if (!reel) return;
+            const cfg = getAdConfig();
+            setAdConfig({ ...cfg, setId: reel.id, enabled: true });
+            setAdConfigState({ ...cfg, setId: reel.id, enabled: true });
+            window.history.replaceState({}, document.title, window.location.pathname);
+          })
+          .catch((err) => console.error('Error importing shared reel:', err));
       }
 
       const sharedData = params.get('shareChannel') || params.get('importChannel');
       if (sharedData) {
-        const decoded = decodeSharedChannel(sharedData);
-        if (decoded) {
+        // Decoding is async now that payloads are compressed.
+        decodeSharedChannel(sharedData).then((decoded) => {
+          if (!decoded) return;
           saveCustomChannel(decoded);
           const fullLineup = getChannelLineup();
           setChannels(fullLineup);
@@ -283,7 +286,7 @@ export default function App() {
           // Clean the address bar without reload
           window.history.replaceState({}, document.title, window.location.pathname);
           audio.playChannelZap(0.4);
-        }
+        }).catch((err) => console.error('Error importing shared channel from URL:', err));
       }
     } catch (err) {
       console.error('Error importing shared channel from URL:', err);

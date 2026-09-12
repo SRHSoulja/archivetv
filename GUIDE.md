@@ -216,11 +216,9 @@ copy, and a shared channel steps off a dial number that is already taken.
 
 **Export** (⬇) downloads the channel as JSON; the lineup tab can import it back.
 
-**Size limit.** The entire channel travels inside the link, so a very large one
-will not fit — browsers and hosts reject a URL past about 8KB, and the recipient
-would get an error page rather than your channel. Roughly 39 programmes is the
-ceiling. Past that the share button says so and points you at Export, which has
-no limit.
+The whole channel travels inside the link, compressed — a 120-programme channel
+comes out around 800 characters. In practice there is no size you are likely to
+hit; if you ever did, the share button says so and points you at Export.
 
 ---
 

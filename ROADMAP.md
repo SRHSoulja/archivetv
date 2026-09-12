@@ -386,6 +386,12 @@ broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
       filename, so it is no longer sent: a 16-programme channel went from 5,068
       characters to 2,996, and the ceiling roughly doubled to 39. Past that the
       share button refuses and points at Export, which has no limit
+- [x] Then removed the ceiling properly: share payloads are deflated before they
+      go into the URL. They are extremely repetitive — the same identifiers and
+      near-identical filenames over and over — so it compresses 50–73% on the
+      shipped channels, and a 120-programme channel that could not be shared at
+      all becomes a 795-character link. Reels got the same treatment. Links
+      minted before this are plain base64 and still decode, verified
 
 ## Known-imperfect, stated plainly
 

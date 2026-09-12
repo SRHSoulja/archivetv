@@ -506,9 +506,9 @@ export default function ChannelCustomizerModal({
     setTimeout(() => setDropSuccessMessage(null), 3500);
   };
 
-  const handleShareChannelLink = (channel) => {
+  const handleShareChannelLink = async (channel) => {
     audio.playSwitch(true);
-    const encoded = encodeChannelForShare(channel);
+    const encoded = await encodeChannelForShare(channel);
     if (!encoded) {
       alert('Could not generate share link.');
       return;

@@ -68,8 +68,8 @@ export default function CommercialBreaksModal({
     e.target.value = '';
   };
 
-  const handleShareReel = (set) => {
-    const encoded = encodeReelForShare(set);
+  const handleShareReel = async (set) => {
+    const encoded = await encodeReelForShare(set);
     if (!encoded) {
       notify('Could not build a link for that reel.');
       return;
