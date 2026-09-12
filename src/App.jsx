@@ -792,6 +792,54 @@ export default function App() {
     return currentProgramIndex;
   }, [currentChannel, activeExplicitProgram, currentProgramIndex]);
 
+  /**
+   * Skip to the next or previous programme.
+   *
+   * Until now the only way past a show you did not want was to hold fast
+   * forward through all of it. On a channel this steps the line-up; on a tape
+   * loaded from the shelf it steps that tape's own episodes, since there is no
+   * line-up to walk.
+   */
+  const handleStepProgram = useCallback(
+    (delta) => {
+      const aux = activeExplicitProgram?.isAuxiliary ? activeExplicitProgram : null;
+      const auxEpisodes = aux?.availableFiles || [];
+
+      if (aux && auxEpisodes.length > 1) {
+        const here = auxEpisodes.findIndex(
+          (f) => f.videoUrl === aux.videoUrl || f.name === aux.videoFile
+        );
+        const next = ((here === -1 ? 0 : here) + delta + auxEpisodes.length) % auxEpisodes.length;
+        const ep = auxEpisodes[next];
+        if (!ep) return;
+        triggerChannelZap();
+        const baseTitle = aux.seriesTitle || (aux.title || '').split(' - ')[0] || aux.title;
+        setActiveExplicitProgram({
+          ...aux,
+          seriesTitle: baseTitle,
+          title: `${baseTitle} - ${ep.displayName || ep.name}`,
+          videoUrl: ep.videoUrl,
+          videoFile: ep.name || ep.videoFile,
+          candidateStreamUrls: ep.candidateStreamUrls || [ep.videoUrl],
+          duration: ep.duration,
+          seekSeconds: 0,
+        });
+        setActiveEngine('direct');
+        return;
+      }
+
+      const progs = currentChannel?.programs || [];
+      if (progs.length < 2) return;
+      triggerChannelZap();
+      setActiveExplicitProgram(null);
+      setActiveEngine('direct');
+      setCurrentProgramIndex(
+        ((airingProgramIndex + delta) % progs.length + progs.length) % progs.length
+      );
+    },
+    [activeExplicitProgram, currentChannel, airingProgramIndex, triggerChannelZap]
+  );
+
   const handleToggleAux = useCallback(() => {
     triggerChannelZap();
     if (activeExplicitProgram?.isAuxiliary) {
@@ -974,6 +1022,12 @@ export default function App() {
       } else if (key.toLowerCase() === 'v') {
         e.preventDefault();
         handleToggleLiveTv();
+      } else if (key === '[') {
+        e.preventDefault();
+        handleStepProgram(-1);
+      } else if (key === ']') {
+        e.preventDefault();
+        handleStepProgram(1);
       } else if (key.toLowerCase() === 'backspace' || key.toLowerCase() === 'home') {
         e.preventDefault();
         handleRestartProgram();
@@ -1007,6 +1061,7 @@ export default function App() {
     handleCycleColorMode,
     handleCycleAspectRatio,
     handleOpenChannelStudio,
+    handleStepProgram,
     currentProgram,
     anyModalOpen,
     episodesOpen,
@@ -1098,6 +1153,7 @@ export default function App() {
           directUnavailable={directUnavailable}
           mediaLoad={mediaLoad}
           onMediaLoadDone={() => setMediaLoad(null)}
+          onStepProgram={handleStepProgram}
           tuneInPrompt={powerOn && !tuneInAsked}
           onTuneInChoice={handleTuneInChoice}
           stationIdAt={stationIdAt}

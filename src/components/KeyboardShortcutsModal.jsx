@@ -13,6 +13,7 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }) {
     { key: 'Shift + ◄ / ►', desc: 'Scrub Backward / Forward 60 seconds' },
     { key: 'J / K / L', desc: 'Rewind 10s / Pause-Play / Fast Forward 10s' },
     { key: 'Home / Backspace', desc: 'Restart Video at Beginning (00:00)' },
+    { key: '[ / ]', desc: 'Previous / Next Programme on This Channel' },
     { key: 'Space', desc: 'Play / Pause Video' },
     { key: '0 - 9', desc: 'Direct Channel Number Entry' },
     { key: '+ / -', desc: 'Volume Up / Down' },

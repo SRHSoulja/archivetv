@@ -63,6 +63,7 @@ enough, so the card gradually stops appearing.
 | Tune directly | Type the channel number, e.g. <kbd>0</kbd><kbd>4</kbd> |
 | Play / pause | <kbd>Space</kbd> or <kbd>K</kbd> |
 | Skip | <kbd>←</kbd> <kbd>→</kbd> for 10s, <kbd>Shift</kbd>+arrows for 60s |
+| Previous / next programme | <kbd>[</kbd> <kbd>]</kbd>, or the ⏮ ⏭ buttons on the deck |
 | Start over | <kbd>Home</kbd> or <kbd>Backspace</kbd> |
 | Volume | <kbd>+</kbd> <kbd>−</kbd>, <kbd>M</kbd> to mute |
 | Fullscreen the picture | <kbd>F</kbd>, or the ⤢ button that appears when you hover the screen |
@@ -297,6 +298,7 @@ Press <kbd>?</kbd> in the app for this list at any time.
 | <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> | Rewind 10s / play-pause / forward 10s |
 | <kbd>Space</kbd> | Play / pause |
 | <kbd>Home</kbd> <kbd>Backspace</kbd> | Restart the programme |
+| <kbd>[</kbd> <kbd>]</kbd> | Previous / next programme on this channel |
 | <kbd>0</kbd>–<kbd>9</kbd> | Tune to a channel number |
 | <kbd>+</kbd> <kbd>−</kbd> | Volume |
 | <kbd>M</kbd> | Mute |

@@ -57,6 +57,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
     directUnavailable = false,
     mediaLoad = null,
     onMediaLoadDone,
+    onStepProgram,
     tuneInPrompt = false,
     onTuneInChoice,
     stationIdAt = null,
@@ -378,6 +379,7 @@ const TvBoxCabinet = forwardRef(function TvBoxCabinet(
                   playbackRate={playbackRate}
                   onChangePlaybackRate={onChangePlaybackRate}
                   activeEngine={activeEngine}
+                  onStepProgram={onStepProgram}
                   onToggleEngine={onToggleEngine}
                   directUnavailable={directUnavailable}
                   onOpenEpisodes={onOpenEpisodes}

@@ -5,6 +5,8 @@ import {
   RotateCcw,
   ChevronsLeft,
   ChevronsRight,
+  SkipBack,
+  SkipForward,
   FastForward,
   Rewind,
   Bookmark,
@@ -25,6 +27,7 @@ export default function VcrControlDeck({
   playbackRate = 1,
   onChangePlaybackRate,
   activeEngine = 'direct',
+  onStepProgram,
   onToggleEngine,
   directUnavailable = false,
   onOpenEpisodes,
@@ -211,6 +214,22 @@ export default function VcrControlDeck({
 
         {/* Center: Rewind / Skip / Play / Fast Forward Buttons */}
         <div className="flex items-center gap-1.5 md:gap-2">
+          {/* Previous programme. Holding fast-forward through a show you did not
+              want was the only way past it before this. */}
+          {onStepProgram && (
+            <button
+              onClick={() => {
+                audio.playKnobClick();
+                onStepProgram(-1);
+              }}
+              title="Previous programme on this channel ( [ )"
+              aria-label="Previous programme"
+              className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-900 border border-zinc-600 text-zinc-200 cursor-pointer transition shadow"
+            >
+              <SkipBack className="w-4 h-4" />
+            </button>
+          )}
+
           {/* Restart from 00:00 */}
           <button
             onClick={onRestart}
@@ -275,6 +294,20 @@ export default function VcrControlDeck({
           >
             <ChevronsRight className="w-4 h-4" />
           </button>
+
+          {onStepProgram && (
+            <button
+              onClick={() => {
+                audio.playKnobClick();
+                onStepProgram(1);
+              }}
+              title="Next programme on this channel ( ] )"
+              aria-label="Next programme"
+              className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-900 border border-zinc-600 text-zinc-200 cursor-pointer transition shadow"
+            >
+              <SkipForward className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Right: Rate & Features */}

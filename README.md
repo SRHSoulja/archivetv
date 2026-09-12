@@ -251,6 +251,7 @@ All user customizations are saved locally in the browser and persist indefinitel
 | `Shift` + `◄` / `►` | Skip 60s backward / forward |
 | `J` / `K` / `L` | Rewind 10s / Play-Pause / Fast Forward 10s |
 | `Home` / `Backspace` | Restart Video at Beginning (00:00) |
+| `[` / `]` | Previous / Next programme on this channel |
 | `Space` | Play / Pause Video |
 | `▲` / `▼` | Channel Up / Channel Down |
 | `0` – `9` | Direct Channel Number Dialing |
