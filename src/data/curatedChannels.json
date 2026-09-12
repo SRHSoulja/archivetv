@@ -2601,15 +2601,15 @@
         "size": 1553674262
       },
       {
-        "identifier": "AngelAndTheBadman",
+        "identifier": "angel_and_the_badman",
         "title": "Angel and the Badman",
         "year": "1947",
         "description": "Quirt Evans, an all-round bad guy, is nursed back to health by a Quaker family and their daughter Penelope. He finds himself torn between his old reckless outlaw life and Penelope.",
-        "videoFile": "Angel_and_the_Badman_512kb.mp4",
-        "videoUrl": "https://archive.org/download/AngelAndTheBadman/Angel_and_the_Badman_512kb.mp4",
-        "thumbnailUrl": "https://archive.org/services/img/AngelAndTheBadman",
-        "duration": 6010,
-        "size": 442981710
+        "videoFile": "angel_and_the_badman.mp4",
+        "videoUrl": "https://archive.org/download/angel_and_the_badman/angel_and_the_badman.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/angel_and_the_badman",
+        "duration": 5971,
+        "size": 622377473
       },
       {
         "identifier": "cco_thegunandthepulpit",
@@ -2683,11 +2683,11 @@
         "title": "The Macintosh Computer",
         "year": "1985",
         "description": "An in-depth look at the early Apple Macintosh computer, available software and hardware add-ons. Originally broadcast in 1985. <br /><strong>Guests:</strong> Joanna Hoffman, Apple; Bob Foster, Telos Software; Lee Lorenzen, Digital Research; Ben Wiseman, InfoCorp; Gary Kildall,...",
-        "videoFile": "TheMacin1985_edit.mp4",
-        "videoUrl": "https://archive.org/download/TheMacin1985/TheMacin1985_edit.mp4",
+        "videoFile": "TheMacin1985.mp4",
+        "videoUrl": "https://archive.org/download/TheMacin1985/TheMacin1985.mp4",
         "thumbnailUrl": "https://archive.org/services/img/TheMacin1985",
         "duration": 1773,
-        "size": 191046183
+        "size": 183588726
       }
     ]
   },
@@ -2874,44 +2874,44 @@
         "title": "Good Eating Habits",
         "year": "1951",
         "description": "Drama focusing on gluttony and \"hidden hunger,\" where well-nourished people eat poorly and malnourish themselves.",
-        "videoFile": "GoodEati1951_edit.mp4",
-        "videoUrl": "https://archive.org/download/GoodEati1951/GoodEati1951_edit.mp4",
+        "videoFile": "GoodEati1951.mp4",
+        "videoUrl": "https://archive.org/download/GoodEati1951/GoodEati1951.mp4",
         "thumbnailUrl": "https://archive.org/services/img/GoodEati1951",
         "duration": 585,
-        "size": 117109492
+        "size": 60898831
       },
       {
         "identifier": "HowtoBeW1949",
         "title": "How to Be Well Groomed",
         "year": "1949",
         "description": "Siblings Don and Sue show how they keep themselves well groomed throughout the school week and for their Friday night dates.",
-        "videoFile": "HowtoBeW1949_edit.mp4",
-        "videoUrl": "https://archive.org/download/HowtoBeW1949/HowtoBeW1949_edit.mp4",
+        "videoFile": "HowtoBeW1949.mp4",
+        "videoUrl": "https://archive.org/download/HowtoBeW1949/HowtoBeW1949.mp4",
         "thumbnailUrl": "https://archive.org/services/img/HowtoBeW1949",
         "duration": 640,
-        "size": 139177173
+        "size": 66604551
       },
       {
         "identifier": "DatingDo1949",
         "title": "Dating: Do's and Don'ts",
         "year": "1949",
         "description": "Classic instructional film for teen daters, presented here in the rare (but incomplete) Kodachrome version.",
-        "videoFile": "DatingDo1949_edit.mp4",
-        "videoUrl": "https://archive.org/download/DatingDo1949/DatingDo1949_edit.mp4",
+        "videoFile": "DatingDo1949.mp4",
+        "videoUrl": "https://archive.org/download/DatingDo1949/DatingDo1949.mp4",
         "thumbnailUrl": "https://archive.org/services/img/DatingDo1949",
         "duration": 745,
-        "size": 141226682
+        "size": 77448078
       },
       {
         "identifier": "DateWith1950",
         "title": "Date With Your Family, A",
         "year": "1950",
         "description": "Advises children to do whatever is necessary -- even lie -- to achieve harmonious family relations. This portrait of manners among the affluent places a premium on pleasant, unemotional behavior, and contains some interesting do's and don'ts sequences. Key line: \"These boys tr...",
-        "videoFile": "DateWith1950_edit.mp4",
-        "videoUrl": "https://archive.org/download/DateWith1950/DateWith1950_edit.mp4",
+        "videoFile": "DateWith1950.mp4",
+        "videoUrl": "https://archive.org/download/DateWith1950/DateWith1950.mp4",
         "thumbnailUrl": "https://archive.org/services/img/DateWith1950",
         "duration": 600,
-        "size": 125194226
+        "size": 62293446
       }
     ]
   }

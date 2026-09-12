@@ -371,13 +371,24 @@ function scoreVideoFile(f, identifier) {
   if (name.endsWith('.m4v')) score += 200;
   if (name.endsWith('.webm')) score += 160;
 
-  // Format bonuses
+  // Format bonuses.
+  //
+  // H.264 has to dominate, not merely place well. archive.org's "MPEG4"
+  // derivatives are MPEG-4 Part 2, and browsers treat that inconsistently: a
+  // "512Kb MPEG4" decodes at 320x240, a plain "MPEG4" usually decodes, and a
+  // "HiRes MPEG4" decodes the audio track and nothing else -- which is why four
+  // educational shorts played as sound over a black screen while a perfectly
+  // good H.264 copy of each sat in the same item. Tested, not assumed.
   if (format.includes('h.264') || format.includes('h.264 hd')) {
-    score += name.endsWith('.ia.mp4') ? 50 : 200;
+    score += name.endsWith('.ia.mp4') ? 400 : 900;
   }
-  if (format.includes('mpeg4')) score += 200;
-  if (format.includes('512kb')) score += 150;
+  // Never a first choice: audio-only in every case measured.
+  if (format.includes('hires mpeg4')) score -= 700;
+  else if (format.includes('512kb')) score += 150;
+  else if (format.includes('mpeg4')) score += 120;
   if (format.includes('webm')) score += 120;
+  // Theora decoded audio-only here too; keep it behind the MPEG-4 variants.
+  if (format.includes('ogg video')) score -= 400;
 
   // Quality keywords in filename
   if (name.includes('720p') || name.includes('h264') || name.includes('h.264')) score += 250;
