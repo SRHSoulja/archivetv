@@ -11,10 +11,12 @@ import {
   Rewind,
   Bookmark,
   BookmarkCheck,
+  Share2,
+  Check,
   List,
 } from 'lucide-react';
 import { audio } from '../services/soundEffects';
-import { isBookmarked, saveBookmark, removeBookmark } from '../services/archiveApi';
+import { isBookmarked, saveBookmark, removeBookmark, encodeTapeForShare } from '../services/archiveApi';
 
 export default function VcrControlDeck({
   currentProgram,
@@ -38,6 +40,7 @@ export default function VcrControlDeck({
   const [hoverTime, setHoverTime] = useState(0);
   const [hoverX, setHoverX] = useState(0);
   const [bookmarked, setBookmarked] = useState(false);
+  const [shareState, setShareState] = useState(null); // null | 'copied' | 'failed'
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
@@ -56,6 +59,35 @@ export default function VcrControlDeck({
       saveBookmark(currentProgram);
       setBookmarked(true);
     }
+  };
+
+  /**
+   * Hand the tape on screen to someone else.
+   *
+   * Channels and reels could already be sent; the programme actually playing
+   * could not, so showing somebody one film meant sending them a whole channel.
+   * The link carries the position, so they land where you are.
+   */
+  const handleShareTape = async () => {
+    if (!currentProgram?.identifier) return;
+    audio.playSwitch(true);
+    const encoded = await encodeTapeForShare(currentProgram, currentTime);
+    if (!encoded) {
+      setShareState('failed');
+      setTimeout(() => setShareState(null), 2500);
+      return;
+    }
+    const url = `${window.location.origin}${window.location.pathname}?shareTape=${encoded}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareState('copied');
+    } catch {
+      // Clipboard access is refused outside a secure context and in some
+      // embedded browsers; the link still has to be reachable somehow.
+      window.prompt('Copy this link to share the tape:', url);
+      setShareState('copied');
+    }
+    setTimeout(() => setShareState(null), 2500);
   };
 
   const seekRafRef = useRef(null);
@@ -372,6 +404,27 @@ export default function VcrControlDeck({
               <span>EPISODES ({episodesCount})</span>
             </button>
           )}
+
+          {/* Send this tape to someone, from where you are in it */}
+          <button
+            onClick={handleShareTape}
+            disabled={!currentProgram?.identifier}
+            title="Copy a link to this tape, starting where you are"
+            className={`p-2 rounded-lg border font-pixel text-xs cursor-pointer transition flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed ${
+              shareState === 'copied'
+                ? 'bg-teal-500/20 text-teal-200 border-teal-500'
+                : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-white'
+            }`}
+          >
+            {shareState === 'copied' ? (
+              <>
+                <Check className="w-3.5 h-3.5" />
+                <span>LINK COPIED</span>
+              </>
+            ) : (
+              <Share2 className="w-3.5 h-3.5" />
+            )}
+          </button>
 
           {/* Bookmark Tape */}
           <button

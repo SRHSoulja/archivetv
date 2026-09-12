@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon, Info, GripVertical, ListVideo } from 'lucide-react';
+import { X, Film, Play, Disc, Copy, Check, Bookmark, Trash2, Star, LayoutGrid, Image as ImageIcon, Info, GripVertical, ListVideo, Tag, Share2 } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import {
   getBookmarks,
@@ -17,6 +17,12 @@ import {
   addProgramToChannel,
   ensureEditableChannel,
   sanitizeProgram,
+  getTapeShelves,
+  toggleTapeShelf,
+  getShelfCounts,
+  renameShelf,
+  deleteShelf,
+  encodeTapeForShare,
 } from '../services/archiveApi';
 import {
   fetchTheatricalPoster,
@@ -25,6 +31,10 @@ import {
 } from '../services/posterService';
 import ArtOverridePanel from './ArtOverridePanel';
 import { useDialog } from '../hooks/useDialog';
+
+// Stands for "tapes on no shelf at all" in the shelf filter. A real shelf could
+// never be named this, so it cannot collide with one.
+const UNSHELVED = '\u0000unshelved';
 
 export default function TapeRackDrawer({
   isOpen,
@@ -58,6 +68,15 @@ export default function TapeRackDrawer({
   const [customLoading, setCustomLoading] = useState(false);
   const [customError, setCustomError] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+
+  // Which shelf the bookmarks tab is filtered to: null for everything,
+  // UNSHELVED for tapes nobody has filed yet, otherwise a shelf name.
+  const [activeShelf, setActiveShelf] = useState(null);
+  const [shelfVersion, setShelfVersion] = useState(0);
+  const [shelfDraft, setShelfDraft] = useState('');
+  const [shelfRenaming, setShelfRenaming] = useState(false);
+  const [shelfRenameDraft, setShelfRenameDraft] = useState('');
+  const [sharedTapeId, setSharedTapeId] = useState(null);
 
   const [posterMap, setPosterMap] = useState({});
 
@@ -103,7 +122,45 @@ export default function TapeRackDrawer({
     return Number.isFinite(n) ? n : null;
   };
 
-  const baseList = (activeTab === 'bookmarks' ? bookmarks : tapes).filter(Boolean);
+  const shelvesOf = (p) => getTapeShelves(p?.identifier);
+  const onShelf = (p, name) =>
+    shelvesOf(p).some((n) => n.toLowerCase() === String(name).toLowerCase());
+
+  const shelfCounts = useMemo(() => {
+    // Only count shelves that still have a saved tape on them, so removing the
+    // last tape from a shelf makes the shelf disappear rather than leaving a
+    // chip that filters to nothing.
+    const saved = new Set(bookmarks.map((b) => b?.identifier).filter(Boolean));
+    return getShelfCounts()
+      .map(({ name }) => ({ name, count: bookmarks.filter((b) => onShelf(b, name)).length }))
+      .filter((sh) => sh.count > 0 && saved.size > 0);
+    // shelfVersion re-runs this after a tape is filed or a shelf renamed
+  }, [bookmarks, shelfVersion]);
+
+  const unshelvedCount = useMemo(
+    () => bookmarks.filter((b) => shelvesOf(b).length === 0).length,
+    [bookmarks, shelfVersion]
+  );
+
+  // Filing the last tape off a shelf, or un-saving it, removes the shelf. Left
+  // alone, the filter would keep pointing at a shelf that no longer exists and
+  // show an empty rack with nothing highlighted.
+  useEffect(() => {
+    if (!activeShelf) return;
+    if (activeShelf === UNSHELVED) {
+      if (unshelvedCount === 0) setActiveShelf(null);
+      return;
+    }
+    if (!shelfCounts.some((sh) => sh.name === activeShelf)) setActiveShelf(null);
+  }, [activeShelf, shelfCounts, unshelvedCount]);
+
+  const baseList = useMemo(() => {
+    const list = (activeTab === 'bookmarks' ? bookmarks : tapes).filter(Boolean);
+    if (activeTab !== 'bookmarks' || !activeShelf) return list;
+    if (activeShelf === UNSHELVED) return list.filter((p) => shelvesOf(p).length === 0);
+    return list.filter((p) => onShelf(p, activeShelf));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, bookmarks, tapes, activeShelf, shelfVersion]);
 
   const sortedList = useMemo(() => {
     const list = [...baseList];
@@ -536,7 +593,11 @@ export default function TapeRackDrawer({
                 type="button"
                 onClick={() => {
                   audio.playSwitch(true);
-                  sendToChannel(sortedList, 'NEW', 'MY TAPES');
+                  sendToChannel(
+                    sortedList,
+                    'NEW',
+                    activeShelf && activeShelf !== UNSHELVED ? activeShelf.toUpperCase() : 'MY TAPES'
+                  );
                 }}
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-teal-600/60 bg-teal-950/70 text-teal-200 hover:bg-teal-900 font-pixel text-[10px] tracking-wider cursor-pointer transition"
                 title="Make a channel that plays every tape on this shelf, in this order"
@@ -567,7 +628,11 @@ export default function TapeRackDrawer({
             </button>
 
             <div className="font-mono text-zinc-400 text-[11px] hidden md:block">
-              {activeTab === 'bookmarks' ? `${bookmarks.length} TAPES SAVED` : 'SELECT TAPE'}
+              {activeTab !== 'bookmarks'
+                ? 'SELECT TAPE'
+                : activeShelf
+                  ? `${sortedList.length} OF ${bookmarks.length} TAPES`
+                  : `${bookmarks.length} TAPES SAVED`}
             </div>
           </div>
         </div>
@@ -591,6 +656,118 @@ export default function TapeRackDrawer({
                 CH {ch.number} • {ch.callsign}
               </button>
             ))}
+          </div>
+        )}
+
+        {/* Shelves: a flat wall of bookmarks stops being findable somewhere
+            around thirty tapes, so they can be filed into named sections. */}
+        {activeTab === 'bookmarks' && bookmarks.length > 0 && (
+          <div className="bg-[#100e0d] px-4 py-2 border-b border-zinc-800 flex items-center gap-2 overflow-x-auto retro-scroll">
+            <Tag className="w-3 h-3 text-zinc-500 shrink-0" />
+            {shelfCounts.length === 0 && !unshelvedCount ? null : (
+              <button
+                onClick={() => {
+                  audio.playKnobClick();
+                  setActiveShelf(null);
+                  setShelfRenaming(false);
+                }}
+                className={`px-3 py-1.5 rounded-lg font-pixel text-xs whitespace-nowrap cursor-pointer transition ${
+                  activeShelf === null
+                    ? 'bg-amber-600 text-black font-bold shadow'
+                    : 'bg-zinc-800/80 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200 border border-zinc-700'
+                }`}
+              >
+                ALL {bookmarks.length}
+              </button>
+            )}
+            {shelfCounts.map((sh) => (
+              <button
+                key={sh.name}
+                onClick={() => {
+                  audio.playKnobClick();
+                  setActiveShelf(sh.name);
+                  setShelfRenaming(false);
+                }}
+                className={`px-3 py-1.5 rounded-lg font-pixel text-xs whitespace-nowrap cursor-pointer transition ${
+                  activeShelf === sh.name
+                    ? 'bg-amber-600 text-black font-bold shadow'
+                    : 'bg-zinc-800/80 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200 border border-zinc-700'
+                }`}
+              >
+                {sh.name.toUpperCase()} {sh.count}
+              </button>
+            ))}
+            {unshelvedCount > 0 && shelfCounts.length > 0 && (
+              <button
+                onClick={() => {
+                  audio.playKnobClick();
+                  setActiveShelf(UNSHELVED);
+                  setShelfRenaming(false);
+                }}
+                className={`px-3 py-1.5 rounded-lg font-pixel text-xs whitespace-nowrap cursor-pointer transition ${
+                  activeShelf === UNSHELVED
+                    ? 'bg-amber-600 text-black font-bold shadow'
+                    : 'bg-zinc-800/80 text-zinc-500 hover:bg-zinc-700 hover:text-zinc-300 border border-dashed border-zinc-700'
+                }`}
+              >
+                UNFILED {unshelvedCount}
+              </button>
+            )}
+
+            {/* Renaming and emptying act on whichever shelf is open, so there is
+                no separate place to go and manage them. */}
+            {activeShelf && activeShelf !== UNSHELVED && !shelfRenaming && (
+              <>
+                <button
+                  onClick={() => {
+                    setShelfRenameDraft(activeShelf);
+                    setShelfRenaming(true);
+                  }}
+                  className="px-2 py-1 font-pixel text-[9px] tracking-wider text-zinc-500 hover:text-amber-300 cursor-pointer whitespace-nowrap"
+                >
+                  RENAME SHELF
+                </button>
+                <button
+                  onClick={() => {
+                    audio.playKnobClick();
+                    deleteShelf(activeShelf);
+                    setActiveShelf(null);
+                    setShelfVersion((v) => v + 1);
+                  }}
+                  title="Takes every tape off this shelf. The tapes themselves stay saved."
+                  className="px-2 py-1 font-pixel text-[9px] tracking-wider text-zinc-500 hover:text-red-400 cursor-pointer whitespace-nowrap"
+                >
+                  PUT SHELF AWAY
+                </button>
+              </>
+            )}
+            {shelfRenaming && (
+              <input
+                autoFocus
+                value={shelfRenameDraft}
+                onChange={(e) => setShelfRenameDraft(e.target.value)}
+                onBlur={() => {
+                  const next = shelfRenameDraft.trim();
+                  if (next && next !== activeShelf) {
+                    renameShelf(activeShelf, next);
+                    setActiveShelf(next);
+                    setShelfVersion((v) => v + 1);
+                  }
+                  setShelfRenaming(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') e.currentTarget.blur();
+                  if (e.key === 'Escape') setShelfRenaming(false);
+                }}
+                className="w-40 bg-black/60 border-2 border-amber-600/60 rounded px-2 py-1 text-[11px] text-zinc-100 outline-none"
+              />
+            )}
+
+            {shelfCounts.length === 0 && (
+              <span className="font-mono text-[11px] text-zinc-500 whitespace-nowrap">
+                No shelves yet &mdash; open a tape&rsquo;s INFO to file it on one.
+              </span>
+            )}
           </div>
         )}
 
@@ -969,6 +1146,32 @@ export default function TapeRackDrawer({
                   <><Copy className="w-3 h-3" /> COPY LINK</>
                 )}
               </button>
+              {/* The archive address above opens archive.org. This one opens
+                  the tape in someone else's television. */}
+              <button
+                type="button"
+                onClick={async () => {
+                  const encoded = await encodeTapeForShare(infoTape, 0);
+                  if (!encoded) return;
+                  audio.playKnobClick();
+                  const url = `${window.location.origin}${window.location.pathname}?shareTape=${encoded}`;
+                  try {
+                    await navigator.clipboard.writeText(url);
+                  } catch {
+                    window.prompt('Copy this link to share the tape:', url);
+                  }
+                  setSharedTapeId(infoTape.identifier);
+                  setTimeout(() => setSharedTapeId(null), 2500);
+                }}
+                className="shrink-0 flex items-center gap-1 px-2 py-1 rounded border border-teal-700/70 bg-teal-950/60 text-teal-200 hover:border-teal-500 font-pixel text-[9px] tracking-wider cursor-pointer transition"
+                title="Copy a link that opens this tape in ArchiveTV"
+              >
+                {sharedTapeId === infoTape.identifier ? (
+                  <><Check className="w-3 h-3 text-teal-300" /> COPIED</>
+                ) : (
+                  <><Share2 className="w-3 h-3" /> SHARE TAPE</>
+                )}
+              </button>
             </div>
 
             {/* Put this tape on a channel. The shelf is where the deliberate
@@ -1088,6 +1291,74 @@ export default function TapeRackDrawer({
                   </div>
                   <p className="mt-1 text-[10px] leading-relaxed text-zinc-400">
                     Archive.org often records the upload year rather than the broadcast year.
+                  </p>
+                </div>
+
+                {/* Shelves. Named by hand rather than chosen from a list --
+                    "Lone Ranger", "For the kids", "Saturday" are all equally
+                    valid sections and none of them is a genre. */}
+                <div className="mt-3">
+                  <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">SHELVES</span>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {shelfCounts.map((sh) => {
+                      const on = onShelf(infoTape, sh.name);
+                      return (
+                        <button
+                          key={sh.name}
+                          type="button"
+                          onClick={() => {
+                            audio.playKnobClick();
+                            toggleTapeShelf(infoTape.identifier, sh.name);
+                            setShelfVersion((v) => v + 1);
+                          }}
+                          className={`px-2 py-1 rounded font-pixel text-[10px] tracking-wider border cursor-pointer transition ${
+                            on
+                              ? 'bg-amber-600 text-black border-amber-400 font-bold'
+                              : 'bg-zinc-900 text-zinc-400 border-zinc-700 hover:border-amber-500/60 hover:text-amber-200'
+                          }`}
+                        >
+                          {sh.name.toUpperCase()}
+                        </button>
+                      );
+                    })}
+                    {shelfCounts.length === 0 && (
+                      <span className="text-[10px] text-zinc-500">Not on any shelf yet.</span>
+                    )}
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <input
+                      type="text"
+                      value={shelfDraft}
+                      onChange={(e) => setShelfDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key !== 'Enter') return;
+                        const name = shelfDraft.trim();
+                        if (!name) return;
+                        toggleTapeShelf(infoTape.identifier, name);
+                        setShelfDraft('');
+                        setShelfVersion((v) => v + 1);
+                      }}
+                      placeholder="New shelf, e.g. Horror"
+                      className="flex-1 min-w-0 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1.5 text-xs text-zinc-100 placeholder-zinc-600 outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const name = shelfDraft.trim();
+                        if (!name) return;
+                        audio.playKnobClick();
+                        toggleTapeShelf(infoTape.identifier, name);
+                        setShelfDraft('');
+                        setShelfVersion((v) => v + 1);
+                      }}
+                      className="px-3 rounded font-pixel text-[10px] tracking-wider bg-amber-600 hover:bg-amber-500 text-black font-bold cursor-pointer"
+                    >
+                      FILE IT
+                    </button>
+                  </div>
+                  <p className="mt-1 text-[10px] leading-relaxed text-zinc-400">
+                    A tape can sit on as many shelves as you like. Shelves appear along the top of
+                    your tapes, and any one of them makes a channel in a press.
                   </p>
                 </div>
               </div>

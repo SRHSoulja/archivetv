@@ -26,6 +26,9 @@ user or verified against the running app; nothing here is speculation.
 
 ### Outstanding, in the order the user raised them
 
+**All five are done and verified.** Kept below with what was built and how it
+was checked, so the next session does not redo them.
+
 1. ~~**Break timing is still interval-based.**~~ **Done.** Breaks are now placed
    in proportion to the programme. `planBreakPoints` in
    `src/services/commercials.js` cuts a programme into acts of roughly
@@ -50,16 +53,25 @@ user or verified against the running app; nothing here is speculation.
    for a second or two after a compilation starts, before the seek lands, so
    sampling once early reports a false "always drops in at 0".
 
-4. **Categorise bookmarked tapes** into genres/series rather than one flat
-   MY BOOKMARKS shelf. Tape metadata lives in `archivetv_bookmarks_v1`; custom
-   labels and years are already stored separately by identifier
-   (`archivetv_custom_titles_v1`, `_custom_years_v1`), so a `tags` map keyed the
-   same way would follow the established pattern.
+4. ~~**Categorise bookmarked tapes.**~~ **Done.** Tapes are filed onto named
+   **shelves** -- `archivetv_tape_shelves_v1`, a map of identifier to names,
+   following the custom-titles pattern. A row of chips along the top of MY
+   BOOKMARKS filters the rack (`ALL`, one per shelf with a count, `UNFILED`),
+   the ⓘ sheet files a tape onto any number of them, and MAKE A CHANNEL is
+   scoped to the open shelf and named after it. Shelves can be renamed or
+   emptied; a shelf with no tapes on it stops existing. No fixed genre list,
+   deliberately -- "Lone Ranger" and "For the kids" are as useful as "Horror".
+   Verified: filed three of six tapes, chips read `ALL 6 | HORROR 2 | NOIR 1 |
+   UNFILED 3`, filtering and the counter agreed, and it survived a reload.
 
-5. **Share the tape you are watching.** Channels and reels both have share
-   links; a single tape does not. The plumbing exists —
-   `encodeChannelForShare` / `decodeSharedChannel` in `src/services/archiveApi.js`
-   compress a payload into a URL — so a one-tape variant is small work.
+5. ~~**Share the tape you are watching.**~~ **Done.** `encodeTapeForShare` /
+   `decodeSharedTape` in `src/services/archiveApi.js`, `?shareTape=`. Share
+   button on the VCR deck beside the bookmark ribbon, and SHARE TAPE on the ⓘ
+   sheet. The link carries the playhead (skipped within 30s of either end), and
+   opening one plays the tape at once without touching the recipient's shelf or
+   settings. Verified end to end in two browser contexts: 128-character link,
+   right tape, address bar cleaned; with a position, sender at 421s and
+   recipient landed at 430s.
 
 ### Things already established — do not re-litigate
 

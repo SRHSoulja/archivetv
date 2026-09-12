@@ -32,6 +32,7 @@ import {
   resolvePlayableItem,
   saveCustomChannel,
   decodeSharedChannel,
+  decodeSharedTape,
   getCanonicalEpisodeKey,
 } from './services/archiveApi';
 import { audio } from './services/soundEffects';
@@ -131,6 +132,13 @@ export default function App() {
     }
   });
   const [channelZap, setChannelZap] = useState(false);
+
+  // A tape that arrived in the address bar, waiting for the player to exist.
+  // Held in a ref rather than played from the URL effect directly: that effect
+  // runs before `handlePlayDirectItem` is worth calling, and a ref keeps the
+  // two from having to know about each other.
+  const pendingSharedTapeRef = useRef(null);
+  const [sharedTapeTick, setSharedTapeTick] = useState(0);
 
   // Top-of-hour station identification. Polls rather than timing a single long
   // timeout: a laptop that sleeps through the hour would otherwise fire the
@@ -268,6 +276,26 @@ export default function App() {
             window.history.replaceState({}, document.title, window.location.pathname);
           })
           .catch((err) => console.error('Error importing shared reel:', err));
+      }
+
+      // A single tape. Played at once rather than filed away: the sender meant
+      // "watch this", and it lands at the moment they were at.
+      const sharedTape = params.get('shareTape');
+      if (sharedTape) {
+        decodeSharedTape(sharedTape)
+          .then((tape) => {
+            if (!tape) return;
+            pendingSharedTapeRef.current = tape;
+            setSharedTapeTick((n) => n + 1);
+            setSharedNotice(
+              `"${tape.title}" arrived as a tape${
+                tape.sharedAt ? ' — starting where the sender was' : ''
+              }. The bookmark button on the deck keeps it.`
+            );
+            setTimeout(() => setSharedNotice(null), 11000);
+            window.history.replaceState({}, document.title, window.location.pathname);
+          })
+          .catch((err) => console.error('Error opening shared tape:', err));
       }
 
       const sharedData = params.get('shareChannel') || params.get('importChannel');
@@ -868,6 +896,16 @@ export default function App() {
     },
     [triggerChannelZap, cabinetStyle]
   );
+
+  // Hand over anything the address bar brought, once there is something to hand
+  // it to. Runs on mount only -- a shared tape arrives with the page.
+  useEffect(() => {
+    const tape = pendingSharedTapeRef.current;
+    if (!tape) return;
+    pendingSharedTapeRef.current = null;
+    handlePlayDirectItem(tape);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sharedTapeTick]);
 
   const handleCustomTapePlay = useCallback(
     async (identifier) => {

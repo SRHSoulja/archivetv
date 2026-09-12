@@ -19,7 +19,9 @@ the machine you are using and do not follow you to another one. See
 - [Episodes and series](#episodes-and-series)
 - [The TV Guide](#the-tv-guide)
 - [Your tape shelf](#your-tape-shelf)
+- [Shelves: sorting your tapes](#shelves-sorting-your-tapes)
 - [Turning tapes into a channel](#turning-tapes-into-a-channel)
+- [Sharing a tape](#sharing-a-tape)
 - [Building channels](#building-channels)
 - [Sharing channels](#sharing-channels)
 - [Commercial breaks](#commercial-breaks)
@@ -141,8 +143,40 @@ grip you can drag, by mouse or by finger. The arrangement is saved.
 | **Rename** | Your own label for that tape. Only you see it. |
 | **Year** | Correct a wrong date. Sorting uses yours. |
 | **COPY LINK** | Copies the archive.org address, for pasting anywhere |
+| **SHARE TAPE** | Copies a link that opens this tape in someone else's television |
+| **SHELVES** | File it under a section you name. See below |
 | **CHANGE BOX ART** | See [Fixing box art](#fixing-box-art) |
 | **PUT THIS TAPE ON A CHANNEL** | See below |
+
+---
+
+## Shelves: sorting your tapes
+
+A flat wall of bookmarks stops being findable somewhere around thirty tapes. So
+tapes can be filed onto **shelves** — named sections that appear as a row along
+the top of MY BOOKMARKS.
+
+**To file a tape:** open its ⓘ sheet, find **SHELVES**, and either tap an
+existing shelf or type a new name and press **FILE IT**. A tape can sit on as
+many shelves as you like.
+
+There is no fixed list of genres, because the useful sections are never only
+genres. "Horror", "Lone Ranger", "For the kids", "Saturday morning" and "Ones I
+have not watched yet" are all equally valid, and only you know which you need.
+
+**The row along the top** gives you `ALL`, one chip per shelf with its count,
+and `UNFILED` for anything you have not sorted. Pick one and the rack shows only
+those tapes.
+
+While a shelf is open:
+
+- **MAKE A CHANNEL** builds a channel from *that shelf*, named after it
+- **RENAME SHELF** renames it everywhere at once
+- **PUT SHELF AWAY** takes every tape off the shelf — the tapes themselves stay
+  saved
+
+A shelf exists only as long as a tape is on it; empty the last one and the chip
+disappears.
 
 ---
 
@@ -206,6 +240,29 @@ Reorder a channel's run order, remove programmes, jump to search or URL entry.
 
 ---
 
+## Sharing a tape
+
+Sending someone a whole channel to show them one film is the wrong shape, so a
+single tape has its own link.
+
+**While you are watching:** press the share button (🔗) on the VCR deck, next to
+the bookmark ribbon. The link is copied to your clipboard.
+
+**From the shelf:** open a tape's ⓘ sheet and press **SHARE TAPE**.
+
+The link carries **where you had got to**. Whoever opens it lands on the same
+moment rather than at the top — unless you were in the first or last thirty
+seconds, where "start here" would only be confusing.
+
+Opening one plays the tape straight away and says what arrived. It is not filed
+on their shelf unless they press the bookmark button, and nothing else about
+their set is touched.
+
+These links are short — around 130 characters — because one tape is one
+identifier and one filename.
+
+---
+
 ## Sharing channels
 
 **Share** (🔗) on any channel copies a link containing the whole line-up. Anyone
@@ -264,7 +321,13 @@ returning to the programme. You will sometimes join an advert halfway through,
 which is roughly what happens when a channel comes back from a break late.
 
 The panel tells you when an item will be treated this way, and reel entries
-longer than four minutes are labelled as a *block* rather than a spot.
+longer than four minutes are labelled as a *block* rather than a spot. How long
+to stay inside one is yours to set — **PLAY THIS MUCH OF A BLOCK**, in seconds.
+
+**A reel can hold both kinds at once.** Separate adverts play top to tail; long
+blocks are joined partway in and left after a clip. Each reel says what it is
+made of — "3 adverts · 2 long blocks · 4 tapes" — so you can see the mix without
+opening it.
 
 **Two that definitely work, to start from:**
 
@@ -284,13 +347,26 @@ and a spot that fails mid-break skips itself rather than stalling the programme.
 
 | Setting | Notes |
 |---|---|
-| **ROUGHLY EVERY** | Minutes between breaks — jittered by ±20%, because a break exactly every twelve minutes reads as a spreadsheet |
+| **ROUGHLY EVERY** | How long an act runs — this sets how *dense* breaks are, not when one lands |
 | **SPOTS PER BREAK** | How many adverts run at once |
-| **Per channel** | Any channel can use a different reel, or opt out |
+| **PLAY THIS MUCH OF A BLOCK** | How long to stay inside a long compilation before returning to the programme |
+| **Per channel** | Any channel can use a different reel, or opt out. Every channel is listed, so you do not have to tune to one to set it |
 
-Breaks never interrupt a programme shorter than 10 minutes, and never within 90
-seconds of either end. Skipping a break is always allowed. **PLAY A BREAK NOW**
-lets you test one without waiting.
+**Breaks are placed in proportion to the programme, not on a timer.** Television
+broke at act boundaries — a half-hour show in the middle, an hour into quarters,
+a feature into five or six parts — so that is what happens here. Each programme
+is cut into acts of roughly the length you set, and a break goes at every join,
+jittered by up to 15% of an act so the same programme never breaks in quite the
+same place twice.
+
+The practical difference: a 22-minute cartoon block breaks once, around the
+middle, while a 95-minute feature breaks six or seven times. Under the old
+fixed-interval scheme both were interrupted on the same clock, which is what
+made it feel like a spreadsheet running.
+
+Anything shorter than about one and a half acts is left alone entirely, nothing
+is interrupted within 90 seconds of either end, and skipping a break is always
+allowed. **PLAY A BREAK NOW** lets you test one without waiting.
 
 Reels can be exported, imported and shared by link, exactly like channels.
 
@@ -403,7 +479,7 @@ Everything is in your browser's local storage on the machine you are using:
 | What | Survives a refresh | Follows you to another device |
 |---|---|---|
 | Custom channels, bookmarks, reels | Yes | No |
-| Renames, dates, box art overrides, shelf order | Yes | No |
+| Renames, dates, box art overrides, shelf order, shelves | Yes | No |
 | Picture settings, cabinet, volume, watch mode | Yes | No |
 
 Clearing site data erases all of it. **Export your channels and reels to JSON if

@@ -779,6 +779,112 @@ export function setCustomTitle(identifier, title) {
   } catch {}
 }
 
+// Shelves.
+//
+// One flat MY BOOKMARKS wall stops being a shelf somewhere around thirty tapes:
+// you can see everything and find nothing. A tape can sit on any number of
+// shelves -- "Horror", "Lone Ranger", "For the kids" -- and the shelf is just a
+// name, invented as needed, the way a video shop grew its own sections rather
+// than importing a taxonomy.
+//
+// Keyed by identifier and stored apart from the bookmark record, so the same
+// pattern as titles and years: removing a tape and saving it again keeps the
+// shelves it was on.
+const TAPE_SHELVES_KEY = 'archivetv_tape_shelves_v1';
+
+function loadTapeShelves() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(TAPE_SHELVES_KEY)) || {};
+    return raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  } catch {
+    return {};
+  }
+}
+
+let tapeShelves = loadTapeShelves();
+
+function writeTapeShelves(next) {
+  tapeShelves = next;
+  try {
+    localStorage.setItem(TAPE_SHELVES_KEY, JSON.stringify(next));
+  } catch {}
+}
+
+export function getTapeShelves(identifier) {
+  if (!identifier) return [];
+  const v = tapeShelves[identifier];
+  return Array.isArray(v) ? v.filter(Boolean) : [];
+}
+
+export function setTapeShelves(identifier, names) {
+  if (!identifier) return;
+  const clean = [...new Set((names || []).map((n) => String(n).trim()).filter(Boolean))];
+  const next = { ...tapeShelves };
+  if (clean.length) next[identifier] = clean;
+  else delete next[identifier];
+  writeTapeShelves(next);
+}
+
+export function toggleTapeShelf(identifier, name) {
+  const label = String(name || '').trim();
+  if (!identifier || !label) return getTapeShelves(identifier);
+  const current = getTapeShelves(identifier);
+  const hit = current.find((n) => n.toLowerCase() === label.toLowerCase());
+  const next = hit ? current.filter((n) => n !== hit) : [...current, label];
+  setTapeShelves(identifier, next);
+  return next;
+}
+
+/**
+ * Every shelf in use, with how many tapes are on it.
+ *
+ * Built from what tapes actually carry rather than from a list of shelves kept
+ * separately, so a shelf cannot outlive its last tape and there is no second
+ * thing to keep in step. Case-insensitive: "horror" and "Horror" are one shelf,
+ * labelled however it was first written.
+ */
+export function getShelfCounts() {
+  const seen = new Map();
+  for (const names of Object.values(tapeShelves)) {
+    if (!Array.isArray(names)) continue;
+    for (const raw of names) {
+      const name = String(raw || '').trim();
+      if (!name) continue;
+      const key = name.toLowerCase();
+      const hit = seen.get(key);
+      if (hit) hit.count += 1;
+      else seen.set(key, { name, count: 1 });
+    }
+  }
+  return [...seen.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export function renameShelf(from, to) {
+  const oldKey = String(from || '').trim().toLowerCase();
+  const label = String(to || '').trim();
+  if (!oldKey || !label) return;
+  const next = {};
+  for (const [id, names] of Object.entries(tapeShelves)) {
+    if (!Array.isArray(names)) continue;
+    const swapped = names.map((n) => (String(n).trim().toLowerCase() === oldKey ? label : n));
+    const deduped = [...new Set(swapped.map((n) => String(n).trim()).filter(Boolean))];
+    if (deduped.length) next[id] = deduped;
+  }
+  writeTapeShelves(next);
+}
+
+export function deleteShelf(name) {
+  const key = String(name || '').trim().toLowerCase();
+  if (!key) return;
+  const next = {};
+  for (const [id, names] of Object.entries(tapeShelves)) {
+    if (!Array.isArray(names)) continue;
+    const kept = names.filter((n) => String(n).trim().toLowerCase() !== key);
+    if (kept.length) next[id] = kept;
+  }
+  writeTapeShelves(next);
+}
+
 // Local year corrections. Archive.org's year is often the upload date rather
 // than the broadcast/release date, and it is not ours to fix upstream.
 const CUSTOM_YEARS_KEY = 'archivetv_custom_years_v1';
@@ -1454,6 +1560,82 @@ export async function encodeChannelForShare(channel, extras = {}) {
     if (encoded.length > SHARE_LINK_MAX) return { tooLong: true, length: encoded.length };
     return encoded;
   } catch {
+    return null;
+  }
+}
+
+/**
+ * One tape as a link.
+ *
+ * A channel could be sent to someone and so could a reel; the thing actually on
+ * screen most of the time -- a single tape -- could not, which made "look at
+ * this" the one thing the app was bad at. Sending a whole channel to show
+ * somebody one film is the wrong shape.
+ *
+ * Carries where the sender had got to, so the link opens on the same moment
+ * rather than at the top. Skipped near either end, where "start here" means
+ * nothing and would only be surprising.
+ */
+export async function encodeTapeForShare(program, atSeconds = 0) {
+  try {
+    if (!program?.identifier) return null;
+    const at = Math.round(Number(atSeconds) || 0);
+    const dur = Number(program.duration) || 0;
+    const worthKeeping = at > 30 && (!dur || at < dur - 30);
+    const derivable =
+      program.videoFile &&
+      program.videoUrl ===
+        `https://archive.org/download/${program.identifier}/${encodeURIComponent(program.videoFile)}`;
+    const compact = {
+      i: program.identifier,
+      t: program.title || '',
+      y: program.year || '',
+      d: dur || 0,
+      ...(program.videoFile ? { vf: program.videoFile } : {}),
+      ...(derivable || !program.videoUrl ? {} : { vu: program.videoUrl }),
+      ...(worthKeeping ? { at } : {}),
+    };
+    const json = JSON.stringify(compact);
+    const packed = await deflateToBase64(json);
+    // A tape is small enough that deflate sometimes costs more than it saves;
+    // take whichever came out shorter, and let the prefix say which it is.
+    const plain = btoa(unescape(encodeURIComponent(json)));
+    const best =
+      packed && packed.length + 1 < plain.length ? COMPRESSED_PREFIX + packed : plain;
+    return encodeURIComponent(best);
+  } catch {
+    return null;
+  }
+}
+
+export async function decodeSharedTape(encoded) {
+  try {
+    const raw = decodeURIComponent(encoded);
+    const jsonStr = raw.startsWith(COMPRESSED_PREFIX)
+      ? await inflateFromBase64(raw.slice(COMPRESSED_PREFIX.length))
+      : decodeURIComponent(escape(atob(raw)));
+    const c = JSON.parse(jsonStr);
+    if (!c || !c.i) return null;
+    const videoUrl =
+      c.vu || (c.vf ? `https://archive.org/download/${c.i}/${encodeURIComponent(c.vf)}` : null);
+    return {
+      identifier: c.i,
+      title: c.t || c.i,
+      seriesTitle: c.t || '',
+      year: c.y || '',
+      duration: Number(c.d) || 0,
+      videoFile: c.vf || null,
+      videoUrl,
+      candidateStreamUrls: videoUrl ? [videoUrl] : [],
+      embedUrl: `https://archive.org/embed/${c.i}?autoplay=1`,
+      thumbnailUrl: `https://archive.org/services/img/${c.i}`,
+      description: 'Shared tape via an ArchiveTV link.',
+      playerEngine: videoUrl ? 'direct' : 'embed',
+      seekSeconds: Number(c.at) || 0,
+      sharedAt: Number(c.at) || 0,
+    };
+  } catch (err) {
+    console.error('Failed to decode shared tape:', err);
     return null;
   }
 }
