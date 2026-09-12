@@ -2,6 +2,8 @@
 
 <p align="center">
   <a href="https://srhsoulja.github.io/archivetv/"><strong>📺 Launch Live TV Set (GitHub Pages) »</strong></a>
+  &nbsp;·&nbsp;
+  <a href="GUIDE.md"><strong>📖 How to Use It (User Guide) »</strong></a>
 </p>
 
 <p align="center">
@@ -19,7 +21,13 @@ Designed to look, feel, and sound like an authentic analog TV set and hi-fi VCR 
 
 ---
 
+> **New here?** The [**User Guide**](GUIDE.md) is the practical "how do I actually
+> use this" document — switching on, building channels, the tape shelf, commercial
+> breaks, every keyboard shortcut, and an honest list of what the app cannot do.
+> The README below is the feature and architecture reference.
+
 ## 📖 Table of Contents
+- [📖 **User Guide — how to use ArchiveTV**](GUIDE.md)
 - [⚖️ Disclaimer, Fair Use & Architecture Notice](#️-disclaimer-fair-use--architecture-notice)
 - [🛠️ How to Build & Customize Channels](#️-how-to-build--customize-channels)
   - [1. Opening Channel Studio](#1-opening-channel-studio)
@@ -256,11 +264,14 @@ All user customizations are saved locally in the browser and persist indefinitel
 | `S` | Open Deep Archive Search & Explorer |
 | `T` | Open VHS Cassette Tape Shelf |
 | `R` | Toggle Handheld Infrared Remote |
+| `B` | Open Commercial Breaks & Reel Builder |
+| `V` | Live (join in progress) / Start everything at 00:00 |
 | `A` | Toggle Aspect Ratio (4:3 / 16:9) |
 | `F` | Fullscreen the picture (video fills the display) |
 | `Shift` + `F` | Fullscreen the whole site (cabinet, deck and all) |
 | `H` | Immersive mode (hide the VCR deck) |
 | `?` | Show Shortcuts Helper |
+| `Esc` | Close whatever panel is on top |
 
 ---
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Tv, ShieldCheck, ExternalLink, Scale, Heart } from 'lucide-react';
+import { X, Tv, ShieldCheck, ExternalLink, Scale, Heart, BookOpen } from 'lucide-react';
 import { audio } from '../services/soundEffects';
 import { useDialog } from '../hooks/useDialog';
 
@@ -86,6 +86,16 @@ export default function AboutModal({ isOpen, onClose }) {
 
           {/* Links & Repository */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+            <a
+              href="https://github.com/SRHSoulja/archivetv/blob/main/GUIDE.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="sm:col-span-2 flex items-center justify-center gap-2 p-2.5 bg-amber-500 hover:bg-amber-400 border border-amber-300 text-black rounded-xl font-pixel text-xs font-bold transition group cursor-pointer shadow"
+            >
+              <BookOpen className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              <span>USER GUIDE — HOW TO USE ARCHIVETV</span>
+            </a>
+
             <a
               href="https://github.com/SRHSoulja/archivetv"
               target="_blank"

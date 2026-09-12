@@ -1263,6 +1263,16 @@ export default function App() {
             [⚖️ LEGAL & ABOUT]
           </button>
           <span>•</span>
+          <a
+            href="https://github.com/SRHSoulja/archivetv/blob/main/GUIDE.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-amber-400 cursor-pointer font-pixel"
+            title="How to use ArchiveTV — channels, tapes, breaks, shortcuts"
+          >
+            [📖 HELP &amp; GUIDE]
+          </a>
+          <span>•</span>
           <button
             onClick={() => setShortcutsOpen(true)}
             className="hover:text-amber-400 cursor-pointer font-pixel"
