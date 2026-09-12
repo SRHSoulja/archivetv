@@ -99,6 +99,8 @@ export default function CommercialBreaksModal({
   const [query, setQuery] = useState('');
   const [collection, setCollection] = useState('classic_tv_commercials');
   const [results, setResults] = useState([]);
+  // The true playable-spot count per search result, filled in as each resolves.
+  const [spotCounts, setSpotCounts] = useState({});
   const [searching, setSearching] = useState(false);
   const [skippedCount, setSkippedCount] = useState(0);
 
@@ -158,6 +160,26 @@ export default function CommercialBreaksModal({
       const found = data.items || [];
       setResults(found);
       if (found.length === 0) setError('Nothing found. Try different words.');
+
+      // The count on a search result is `files_count` -- every file in the item,
+      // thumbnails and metadata included. One "80s Commercials" item reports 55
+      // and holds a single 48-minute compilation. That is precisely the wrong
+      // answer here, because the whole question being asked is "does this break
+      // into separate adverts?". Resolve the real playable count per result.
+      setSpotCounts({});
+      found.forEach((r) => {
+        resolvePlayableItem(r.identifier)
+          .then((res) => {
+            if (!res) return;
+            const n = (res.availableFiles || []).length || 1;
+            const longest = Math.max(
+              0,
+              ...(res.availableFiles || []).map((f) => f.duration || 0)
+            );
+            setSpotCounts((prev) => ({ ...prev, [r.identifier]: { n, longest } }));
+          })
+          .catch(() => {});
+      });
     } catch {
       setError('Search failed.');
     }
@@ -594,9 +616,23 @@ export default function CommercialBreaksModal({
                   <span className="block text-[11px] text-zinc-200 truncate">{r.title}</span>
                   <span className="block text-[10px] text-zinc-400">
                     {r.year || 'Vintage'} &middot;{' '}
-                    <span className={r.filesCount > 1 ? 'text-amber-400' : ''}>
-                      {r.filesCount > 1 ? `${r.filesCount} spots inside` : 'single item'}
-                    </span>
+                    {(() => {
+                      const real = spotCounts[r.identifier];
+                      if (!real) return <span className="text-zinc-500">checking…</span>;
+                      if (real.n > 1) {
+                        return (
+                          <span className="text-amber-400">
+                            {real.n} separate spots
+                          </span>
+                        );
+                      }
+                      const mins = Math.round((real.longest || 0) / 60);
+                      return (
+                        <span className="text-zinc-400">
+                          one {mins ? `${mins}-minute ` : ''}compilation, not separate adverts
+                        </span>
+                      );
+                    })()}
                   </span>
                 </button>
               ))}
@@ -630,6 +666,27 @@ export default function CommercialBreaksModal({
 
           {candidate && (
             <div className="mt-3">
+              {/* A 48-minute file is a compilation someone recorded off air, not
+                  an advert. Adding one makes a "break" that runs for most of an
+                  hour, which is how this went wrong for the first person to try
+                  it. Say so before they commit rather than after. */}
+              {(() => {
+                // `candidate` is { resolved, files } -- the playable files are
+                // on `.files`, not `.availableFiles`.
+                const spots = candidate.files || [];
+                const longest = Math.max(0, ...spots.map((f) => f.duration || 0));
+                if (longest <= 240) return null;
+                const mins = Math.round(longest / 60);
+                const single = spots.length <= 1;
+                return (
+                  <p className="mb-2 px-2 py-1.5 rounded border border-amber-600/60 bg-amber-950/50 text-amber-200 text-[10px] leading-relaxed">
+                    {single
+                      ? `This is one ${mins}-minute recording, not separate adverts. Added as a spot it would interrupt your programme for ${mins} minutes.`
+                      : `Some of these run to ${mins} minutes — long enough to be whole segments rather than single adverts.`}{' '}
+                    Reels work best from items that split into one file per advert.
+                  </p>
+                );
+              })()}
               <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">ADD TO</span>
               <select
                 value={targetSetId}

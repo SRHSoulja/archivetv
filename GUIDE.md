@@ -250,10 +250,15 @@ were split into one file per advert. A single-file compilation still *works* as
 a spot — it will just play the whole twenty minutes when a break comes round,
 which is not what you want.
 
-**So look for items with many files.** The `📦 N FILES` badge on a search card
-is a useful signal here, even though it is not an episode count: a commercials
-item with 30+ files is usually one advert per file, and one with 3 is a
-compilation.
+**The search tells you which is which.** Each result is resolved and reports its
+real playable count — "122 separate spots" or "one 49-minute compilation, not
+separate adverts" — rather than a file count. A file count is badly misleading
+here: one popular 80s commercials item advertises 55 files and contains a single
+49-minute video, because archive.org generates about one scrub-bar thumbnail per
+minute and 49 of those 55 files are thumbnails.
+
+If you load a compilation anyway, the panel says what will happen before you
+commit — a 49-minute "spot" would interrupt your programme for 49 minutes.
 
 **Two that definitely work, to start from:**
 

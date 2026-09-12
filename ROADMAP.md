@@ -402,6 +402,14 @@ broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
       global setting and their other channels untouched, and a notice saying what
       arrived. A channel with no breaks set shares exactly as before
 
+- [x] The commercials search advertised spot counts that were file counts. One
+      "80s Commercials" item reports 55 and holds a single 49-minute video —
+      49 of those files are scrub-bar thumbnails, which archive.org generates at
+      roughly one a minute, plus metadata and a torrent. Picking it produced a
+      one-spot reel whose "advert" ran for 49 minutes. Results are now resolved
+      and report their true playable count, and loading a long single file warns
+      before it is committed rather than after
+
 ## Known-imperfect, stated plainly
 
 - Episode counts are wrong on films with multiple cuts — counts `availableFiles`,
