@@ -215,10 +215,34 @@ A **reel** is a playlist of spots that interrupts programmes. Nothing ships with
 the app — you bring your own, which keeps the project clear of anything it has no
 right to redistribute.
 
-**Building a reel:** search archive.org from inside the panel, or paste an
-identifier. Compilations of vintage adverts usually break down into one file per
-spot, and you add the ones you want. Reels can be renamed, and spots reordered,
-removed, or shared.
+### Finding spots worth using
+
+This is the genuinely fiddly part, so here is the honest version.
+
+**Most archive.org "commercials" uploads are one long compilation video, not
+separate files.** Of roughly forty-five likely-looking items checked, only two
+were split into one file per advert. A single-file compilation still *works* as
+a spot — it will just play the whole twenty minutes when a break comes round,
+which is not what you want.
+
+**So look for items with many files.** The `📦 N FILES` badge on a search card
+is a useful signal here, even though it is not an episode count: a commercials
+item with 30+ files is usually one advert per file, and one with 3 is a
+compilation.
+
+**Two that definitely work, to start from:**
+
+| Paste this identifier | What you get |
+|---|---|
+| `ctvc` | *Classic Television Commercials* — 32 separate spots |
+| `Election_Ads` | 1960 presidential campaign ads — 10 spots, about a minute each |
+
+**Building the reel:** search archive.org from inside the BREAKS panel, or paste
+an identifier into it. Pick the spots you want; they are added in the order you
+choose them. Reels can be renamed, and spots reordered, removed or shared.
+
+Spots in formats a browser cannot decode are filtered out before you see them,
+and a spot that fails mid-break skips itself rather than stalling the programme.
 
 **Settings:**
 
