@@ -6,6 +6,94 @@ by review; nothing here is aspirational hand-waving. Status markers are honest:
 
 ---
 
+## NEXT UP — read this first
+
+Written to survive a context reset. Everything below is either agreed with the
+user or verified against the running app; nothing here is speculation.
+
+### How to work on this
+
+- **Verify in a browser, never assert.** Every claim in this file was checked
+  with Playwright against a real build. Build with `npx vite build`, serve with
+  `npx vite preview --port <n>`, drive it with a script in the scratchpad. The
+  user has been burned by confident wrong answers; measure before reporting.
+- **Deploys:** commit, push, then `gh run watch --exit-status <id>`. A run that
+  has *started* is not a run that has *passed*. CI uses
+  `bun install --frozen-lockfile`, so any dependency change needs the lockfile.
+- **GitHub Pages caches for 10 minutes.** Suggest a hard refresh before
+  investigating "it didn't update".
+- **Don't raise cosmetic nitpicks.** Report what changes what someone can do.
+
+### Outstanding, in the order the user raised them
+
+1. **Break timing is still interval-based.** The user pointed out that the
+   original intent was breaks that do not feel clockwork, and "roughly every N
+   minutes ±20% jitter" is still a timer. The agreed-plausible fix is
+   **proportional placement**: put breaks at act-like fractions of the
+   programme (around a third and two-thirds through a 22-minute show) rather
+   than every N minutes regardless of length, still jittered. Lives in
+   `scheduleNextBreak` in `src/services/commercials.js`.
+   *Scene/silence detection is impossible — see the CORS note below.*
+
+2. **Compilation clip length should be adjustable.** Currently hardcoded
+   `CLIP_MIN = 32` / `CLIP_MAX = 52` in `src/services/commercials.js`. Wants a
+   control in the BREAKS panel.
+
+3. **Mix short spots and long blocks in one reel.** Already half-true —
+   `isCompilationSpot` decides per spot, so a reel can hold both. Needs
+   checking end to end and probably surfacing in the UI, because the user does
+   not currently believe it works.
+
+4. **Categorise bookmarked tapes** into genres/series rather than one flat
+   MY BOOKMARKS shelf. Tape metadata lives in `archivetv_bookmarks_v1`; custom
+   labels and years are already stored separately by identifier
+   (`archivetv_custom_titles_v1`, `_custom_years_v1`), so a `tags` map keyed the
+   same way would follow the established pattern.
+
+5. **Share the tape you are watching.** Channels and reels both have share
+   links; a single tape does not. The plumbing exists —
+   `encodeChannelForShare` / `decodeSharedChannel` in `src/services/archiveApi.js`
+   compress a payload into a URL — so a one-tape variant is small work.
+
+### Things already established — do not re-litigate
+
+- **Per-episode art is impossible.** archive.org stores one image per *item*.
+  Frame capture is blocked: `crossOrigin="anonymous"` fails because the CDN the
+  download redirect lands on sends no CORS header, and a plain load taints the
+  canvas (`toDataURL` throws `SecurityError`). Same wall blocks any pixel or
+  audio analysis, which is why scene-detected breaks are out.
+- **`files_count` is not a count of anything useful.** It is every file in the
+  item. One commercials item reports 55 and holds a single 49-minute video; 49
+  of those files are scrub-bar thumbnails, which archive.org generates at about
+  one a minute. Those thumbnails *are* timestamped but at a flat interval, so
+  they mark no advert boundaries.
+- **"HiRes MPEG4" decodes audio only.** Browsers refuse the video track. Prefer
+  h.264 always; `scoreVideoFile` handles this.
+- **Properly split commercial items barely exist** — two of roughly forty-five
+  probed. `ctvc` (32 spots) and `Election_Ads` (10) are the known-good ones.
+  Hence the compilation drop-in feature.
+- **Share links are compressed** (`deflate-raw`, `z` prefix, old links still
+  decode). A 120-programme channel is ~795 characters. The 8KB/414 ceiling that
+  used to cap this at ~25 programmes is gone.
+- **Channel edits fork the shipped channel.** A fork hides its source; the
+  line-up shows `+ N NEW — CLICK TO ADD` to merge updates without losing edits.
+- **Curated line-up: 12 channels, 108 programmes.** Every one screened for an
+  H.264 file, a sensible runtime, and a public-domain or open-licence signal.
+  That check keeps *Fantastic Planet*, *UFO* and *Space 1999* off the dial —
+  all popular, all still in copyright. Keep it.
+- **No WWII/Nazi newsreel material** on the dial, by the user's request.
+
+### Recently fixed — regressions to watch for
+
+The episode rotation (a channel slot standing for a whole series airs a
+different episode by wall clock) has broken things twice. It must not apply when
+a channel already lists several programmes from the same item, and it must not
+apply to items with fewer than six files, which are usually one film at several
+qualities. If "skip does nothing" or "every slot plays the same thing" comes
+back, look there first.
+
+---
+
 ## The principle this hangs on
 
 ArchiveTV is **not a television emulator**. It is a modern portal that gives nods
