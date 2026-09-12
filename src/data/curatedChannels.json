@@ -52,6 +52,72 @@
         "thumbnailUrl": "https://archive.org/services/img/Sintel",
         "duration": 888,
         "size": 310674005
+      },
+      {
+        "identifier": "steamboat-willie_1928",
+        "title": "Steamboat Willie",
+        "year": "1928",
+        "description": "Steamboat Willie. Public domain programming from the Internet Archive.",
+        "videoFile": "steamboat-willie_1928.ia.mp4",
+        "videoUrl": "https://archive.org/download/steamboat-willie_1928/steamboat-willie_1928.ia.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/steamboat-willie_1928",
+        "duration": 461,
+        "size": 593323557
+      },
+      {
+        "identifier": "BettyBoopInPoorCinderella",
+        "title": "Betty Boop in Poor Cinderella",
+        "year": "Vintage",
+        "description": "This is the best copy available. Thanks Dave from San Francisco for the video. I know that this one is available on this site so, don't tell me about it. This one had been restored. In the forum it was mentioned that my little group would look for the best possible quality of ...",
+        "videoFile": "1934.08.03-BettyBoop-PoorCinderellafleischerStudiosFirstColorCartoon.mp4",
+        "videoUrl": "https://archive.org/download/BettyBoopInPoorCinderella/1934.08.03-BettyBoop-PoorCinderellafleischerStudiosFirstColorCartoon.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/BettyBoopInPoorCinderella",
+        "duration": 637,
+        "size": 66382034
+      },
+      {
+        "identifier": "popeye-the-sailor-the-complete-series",
+        "title": "Popeye the Sailor Man: The Complete Series (1933 - 1957) (WIP-ish)",
+        "year": "1933",
+        "description": "Every ep of Popeye the Sailor Man archived for your pleasure :3 Credits for rips: Popeye Mercer, Demin Valentine Stuff I need to add: HD prints of the 1933-1949 from Boomerang and HBO Max SD prints Extras from the Thunderbean blu ray",
+        "videoFile": "1933e00-Popeye the Sailor.ia.mp4",
+        "videoUrl": "https://archive.org/download/popeye-the-sailor-the-complete-series/1933e00-Popeye%20the%20Sailor.ia.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/popeye-the-sailor-the-complete-series",
+        "duration": 454,
+        "size": 117112223
+      },
+      {
+        "identifier": "superman-the-complete-collection-fleischerfamous-studios",
+        "title": "Superman - The Complete Collection (Fleischer/Famous Studios)",
+        "year": "1941",
+        "description": "All 17 episodes produced by Fleischer/Famous Studios for Paramount Pictures between 1941 and 1943, and based on the comic strip from DC Comics.",
+        "videoFile": "Superman E01 - The Mad Scientist (1941).mp4",
+        "videoUrl": "https://archive.org/download/superman-the-complete-collection-fleischerfamous-studios/Superman%20E01%20-%20The%20Mad%20Scientist%20%281941%29.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/superman-the-complete-collection-fleischerfamous-studios",
+        "duration": 620,
+        "size": 59795507
+      },
+      {
+        "identifier": "InMyMerr1932",
+        "title": "In My Merry Oldsmobile",
+        "year": "1932",
+        "description": "Surprisingly licentious advertising cartoon produced by the Fleischer brothers.",
+        "videoFile": "InMyMerr1932.mp4",
+        "videoUrl": "https://archive.org/download/InMyMerr1932/InMyMerr1932.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/InMyMerr1932",
+        "duration": 388,
+        "size": 40442318
+      },
+      {
+        "identifier": "RaggedyAnnAndAndy",
+        "title": "Raggedy Ann and Andy",
+        "year": "Vintage",
+        "description": "The condition of this cartoon is not known. It is an 1940 fleischer studios classic",
+        "videoFile": "cartoonFleischer-RaggedyAnnRaggedyAndy1940.mp4",
+        "videoUrl": "https://archive.org/download/RaggedyAnnAndAndy/cartoonFleischer-RaggedyAnnRaggedyAndy1940.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/RaggedyAnnAndAndy",
+        "duration": 1053,
+        "size": 109254057
       }
     ]
   },
@@ -108,6 +174,61 @@
         "thumbnailUrl": "https://archive.org/services/img/StarWreckInThePirkining",
         "duration": 6211,
         "size": 451124058
+      },
+      {
+        "identifier": "VoyagetothePlanetofPrehistoricWomen",
+        "title": "Voyage to the Planet of Prehistoric Women",
+        "year": "1967",
+        "description": "A team of astronauts crashes on the surface of Venus. Accompanied by their robot, they explore the surface and end up destroying the Venusian God. This film is also known as \"The Gill Women\" and \"The Gill Women of Venus\". This film began life as a Soviet-produced work. An Amer...",
+        "videoFile": "VoyagetothePlanetofPrehistoricWomen.mp4",
+        "videoUrl": "https://archive.org/download/VoyagetothePlanetofPrehistoricWomen/VoyagetothePlanetofPrehistoricWomen.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/VoyagetothePlanetofPrehistoricWomen",
+        "duration": 4775,
+        "size": 496578286
+      },
+      {
+        "identifier": "Killers_from_space",
+        "title": "Killers From Space",
+        "year": "1954",
+        "description": "Attack by monsters from another planet! IMDB page",
+        "videoFile": "Killers_from_space.mp4",
+        "videoUrl": "https://archive.org/download/Killers_from_space/Killers_from_space.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Killers_from_space",
+        "duration": 4254,
+        "size": 443284130
+      },
+      {
+        "identifier": "Assignment_Outer_Space",
+        "title": "Assignment Outer Space",
+        "year": "1960",
+        "description": "From IMDb: In the 21st century Ray Peterson, reporter for the Interplanetary News, is assigned to write a story aboard a space station. Tension mounts between Peterson and the station commander, who believes he is in the way, but has orders to leave him alone. Errant spaceship...",
+        "videoFile": "Assignment_Outer_Space.mp4",
+        "videoUrl": "https://archive.org/download/Assignment_Outer_Space/Assignment_Outer_Space.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Assignment_Outer_Space",
+        "duration": 4354,
+        "size": 452697780
+      },
+      {
+        "identifier": "Phantom_Planet",
+        "title": "The Phantom Planet",
+        "year": "1961",
+        "description": "A spaceship is drawn towards a planet populated by tiny people where the atmosphere shrinks the astronauts as well. This film was featured on the television program Mystery Science Theater 3000. You can find an MP4 of this film here . You can find out more about this film on i...",
+        "videoFile": "The_Phantom_Planet.mp4",
+        "videoUrl": "https://archive.org/download/Phantom_Planet/The_Phantom_Planet.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Phantom_Planet",
+        "duration": 4924,
+        "size": 512855084
+      },
+      {
+        "identifier": "InvasionOfTheBeeGirls",
+        "title": "Invasion of the Bee girls",
+        "year": "Vintage",
+        "description": "This one's about strange women who love their men to death, literally! Maybe the fact that there's a research facility doing top secret experiments might have something to do with the suspicious deaths.",
+        "videoFile": "InvasionOfTheBeeGirls.mp4",
+        "videoUrl": "https://archive.org/download/InvasionOfTheBeeGirls/InvasionOfTheBeeGirls.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/InvasionOfTheBeeGirls",
+        "duration": 5188,
+        "size": 540742395
       }
     ]
   },
@@ -2455,15 +2576,37 @@
         "size": 190418272
       },
       {
-        "identifier": "ThePhantomoftheOpera",
-        "title": "The Phantom of the Opera",
-        "year": "1925",
-        "description": "At the Opera of Paris, a mysterious phantom threatens a famous lyric singer, Carlotta and thus forces her to give up her role (Marguerite in Faust) for unknown Christine Daae. \nChristine meets this phantom (a masked man) in the catacombs, where he lives.",
-        "videoFile": "Phantom_of_the_Opera_512kb.mp4",
-        "videoUrl": "https://archive.org/download/ThePhantomoftheOpera/Phantom_of_the_Opera_512kb.mp4",
-        "thumbnailUrl": "https://archive.org/services/img/ThePhantomoftheOpera",
-        "duration": 6388,
-        "size": 463554725
+        "identifier": "CarnivalofSouls",
+        "title": "Carnival of Souls",
+        "year": "1962",
+        "description": "Atmospheric 60s B-horror film with a cult following. Mary Henry is enjoying the day by riding around with two friends but everything goes wrong when challenged to a drag race and their car gets forced off of a bridge. The car sinks into the murky depths, and all three women ar...",
+        "videoFile": "CarnivalOfSouls.mp4",
+        "videoUrl": "https://archive.org/download/CarnivalofSouls/CarnivalOfSouls.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/CarnivalofSouls",
+        "duration": 4979,
+        "size": 518506661
+      },
+      {
+        "identifier": "Night.Of.The.Living.Dead_1080p",
+        "title": "Night of the Living Dead",
+        "year": "1968",
+        "description": "This is the full 1080p Blu-Ray rip (m2ts) of \"Night of the Living Dead\" ( IMDB ) as well as other versions derived from it. The mkv's each have the DTS and AC3 soundtracks with the chapters info included. Please enjoy and let me know if there are problems with any of the files.",
+        "videoFile": "NightOfTheLivingDead.mp4",
+        "videoUrl": "https://archive.org/download/Night.Of.The.Living.Dead_1080p/NightOfTheLivingDead.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Night.Of.The.Living.Dead_1080p",
+        "duration": 5753,
+        "size": 596808390
+      },
+      {
+        "identifier": "Horror_Hotel",
+        "title": "City of the Dead/Horror Hotel",
+        "year": "1960",
+        "description": "College student Nan Barlow visits the village of Whitewood as research for her paper on witchcraft in New England, particularly the case of Elizabeth Selwyn. Her tutor, Professor Alan Driscoll(Lee), recommends the Raven's Inn, run by a Mrs. Newless. Rather unwisely, given the ...",
+        "videoFile": "Horror_Hotel.mp4",
+        "videoUrl": "https://archive.org/download/Horror_Hotel/Horror_Hotel.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Horror_Hotel",
+        "duration": 4554,
+        "size": 474358828
       }
     ]
   },
@@ -2576,6 +2719,39 @@
         "thumbnailUrl": "https://archive.org/services/img/impact",
         "duration": 6578,
         "size": 686028700
+      },
+      {
+        "identifier": "Detour",
+        "title": "Detour",
+        "year": "1945",
+        "description": "\"Man is involved in two freakish accidents that make him look like a murderer. Poverty row masterwork that is the most precise elucidation of the noir theme of explicit fatalism.\" - noir expert Spencer Selby | Cast: Tom Neal, Ann Savage, Claudia Drake, Edmund MacDonald. | A B-...",
+        "videoFile": "Detour.mp4",
+        "videoUrl": "https://archive.org/download/Detour/Detour.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Detour",
+        "duration": 4058,
+        "size": 423770341
+      },
+      {
+        "identifier": "Please_Murder_Me_movie",
+        "title": "Please Murder Me",
+        "year": "1956",
+        "description": "How's that for a title? Lawyer Raymond Burr (seeming very much like Perry Mason) brilliantly defends Angela Lansbury, who seems certain to be found guilty of murdering her husband, who was Burr's best friend! Instead of spoiling it for you, I'll just say that a couple of surpr...",
+        "videoFile": "Please_Murder_Me.mp4",
+        "videoUrl": "https://archive.org/download/Please_Murder_Me_movie/Please_Murder_Me.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Please_Murder_Me_movie",
+        "duration": 4482,
+        "size": 467347375
+      },
+      {
+        "identifier": "Saint_Louis_Bank_Robbery",
+        "title": "The Saint Louis Bank Robbery",
+        "year": "1959",
+        "description": "Steve McQueen stars in a gritty, downbeat, and sometimes savage heist movie that features a gang of very psychologically warped men and a story that's based on an actual crime. Warning: this film is devoid of humor, wit, cheerfulness, glamor, and mercy. It's grim to the brim. ...",
+        "videoFile": "Saint_Louis_Bank_Robbery.mp4",
+        "videoUrl": "https://archive.org/download/Saint_Louis_Bank_Robbery/Saint_Louis_Bank_Robbery.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Saint_Louis_Bank_Robbery",
+        "duration": 5326,
+        "size": 555218751
       }
     ]
   },
@@ -2632,6 +2808,72 @@
         "thumbnailUrl": "https://archive.org/services/img/Santa_Fe_Trail_movie",
         "duration": 6575,
         "size": 684335863
+      },
+      {
+        "identifier": "OnlytheValaint",
+        "title": "Only the Valiant",
+        "year": "1951",
+        "description": "Capt. Richard Lance (Gregory Peck) is unjustly held responsible, by his men and his girlfriend (Barbara Payton), for an Indian massacre death of beloved Lt. Holloway. Holloway (Gig Young) is killed while escorting a dangerous Indian chief to another fort's prison. The chief es...",
+        "videoFile": "OnlytheValaint.mp4",
+        "videoUrl": "https://archive.org/download/OnlytheValaint/OnlytheValaint.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/OnlytheValaint",
+        "duration": 6291,
+        "size": 655317069
+      },
+      {
+        "identifier": "WarOfTheWildcats-JohnWayne1943",
+        "title": "War of the Wildcats - John Wayne (1943)",
+        "year": "1943",
+        "description": "War of the Wildcats or In Old Oklahoma (1943) â John Wayne John Wayne as Daniel Somers Martha Scott as Catherine Allen Albert Dekker as Jim \"Hunk\" Gardner George \"Gabby\" Hayes as Desprit Dean Marjorie Rambeau as Bessie Baxter Dale Evans as \"Cuddles\" Walker Grant Withers as Ric...",
+        "videoFile": "JohnWayne-WarOfTheWildcats1943.mp4",
+        "videoUrl": "https://archive.org/download/WarOfTheWildcats-JohnWayne1943/JohnWayne-WarOfTheWildcats1943.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/WarOfTheWildcats-JohnWayne1943",
+        "duration": 5863,
+        "size": 608710318
+      },
+      {
+        "identifier": "texas_terror_1935",
+        "title": "Texas Terror",
+        "year": "1935",
+        "description": "You can find more information regarding this film on its IMDb page .",
+        "videoFile": "texas_terror_1935.mp4",
+        "videoUrl": "https://archive.org/download/texas_terror_1935/texas_terror_1935.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/texas_terror_1935",
+        "duration": 3101,
+        "size": 322524036
+      },
+      {
+        "identifier": "SagebrushTrail",
+        "title": "Sagebrush Trail",
+        "year": "1933",
+        "description": "Imprisoned for a murder he did not commit, John Brant (John Wayne) escapes and ends up out west where, after giving the local lawmen the slip, he joins up with an outlaw gang. Brant finds out that 'Jones' (Nancy Shubert), one of the outlaws he has become friends with, committe...",
+        "videoFile": "SagebrushTrail.mp4",
+        "videoUrl": "https://archive.org/download/SagebrushTrail/SagebrushTrail.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/SagebrushTrail",
+        "duration": 3208,
+        "size": 333270396
+      },
+      {
+        "identifier": "TheLuckyTexan",
+        "title": "The Lucky Texan",
+        "year": "1934",
+        "description": "Jerry Mason (Wayne), a young Texan, and Jake Benson (Hayes), an old rancher, become partners and strike it rich with a gold mine. They then find their lives complicated by bad guys and a woman.",
+        "videoFile": "TheLuckyTexan.mp4",
+        "videoUrl": "https://archive.org/download/TheLuckyTexan/TheLuckyTexan.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/TheLuckyTexan",
+        "duration": 3267,
+        "size": 339182792
+      },
+      {
+        "identifier": "west_of_the_divide",
+        "title": "West of the Divide",
+        "year": "1934",
+        "description": "You can find more information regarding this film on its IMDb page .",
+        "videoFile": "west_of_the_divide.mp4",
+        "videoUrl": "https://archive.org/download/west_of_the_divide/west_of_the_divide.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/west_of_the_divide",
+        "duration": 3204,
+        "size": 333126078
       }
     ]
   },
@@ -2688,6 +2930,72 @@
         "thumbnailUrl": "https://archive.org/services/img/TheMacin1985",
         "duration": 1773,
         "size": 183588726
+      },
+      {
+        "identifier": "Computer1984_4",
+        "title": "Computer Games",
+        "year": "1984",
+        "description": "Computers are creating an entirely new platform for playing games, between humans or between humans and computers. Guests: Trip Hawkins, Electronic Arts; Bill Budge, Game Designer; Chris Crawford, Atari; Steve Kitchen, Activision Products/Demos: Pinball Construction Set, One o...",
+        "videoFile": "Computer1984_4.mp4",
+        "videoUrl": "https://archive.org/download/Computer1984_4/Computer1984_4.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Computer1984_4",
+        "duration": 1732,
+        "size": 174773759
+      },
+      {
+        "identifier": "Amigaand1985",
+        "title": "Amiga and Atari",
+        "year": "1985",
+        "description": "How much computer can you get at the bottom end of the market - comparison between the Commodore Amiga and the Atari 520ST. Guests: Rick Geiger, Commodore; Tim Mott, Electronic Arts; Bryan Kerr, Atari; Jim Tittsler, Atari; Lewis Moore, Home Computing; George Morrow, Morrow Com...",
+        "videoFile": "Amigaand1985.mp4",
+        "videoUrl": "https://archive.org/download/Amigaand1985/Amigaand1985.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Amigaand1985",
+        "duration": 1758,
+        "size": 177660599
+      },
+      {
+        "identifier": "virtualreali",
+        "title": "Virtual Reality",
+        "year": "1992",
+        "description": "Virtual reality started out as a science fiction concept in the early 1950s. Now, VR has become a kind of holy grail - lots of promises and claims, few results delivered. This program looks at the state of virtual reality. Demonstrations include the Talking Glove, AutoDesk's C...",
+        "videoFile": "virtualreali.mp4",
+        "videoUrl": "https://archive.org/download/virtualreali/virtualreali.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/virtualreali",
+        "duration": 1619,
+        "size": 163513880
+      },
+      {
+        "identifier": "CC605_apple_ii_forever",
+        "title": "Apple II Forever",
+        "year": "Vintage",
+        "description": "Today they're called \"mac heads\", but way back in the 1980's, Apple users were in love with the Apple II. Despite the introduction of the Mac in 1984, the Apple II continued to have its devoted fans. This program looks at the Apple II culture during the early Mac era. Included...",
+        "videoFile": "CC605_apple_ii_forever.mp4",
+        "videoUrl": "https://archive.org/download/CC605_apple_ii_forever/CC605_apple_ii_forever.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/CC605_apple_ii_forever",
+        "duration": 1719,
+        "size": 169567823
+      },
+      {
+        "identifier": "UNIX1985",
+        "title": "UNIX",
+        "year": "1985",
+        "description": "AT&T's computer operating system is threatening to take over IBM's MS-DOS dominance. Guests: John Mashey, Bell Labs; Mark Sobell, Author; Bill Joy, Sun Microsystems; Doug Hartman, Hewlett Packard; Mike Denney, Basis; Gary Kildall, DRI Products/Demos: File It, HP Integral PC, U...",
+        "videoFile": "UNIX1985.mp4",
+        "videoUrl": "https://archive.org/download/UNIX1985/UNIX1985.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/UNIX1985",
+        "duration": 1691,
+        "size": 172682989
+      },
+      {
+        "identifier": "BillGate99",
+        "title": "Bill Gates Profile",
+        "year": "1999",
+        "description": "An up close and personal profile of Microsoft chairman Bill Gates. Includes comments by John Gage, Sun Microsystems; David Kirkpatrick, Fortune Magazine; Tony Perkins, Red Herring; Mitchell Kertzman, Liberate Technologies; Alex Vieux, Dasar. Originally broadcast in 1998. Copyr...",
+        "videoFile": "BillGate99.mp4",
+        "videoUrl": "https://archive.org/download/BillGate99/BillGate99.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/BillGate99",
+        "duration": 1775,
+        "size": 176824463
       }
     ]
   },
@@ -2735,15 +3043,48 @@
         "size": 105468993
       },
       {
-        "identifier": "mclintok_widescreen",
-        "title": "McLintock!",
-        "year": "1963",
-        "description": "John Wayne Comedy Western filmed in widescreeen.",
-        "videoFile": "McLintock.mp4",
-        "videoUrl": "https://archive.org/download/mclintok_widescreen/McLintock.mp4",
-        "thumbnailUrl": "https://archive.org/services/img/mclintok_widescreen",
-        "duration": 7607,
-        "size": 1553674262
+        "identifier": "TheFlyingDeuces",
+        "title": "The Flying Deuces",
+        "year": "1939",
+        "description": "This was the first comedy that Laurel and Hardy starred in without producer Hal Roach, although they had previously been \"guest stars\" in four MGM movies. After they finished making \"The Flying Deuces,\" they returned to Hal Roach Studios to make films. In order to make this mo...",
+        "videoFile": "The_Flying_Deuces.mp4",
+        "videoUrl": "https://archive.org/download/TheFlyingDeuces/The_Flying_Deuces.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/TheFlyingDeuces",
+        "duration": 4077,
+        "size": 425079141
+      },
+      {
+        "identifier": "ColorCrazinessTheThreeStooges",
+        "title": "ColorCrazinessTheThreeStooges",
+        "year": "Vintage",
+        "description": "\"The New Three Stooges\" was produced in 1965. It featured the animated adventures of Moe, Larry, & Curly Joe. The cartoons were introduced by live-action inserts with the real Stooges. These inserts were some of the only Stooges material ever filmed in color, and they also fea...",
+        "videoFile": "threestoogescolorcraziness.mp4",
+        "videoUrl": "https://archive.org/download/ColorCrazinessTheThreeStooges/threestoogescolorcraziness.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/ColorCrazinessTheThreeStooges",
+        "duration": 3295,
+        "size": 343354358
+      },
+      {
+        "identifier": "disorder_in_the_court",
+        "title": "Disorder in the Court",
+        "year": "1936",
+        "description": "You can find more information regarding this film on its IMDb page .",
+        "videoFile": "disorder_in_the_court.mp4",
+        "videoUrl": "https://archive.org/download/disorder_in_the_court/disorder_in_the_court.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/disorder_in_the_court",
+        "duration": 996,
+        "size": 103861655
+      },
+      {
+        "identifier": "sing_a_song_of_six_pants",
+        "title": "Sing A Song of Six Pants",
+        "year": "1947",
+        "description": "The Three Stooges (Moe, Larry, Shemp) are tailors and are heavily in debt. Could a big reward for the capture of a fugitive bank robber answer their financial prayers? You can find more information regarding this film on its IMDb page .",
+        "videoFile": "sing_a_song_of_six_pants.mp4",
+        "videoUrl": "https://archive.org/download/sing_a_song_of_six_pants/sing_a_song_of_six_pants.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/sing_a_song_of_six_pants",
+        "duration": 1017,
+        "size": 106014909
       }
     ]
   },
@@ -2780,17 +3121,6 @@
         "size": 16320172
       },
       {
-        "identifier": "1942-01-07_Gen_Adolph_Takes_Over",
-        "title": "Gen. Adolf Takes Over, 1942/01/07",
-        "year": "1942",
-        "description": "\"The cleverest anti-Nazi propaganda yet! You will howl with glee when you see and hear what our London newsreel friends have cooked up for Hitler and his goose-stepping armies. The 'Nasties' skip and sway in tune to the Lambeth Walk!\" - humorous editing of German newsreels to ...",
-        "videoFile": "1942-01-07_Gen_Adolph_Takes_Over_512kb.mp4",
-        "videoUrl": "https://archive.org/download/1942-01-07_Gen_Adolph_Takes_Over/1942-01-07_Gen_Adolph_Takes_Over_512kb.mp4",
-        "thumbnailUrl": "https://archive.org/services/img/1942-01-07_Gen_Adolph_Takes_Over",
-        "duration": 111,
-        "size": 8086281
-      },
-      {
         "identifier": "1933-10-11_Farmer_Plays_Tune_With_Hands",
         "title": "Farmer Plays Tune With Hands,  1933/10/11",
         "year": "1933",
@@ -2800,6 +3130,72 @@
         "thumbnailUrl": "https://archive.org/services/img/1933-10-11_Farmer_Plays_Tune_With_Hands",
         "duration": 94,
         "size": 9133869
+      },
+      {
+        "identifier": "Designfo1956",
+        "title": "Design for Dreaming",
+        "year": "1956",
+        "description": "Set at the 1956 General Motors Motorama, this is one of the key Populuxe films of the 1950s, showing futuristic dream cars and Frigidaire's \"Kitchen of the Future.\"",
+        "videoFile": "Designfo1956.mp4",
+        "videoUrl": "https://archive.org/download/Designfo1956/Designfo1956.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Designfo1956",
+        "duration": 556,
+        "size": 57947878
+      },
+      {
+        "identifier": "Century21964",
+        "title": "Century 21 Calling",
+        "year": "1964",
+        "description": "Romp through the futuristic landscape of the Seattle World's Fair, centered in the Bell System pavilion.",
+        "videoFile": "Century21964.mp4",
+        "videoUrl": "https://archive.org/download/Century21964/Century21964.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Century21964",
+        "duration": 836,
+        "size": 87047539
+      },
+      {
+        "identifier": "out_of_this_world",
+        "title": "Out of This World",
+        "year": "1964",
+        "description": "This 1964 vintage promotional film by Frigidaire, a division of General Motors, presents a visionary glimpse into the future through a blend of futuristic world's fair exhibits and mid-century modern home appliance innovations. Beginning with abstract artistic visuals and futu...",
+        "videoFile": "out_of_this_world.mp4",
+        "videoUrl": "https://archive.org/download/out_of_this_world/out_of_this_world.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/out_of_this_world",
+        "duration": 796,
+        "size": 82893771
+      },
+      {
+        "identifier": "0731_Wonderful_World_19_01_23_00",
+        "title": "Wonderful World",
+        "year": "1959",
+        "description": "PA-2177 ìWonderful Worldî 08:01:14:28 - 08:45:06:23 Color Sound 1959 \"Wonderful World\" Broad documentary surveying global cultures, lifestyles, emphasizing common human activities, sponsored by Coca-Cola. Narrator: Ken Nordine. Parallels in European, American, Asian, South Ame...",
+        "videoFile": "0731_Wonderful_World_19_01_23_00_3mb.mp4",
+        "videoUrl": "https://archive.org/download/0731_Wonderful_World_19_01_23_00/0731_Wonderful_World_19_01_23_00_3mb.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/0731_Wonderful_World_19_01_23_00",
+        "duration": 2600,
+        "size": 271062545
+      },
+      {
+        "identifier": "American1958",
+        "title": "American Look (Part I)",
+        "year": "1958",
+        "description": "The definitive Populuxe film on 1950s automotive, industrial, interior and architectural design. (6383_American_Look_M04199_01_22_19_00)",
+        "videoFile": "American1958.mp4",
+        "videoUrl": "https://archive.org/download/American1958/American1958.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/American1958",
+        "duration": 491,
+        "size": 51110003
+      },
+      {
+        "identifier": "American1958_2",
+        "title": "American Look (Part II)",
+        "year": "1958",
+        "description": "The definitive Populuxe film on 1950s automotive, industrial, interior and architectural design.",
+        "videoFile": "American1958_2.mp4",
+        "videoUrl": "https://archive.org/download/American1958_2/American1958_2.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/American1958_2",
+        "duration": 538,
+        "size": 56013906
       }
     ]
   },
@@ -2856,6 +3252,72 @@
         "thumbnailUrl": "https://archive.org/services/img/CC_1916_10_02_ThePawnshop",
         "duration": 1221,
         "size": 88687079
+      },
+      {
+        "identifier": "lost_world",
+        "title": "The Lost World",
+        "year": "1925",
+        "description": "The first film adaptation of Sir Arthur Conan Doyle's classic novel about a land where prehistoric creatures still roam.You can find more information regarding this film on its IMDb page .",
+        "videoFile": "lost_world.mp4",
+        "videoUrl": "https://archive.org/download/lost_world/lost_world.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/lost_world",
+        "duration": 4085,
+        "size": 424986300
+      },
+      {
+        "identifier": "iron_mask",
+        "title": "The Iron Mask",
+        "year": "1929",
+        "description": "A swashbuckling Alexandre Dumas adventure featuring Douglas Fairbanks. You can find more information regarding this film on its IMDb page .",
+        "videoFile": "iron_mask.mp4",
+        "videoUrl": "https://archive.org/download/iron_mask/iron_mask.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/iron_mask",
+        "duration": 4337,
+        "size": 452078868
+      },
+      {
+        "identifier": "markofzorro-1920",
+        "title": "Mark of Zorro",
+        "year": "1920",
+        "description": "Mark of Zorro was the transition between Douglas Fairbanks' early career as a brash all-American hero and the lavish 1920s costume adventures.",
+        "videoFile": "markofzorro.mp4",
+        "videoUrl": "https://archive.org/download/markofzorro-1920/markofzorro.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/markofzorro-1920",
+        "duration": 4457,
+        "size": 464620692
+      },
+      {
+        "identifier": "The_General_Buster_Keaton",
+        "title": "The General (complete & clearer) (1926)",
+        "year": "1926",
+        "description": "A great Buster Keaton silent movie. In 1862, after spies steal his locomotive, \"The General\", he wages a one-man battle to recover it. The copies previously uploaded here were either incomplete or too blurry. I hope that this copy will be more satisfactory.",
+        "videoFile": "The_General.mp4",
+        "videoUrl": "https://archive.org/download/The_General_Buster_Keaton/The_General.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/The_General_Buster_Keaton",
+        "duration": 4723,
+        "size": 412400222
+      },
+      {
+        "identifier": "TarzanoftheApes1918AndyDivx",
+        "title": "Tarzan of the Apes",
+        "year": "1918",
+        "description": "Original (PD) version of this classic, NOT the VHS version \"copyrighted\" in 1982. http://www.imdb.com/title/tt0009682/ At this early point in American film history, Tarzan of the Apes was an instant success. Elmo Lincoln was perhaps the best actor at the time for the role. It'...",
+        "videoFile": "TarzanoftheApes1918AndyDivx.mp4",
+        "videoUrl": "https://archive.org/download/TarzanoftheApes1918AndyDivx/TarzanoftheApes1918AndyDivx.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/TarzanoftheApes1918AndyDivx",
+        "duration": 3629,
+        "size": 377836610
+      },
+      {
+        "identifier": "The_Wonderful_Wizard_of_Oz",
+        "title": "The Wonderful Wizard of Oz",
+        "year": "1910",
+        "description": "The Wonderful Wizard of Oz (1910) is the earliest surviving film version of L. Frank Baum's 1900 novel, made by the Selig Polyscope Company without Baum's direct input. It was created to fulfill a contractual obligation associated with Baum's personal bankruptcy caused by The ...",
+        "videoFile": "WizardOfOz1910.mp4",
+        "videoUrl": "https://archive.org/download/The_Wonderful_Wizard_of_Oz/WizardOfOz1910.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/The_Wonderful_Wizard_of_Oz",
+        "duration": 793,
+        "size": 69780363
       }
     ]
   },
@@ -2912,6 +3374,72 @@
         "thumbnailUrl": "https://archive.org/services/img/DateWith1950",
         "duration": 600,
         "size": 62293446
+      },
+      {
+        "identifier": "AboutBan1935",
+        "title": "About Bananas",
+        "year": "1935",
+        "description": "Complete presentation of the banana industry from the clearing of the jungle and the planting to the shipment of the fruit to the American markets.",
+        "videoFile": "AboutBan1935.mp4",
+        "videoUrl": "https://archive.org/download/AboutBan1935/AboutBan1935.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/AboutBan1935",
+        "duration": 664,
+        "size": 68512128
+      },
+      {
+        "identifier": "HealthYo1953",
+        "title": "Health: Your Posture",
+        "year": "1953",
+        "description": "Young girl's mirror image teaches her fundamentals of good posture.",
+        "videoFile": "HealthYo1953.mp4",
+        "videoUrl": "https://archive.org/download/HealthYo1953/HealthYo1953.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/HealthYo1953",
+        "duration": 640,
+        "size": 66520877
+      },
+      {
+        "identifier": "Sleepfor1950",
+        "title": "Sleep for Health",
+        "year": "1950",
+        "description": "Told from the viewpoint of a child, this film emphasizes that children should train themselves in good sleeping habits. In typical \"Goofus and Gallant\" style, it shows the advantages a well-rested kid has over his poor-sleeping classmate. Dreams are presented as a normal part ...",
+        "videoFile": "Sleepfor1950.mp4",
+        "videoUrl": "https://archive.org/download/Sleepfor1950/Sleepfor1950.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/Sleepfor1950",
+        "duration": 644,
+        "size": 66986081
+      },
+      {
+        "identifier": "JoanAvoi1947",
+        "title": "Joan Avoids a Cold",
+        "year": "1947",
+        "description": "How young children must behave to avoid transmitting germs to one another.",
+        "videoFile": "JoanAvoi1947.mp4",
+        "videoUrl": "https://archive.org/download/JoanAvoi1947/JoanAvoi1947.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/JoanAvoi1947",
+        "duration": 625,
+        "size": 65083997
+      },
+      {
+        "identifier": "EatforHe1954",
+        "title": "Eat for Health",
+        "year": "1954",
+        "description": "Ralph learns the five food groups, helping him to eat a balanced diet, and has more fun because of his better health.",
+        "videoFile": "EatforHe1954.mp4",
+        "videoUrl": "https://archive.org/download/EatforHe1954/EatforHe1954.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/EatforHe1954",
+        "duration": 624,
+        "size": 64969607
+      },
+      {
+        "identifier": "FromtheG1954",
+        "title": "From the Ground Up",
+        "year": "Vintage",
+        "description": "Promotional film for \"Nutrilite,\" a 1950s-vintage food supplement.",
+        "videoFile": "FromtheG1954.mp4",
+        "videoUrl": "https://archive.org/download/FromtheG1954/FromtheG1954.mp4",
+        "thumbnailUrl": "https://archive.org/services/img/FromtheG1954",
+        "duration": 1145,
+        "size": 119087429
       }
     ]
   }

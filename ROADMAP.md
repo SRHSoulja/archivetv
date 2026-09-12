@@ -337,6 +337,19 @@ broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
       sleeve read "ep 5 My Favorite…" over ep 6. The previous label is stripped
       before the new one goes on, so they do not stack up either
 
+- [x] Default line-up curation. Ten channels sat at four programmes each. Every
+      channel except Lone Ranger and the commercial reel was filled out to
+      7–10, and every candidate had to clear three tests before it was
+      considered: an H.264 file present (so it decodes, not just plays audio), a
+      runtime in a sensible band, and a public-domain or open-licence signal in
+      its archive.org metadata. That last test excluded Fantastic Planet, UFO
+      and Space 1999, all of which are still in copyright and all of which
+      ranked highly on downloads alone.
+      Also removed: a 1942 Hitler newsreel from Mid-Century (the channel now
+      leans on mid-century optimism — Design for Dreaming, American Look,
+      Century 21 Calling — rather than war footage), and two films that were
+      sitting on two channels at once
+
 ## Known-imperfect, stated plainly
 
 - Episode counts are wrong on films with multiple cuts — counts `availableFiles`,
