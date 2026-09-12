@@ -272,6 +272,39 @@ export function formatSpotLength(seconds) {
   return m > 0 ? `${m}:${String(s % 60).padStart(2, '0')}` : `0:${String(s).padStart(2, '0')}`;
 }
 
+// Anything longer than this is a recorded block of adverts rather than one
+// advert, and is played by dropping into it rather than from the top.
+export const COMPILATION_SECONDS = 240;
+// How long to stay in a compilation before moving on. Roughly the length of two
+// or three adverts, jittered so every break is not identically long.
+const CLIP_MIN = 32;
+const CLIP_MAX = 52;
+
+export function isCompilationSpot(spot) {
+  return !!spot && (spot.compilation === true || (spot.duration || 0) > COMPILATION_SECONDS);
+}
+
+/**
+ * Where to drop into a compilation, and how long to stay.
+ *
+ * Properly separated commercial items barely exist on archive.org — of roughly
+ * forty-five likely-looking ones, two split into a file per advert. The rest are
+ * half-hour blocks taped off air, which are *nothing but* adverts back to back.
+ * So rather than refuse them, join one at a random point and leave after a spot
+ * or two. The edges land mid-advert sometimes, which is roughly what happens
+ * when a channel joins a break late anyway.
+ */
+export function planCompilationClip(spot) {
+  const total = spot?.duration || 0;
+  const clip = CLIP_MIN + Math.random() * (CLIP_MAX - CLIP_MIN);
+  // Stay clear of the very start and end, where these recordings tend to carry
+  // the tail of a programme or a blank run-out.
+  const earliest = Math.min(30, total * 0.05);
+  const latest = Math.max(earliest, total - clip - 20);
+  const startAt = earliest + Math.random() * Math.max(0, latest - earliest);
+  return { startAt: Math.round(startAt), clipSeconds: Math.round(clip) };
+}
+
 export function pickSpots(set, count, lastPlayedName = null) {
   const spots = (set?.spots || []).filter(Boolean);
   if (spots.length === 0) return [];
@@ -282,5 +315,7 @@ export function pickSpots(set, count, lastPlayedName = null) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  return shuffled.slice(0, Math.max(1, Math.min(count || 2, shuffled.length)));
+  return shuffled.slice(0, Math.max(1, Math.min(count || 2, shuffled.length))).map((spot) =>
+    isCompilationSpot(spot) ? { ...spot, ...planCompilationClip(spot) } : spot
+  );
 }

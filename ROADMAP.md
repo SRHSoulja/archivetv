@@ -410,6 +410,19 @@ broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
       and report their true playable count, and loading a long single file warns
       before it is committed rather than after
 
+- [x] Long commercial compilations are usable rather than refused. Properly
+      separated items barely exist — two of roughly forty-five — but a half-hour
+      block taped off air is nothing but adverts back to back, so a break drops
+      into one at a random point and leaves after 32–52 seconds. Verified across
+      runs: dropped in at 1,616s and 1,298s of a 2,918-second recording, each
+      break ending after about fifty seconds.
+      Timed against the wall clock, not the video's position: the position only
+      reaches its target once a seek into the middle of a 49-minute remote file
+      has landed, and when that was slow the clip never ended at all
+- [x] The info panel followed the adverts during a break. It stays on the
+      programme being interrupted now and reads AFTER THE BREAK — what you are
+      watching is the show; the adverts interrupt it rather than replace it
+
 ## Known-imperfect, stated plainly
 
 - Episode counts are wrong on films with multiple cuts — counts `availableFiles`,

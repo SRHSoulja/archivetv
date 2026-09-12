@@ -257,8 +257,14 @@ here: one popular 80s commercials item advertises 55 files and contains a single
 49-minute video, because archive.org generates about one scrub-bar thumbnail per
 minute and 49 of those 55 files are thumbnails.
 
-If you load a compilation anyway, the panel says what will happen before you
-commit — a 49-minute "spot" would interrupt your programme for 49 minutes.
+**Compilations work too.** Most of what exists is a half-hour block taped off
+air — which is nothing but adverts back to back. Add one and each break drops
+into it at a different random point and plays for about forty seconds before
+returning to the programme. You will sometimes join an advert halfway through,
+which is roughly what happens when a channel comes back from a break late.
+
+The panel tells you when an item will be treated this way, and reel entries
+longer than four minutes are labelled as a *block* rather than a spot.
 
 **Two that definitely work, to start from:**
 

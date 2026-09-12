@@ -35,6 +35,7 @@ export default function NowPlayingSleeve({
   // firing through it, the same as every other panel.
   sheetOpen,
   onSheetOpenChange,
+  onBreak = false,
 }) {
   const panelRef = useRef(null);
   const identifier = currentProgram?.identifier || '';
@@ -166,8 +167,10 @@ export default function NowPlayingSleeve({
         {/* Header strip, mirroring the remote's */}
         <div className="w-full shrink-0 flex items-center justify-between pb-3 border-b border-zinc-700/60">
           <div className="flex items-center gap-2">
-            <Film className="w-3.5 h-3.5 text-amber-400" />
-            <span className="font-pixel text-[11px] text-zinc-400 tracking-wider">NOW PLAYING</span>
+            <Film className={`w-3.5 h-3.5 ${onBreak ? 'text-zinc-500' : 'text-amber-400'}`} />
+            <span className="font-pixel text-[11px] text-zinc-400 tracking-wider">
+              {onBreak ? 'AFTER THE BREAK' : 'NOW PLAYING'}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             {currentChannel?.callsign && (

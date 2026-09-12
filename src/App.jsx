@@ -366,7 +366,8 @@ export default function App() {
           duration: spot.duration || 30,
           year: spot.year || '',
           description: '',
-          seekSeconds: 0,
+          // A compilation is joined partway in; a single advert starts at zero.
+          seekSeconds: spot.startAt || 0,
           isInterstitial: true,
         };
       }
@@ -497,9 +498,13 @@ export default function App() {
   }, []);
 
   // Shared by the timed trigger and the "play one now" test button.
+  // When the spot now on screen began, in wall-clock terms.
+  const clipStartedRef = useRef(null);
+
   const advanceBreak = useCallback(() => {
     const brk = adBreakRef.current;
     if (!brk) return;
+    clipStartedRef.current = Date.now();
     lastSpotRef.current = brk.queue[brk.index]?.videoFile || null;
     const nextIndex = brk.index + 1;
     if (nextIndex < brk.queue.length) {
@@ -517,9 +522,14 @@ export default function App() {
       const brk = { queue: spots, index: 0, resumeProgram, resumeSeconds };
       adBreakRef.current = brk;
       setAdBreak(brk);
+      clipStartedRef.current = Date.now();
 
       if (breakWatchdogRef.current) clearTimeout(breakWatchdogRef.current);
-      const budget = spots.reduce((t, s) => t + (s.duration || 30), 0) * 1000 + 45000;
+      // A compilation spot's `duration` is the whole recording; only its clip
+      // actually plays, so budgeting on the file length would leave the
+      // watchdog asleep for the better part of an hour.
+      const budget =
+        spots.reduce((t, s) => t + (s.clipSeconds || s.duration || 30), 0) * 1000 + 45000;
       breakWatchdogRef.current = setTimeout(() => {
         if (adBreakRef.current) resumeFromBreak();
       }, Math.min(budget, 300000));
@@ -530,7 +540,27 @@ export default function App() {
   const handlePlaybackProgress = useCallback(
     (time, duration) => {
       playheadRef.current = { time, duration };
-      if (adBreakRef.current) return;
+
+      // A compilation spot has no natural end -- the file runs for another forty
+      // minutes -- so the clip is timed out and handed on deliberately.
+      //
+      // Timed against the wall clock rather than the video's own position. The
+      // position only reaches `startAt + clip` once the seek into the middle of
+      // a 49-minute remote file has actually landed, and when that was slow the
+      // clip never ended at all and the break ran until the watchdog. How long
+      // the viewer has been sitting through adverts is the thing being measured
+      // anyway.
+      const brk = adBreakRef.current;
+      if (brk) {
+        const spot = brk.queue[brk.index];
+        if (spot?.clipSeconds) {
+          const startedAt = clipStartedRef.current;
+          if (startedAt && Date.now() - startedAt >= spot.clipSeconds * 1000) {
+            advanceBreak();
+          }
+        }
+        return;
+      }
 
       const { enabled, setId } = resolveChannelAds(adConfig, currentChannel?.id);
       if (!enabled || !setId) return;
@@ -555,7 +585,7 @@ export default function App() {
 
       startBreak(spots, currentProgramRef.current, time);
     },
-    [adConfig, currentChannel?.id, activeEngine, startBreak]
+    [adConfig, currentChannel?.id, activeEngine, startBreak, advanceBreak]
   );
 
   const handleTestBreak = useCallback(() => {
@@ -1297,8 +1327,13 @@ export default function App() {
         onColorModeChange={setColorMode}
       />
 
+      {/* During a break the sleeve stays on the programme being interrupted. It
+          is the panel that tells you what you are watching, and what you are
+          watching is the show — the adverts interrupt it rather than replace it.
+          It says a break is on instead. */}
       <NowPlayingSleeve
-        currentProgram={currentProgram}
+        currentProgram={adBreak ? adBreak.resumeProgram || currentProgram : currentProgram}
+        onBreak={!!adBreak}
         currentChannel={displayChannel}
         powerOn={powerOn}
         gutters={gutters}

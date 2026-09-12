@@ -18,6 +18,7 @@ import {
   setAdConfig,
   MIN_PROGRAMME_SECONDS,
   formatSpotLength,
+  isCompilationSpot,
 } from '../services/commercials';
 
 export default function CommercialBreaksModal({
@@ -479,7 +480,9 @@ export default function CommercialBreaksModal({
                           {spot.title}
                         </span>
                         <span className="shrink-0 text-[10px] text-zinc-400 font-mono">
-                          {formatSpotLength(spot.duration)}
+                          {isCompilationSpot(spot)
+                            ? `${formatSpotLength(spot.duration)} block`
+                            : formatSpotLength(spot.duration)}
                         </span>
                         <button
                           type="button"
@@ -679,11 +682,14 @@ export default function CommercialBreaksModal({
                 const mins = Math.round(longest / 60);
                 const single = spots.length <= 1;
                 return (
-                  <p className="mb-2 px-2 py-1.5 rounded border border-amber-600/60 bg-amber-950/50 text-amber-200 text-[10px] leading-relaxed">
+                  <p className="mb-2 px-2 py-1.5 rounded border border-teal-600/60 bg-teal-950/50 text-teal-200 text-[10px] leading-relaxed">
                     {single
-                      ? `This is one ${mins}-minute recording, not separate adverts. Added as a spot it would interrupt your programme for ${mins} minutes.`
-                      : `Some of these run to ${mins} minutes — long enough to be whole segments rather than single adverts.`}{' '}
-                    Reels work best from items that split into one file per advert.
+                      ? `This is one ${mins}-minute block of adverts rather than separate files.`
+                      : `Some of these run to ${mins} minutes — blocks of adverts rather than single ones.`}{' '}
+                    That is fine: each break will drop into it at a different
+                    random point and play for about forty seconds, then go back
+                    to the programme. You will sometimes join an advert halfway,
+                    which is roughly what happens when a channel comes back late.
                   </p>
                 );
               })()}
