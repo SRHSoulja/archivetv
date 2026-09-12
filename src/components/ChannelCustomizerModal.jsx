@@ -40,6 +40,7 @@ import {
   sanitizeProgram,
 } from '../services/archiveApi';
 import { audio } from '../services/soundEffects';
+import { getAdConfig, getAdSets, resolveChannelAds } from '../services/commercials';
 import { useDialog } from '../hooks/useDialog';
 
 export default function ChannelCustomizerModal({
@@ -520,7 +521,21 @@ export default function ChannelCustomizerModal({
 
   const handleShareChannelLink = async (channel) => {
     audio.playSwitch(true);
-    const encoded = await encodeChannelForShare(channel);
+    // If this channel plays commercial breaks, the reel goes with it. A channel
+    // curated with period adverts is not the same channel without them.
+    let extras = {};
+    try {
+      const cfg = getAdConfig();
+      const { enabled, setId } = resolveChannelAds(cfg, channel.id);
+      const reel = setId ? getAdSets().find((r) => r.id === setId) : null;
+      if (enabled && reel?.spots?.length) {
+        extras = {
+          reel,
+          ads: { everyMinutes: cfg.everyMinutes, spotsPerBreak: cfg.spotsPerBreak, enabled: true },
+        };
+      }
+    } catch {}
+    const encoded = await encodeChannelForShare(channel, extras);
     if (!encoded) {
       alert('Could not generate share link.');
       return;

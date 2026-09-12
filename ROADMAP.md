@@ -393,6 +393,15 @@ broadcast-feeling behaviour in the app is opt-in and largely undiscovered.
       all becomes a 795-character link. Reels got the same treatment. Links
       minted before this are plain base64 and still decode, verified
 
+- [x] Sharing a channel left its commercials behind. The reel and the per-channel
+      break settings live in separate storage keyed by channel id, and a shared
+      channel is minted with a new id, so neither the reel nor the settings could
+      ever follow — a channel curated around period adverts arrived without them.
+      The link now carries the reel and that channel's settings when it has any.
+      Scoped: switched on for the shared channel alone, with the recipient's
+      global setting and their other channels untouched, and a notice saying what
+      arrived. A channel with no breaks set shares exactly as before
+
 ## Known-imperfect, stated plainly
 
 - Episode counts are wrong on films with multiple cuts — counts `availableFiles`,

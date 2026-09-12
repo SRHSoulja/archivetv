@@ -220,6 +220,16 @@ The whole channel travels inside the link, compressed — a 120-programme channe
 comes out around 800 characters. In practice there is no size you are likely to
 hit; if you ever did, the share button says so and points you at Export.
 
+**Commercials travel with it.** If the channel you are sharing plays breaks from
+one of your reels, the reel goes in the link too. Whoever opens it gets the
+channel *and* the adverts you curated for it — which is usually the point, since
+a channel built around period commercials is not the same channel without them.
+
+It is scoped and announced. The reel is switched on **for that channel only**;
+the recipient's global break setting and every other channel of theirs are left
+exactly as they were, and a notice tells them what arrived. A channel with no
+breaks set shares exactly as it always did.
+
 ---
 
 ## Commercial breaks

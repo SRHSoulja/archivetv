@@ -11,6 +11,7 @@ import {
   getAdConfig,
   setAdConfig,
   decodeSharedReel,
+  importAdSet,
   resolveChannelAds,
   scheduleNextBreak,
   pickSpots,
@@ -87,6 +88,7 @@ export default function App() {
   const [breaksOpen, setBreaksOpen] = useState(false);
   // The now-playing sleeve becomes a panel when the gutter cannot hold it.
   const [sleeveSheetOpen, setSleeveSheetOpen] = useState(false);
+  const [sharedNotice, setSharedNotice] = useState(null);
   const [scanlinesEnabled, setScanlinesEnabled] = useState(savedPicture.scanlines ?? true);
   const [curvatureEnabled, setCurvatureEnabled] = useState(savedPicture.curvature ?? true);
   const [eraTintEnabled, setEraTintEnabled] = useState(savedPicture.eraTint ?? true);
@@ -274,6 +276,37 @@ export default function App() {
         decodeSharedChannel(sharedData).then((decoded) => {
           if (!decoded) return;
           saveCustomChannel(decoded);
+
+          // A shared channel can bring the reel it plays its breaks from. Scoped
+          // to that channel alone -- the recipient's global break setting and
+          // every other channel of theirs are left exactly as they were -- and
+          // announced, because adverts appearing unannounced would be rude.
+          if (decoded.sharedReel && decoded.sharedAds) {
+            try {
+              const reel = importAdSet({
+                name: decoded.sharedReel.name,
+                spots: decoded.sharedReel.spots,
+              });
+              if (reel) {
+                const cfg = getAdConfig();
+                const next = {
+                  ...cfg,
+                  everyMinutes: decoded.sharedAds.everyMinutes || cfg.everyMinutes,
+                  spotsPerBreak: decoded.sharedAds.spotsPerBreak || cfg.spotsPerBreak,
+                  byChannel: {
+                    ...(cfg.byChannel || {}),
+                    [decoded.id]: { enabled: true, setId: reel.id },
+                  },
+                };
+                setAdConfig(next);
+                setAdConfigState(next);
+                setSharedNotice(
+                  `"${decoded.name}" arrived with its commercial reel — ${reel.spots.length} spots, on this channel only.`
+                );
+                setTimeout(() => setSharedNotice(null), 9000);
+              }
+            } catch {}
+          }
           const fullLineup = getChannelLineup();
           setChannels(fullLineup);
           const targetIndex = fullLineup.findIndex(
@@ -1368,6 +1401,21 @@ export default function App() {
         isOpen={aboutOpen}
         onClose={() => setAboutOpen(false)}
       />
+
+      {sharedNotice && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] max-w-md px-4 py-3 rounded-xl bg-teal-950/95 border-2 border-teal-500 text-teal-100 font-pixel text-[11px] leading-relaxed shadow-2xl flex items-start gap-2">
+          <span aria-hidden="true">📻</span>
+          <span>{sharedNotice}</span>
+          <button
+            type="button"
+            onClick={() => setSharedNotice(null)}
+            aria-label="Dismiss"
+            className="ml-1 shrink-0 text-teal-300 hover:text-white cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Footer Info Bar */}
       <footer className="w-full bg-[#100e0d] border-t border-zinc-900 px-4 py-2 text-center text-xs font-mono text-zinc-400 flex flex-col sm:flex-row items-center justify-between gap-2 select-none">

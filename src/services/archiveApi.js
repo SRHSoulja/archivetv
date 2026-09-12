@@ -1385,7 +1385,15 @@ async function inflateFromBase64(b64) {
   return new Response(stream).text();
 }
 
-export async function encodeChannelForShare(channel) {
+/**
+ * @param channel  the channel itself
+ * @param extras   optionally `{ reel, ads }` — the reel that channel plays its
+ *                 breaks from, and that channel's own break settings. Carried
+ *                 because a channel curated with period commercials is not the
+ *                 same channel without them, and the two are stored so far
+ *                 apart that sharing one never used to bring the other.
+ */
+export async function encodeChannelForShare(channel, extras = {}) {
   try {
     const clean = sanitizeChannel(channel);
     const compact = {
@@ -1397,6 +1405,20 @@ export async function encodeChannelForShare(channel) {
       c: clean.callsign,
       b: clean.badge,
       d: (clean.description || '').slice(0, 160),
+      ...(extras.reel && extras.ads
+        ? {
+            r: {
+              n: extras.reel.name,
+              s: (extras.reel.spots || []).map((sp) => ({
+                i: sp.identifier,
+                t: sp.title,
+                vf: sp.videoFile,
+                d: sp.duration || 0,
+              })),
+            },
+            a: { e: extras.ads.everyMinutes, c: extras.ads.spotsPerBreak, on: !!extras.ads.enabled },
+          }
+        : {}),
       // `vu` is the single biggest field and is usually reconstructible from
       // the identifier and the filename -- which decodeSharedChannel already
       // does. Sending it anyway cost about ninety characters per programme,
@@ -1496,7 +1518,7 @@ export async function decodeSharedChannel(encoded) {
       playerEngine: p.vu ? 'direct' : 'embed',
     }));
 
-    return sanitizeChannel({
+    const channel = sanitizeChannel({
       id: sharedId,
       name: compact.n,
       number: resolveSharedNumber(sharedId, compact.num || '14'),
@@ -1505,6 +1527,30 @@ export async function decodeSharedChannel(encoded) {
       description: compact.d || 'Shared broadcast channel from the Internet Archive.',
       programs,
     });
+
+    // A reel and break settings ride along when the sender had them set on this
+    // channel. Handed back beside the channel rather than folded into it, so
+    // the importer can say what arrived instead of quietly starting to
+    // interrupt someone's programmes.
+    const reel = compact.r
+      ? {
+          name: compact.r.n || 'Shared reel',
+          spots: (compact.r.s || [])
+            .filter((sp) => sp && sp.i && sp.vf)
+            .map((sp) => ({
+              identifier: sp.i,
+              title: sp.t || sp.vf,
+              videoFile: sp.vf,
+              videoUrl: `https://archive.org/download/${sp.i}/${encodeURIComponent(sp.vf)}`,
+              duration: Number(sp.d) || 0,
+            })),
+        }
+      : null;
+    channel.sharedReel = reel && reel.spots.length ? reel : null;
+    channel.sharedAds = compact.a
+      ? { everyMinutes: compact.a.e, spotsPerBreak: compact.a.c, enabled: !!compact.a.on }
+      : null;
+    return channel;
   } catch (err) {
     console.error('Failed to decode shared channel:', err);
     return null;
