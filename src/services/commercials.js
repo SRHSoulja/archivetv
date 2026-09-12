@@ -210,11 +210,19 @@ export function deleteAdSet(id) {
   return next;
 }
 
+// How long to stay in a compilation before moving on, when nothing else is
+// asked for. Roughly the length of two or three adverts.
+export const DEFAULT_CLIP_SECONDS = 42;
+export const CLIP_SECONDS_MIN = 10;
+export const CLIP_SECONDS_MAX = 180;
+
 const DEFAULT_CONFIG = {
   enabled: false,
   setId: null,
   everyMinutes: 12,
   spotsPerBreak: 2,
+  // How much of a long compilation block to play when one comes up.
+  clipSeconds: DEFAULT_CLIP_SECONDS,
   byChannel: {},
 };
 
@@ -243,26 +251,64 @@ export function resolveChannelAds(config, channelId) {
 }
 
 /**
- * When should the next break land?
+ * Where the breaks go in a programme.
  *
- * Jittered rather than exact: a break every twelve minutes on the dot reads as
- * a spreadsheet, whereas a little irregularity reads as television. Returns
- * null when the programme is too short, or when the whole playable window sits
- * inside the edge guards.
+ * Not a timer. Television broke at act boundaries -- a half-hour show in the
+ * middle, an hour into quarters, a feature into five or six parts -- which
+ * means placement is a *fraction of the programme*, not a fixed number of
+ * minutes since the last one. A 22 minute cartoon block and a 95 minute
+ * feature both interrupted every twelve minutes on the dot read as a
+ * spreadsheet running; interrupted at their own act joins they read as
+ * scheduling.
+ *
+ * `everyMinutes` still means something -- it decides how many acts the
+ * programme is cut into -- but it no longer decides where a cut lands. Each
+ * join is then jittered by up to 15% of an act either way, so two viewings of
+ * the same programme do not break in the same place.
+ *
+ * Returns ascending seconds, empty when the programme is too short to carry a
+ * break at all.
+ */
+export function planBreakPoints(duration, everyMinutes) {
+  if (!duration || duration < MIN_PROGRAMME_SECONDS) return [];
+
+  const act = Math.max(60, (Number(everyMinutes) || 12) * 60);
+  // One fewer join than the programme has acts, rounded: this keeps the acts
+  // that result close to the length asked for, where flooring would cut a 24
+  // minute programme into three 8 minute acts. Nothing shorter than about one
+  // and a half acts gets a break at all, which is what leaves a short cartoon
+  // uninterrupted.
+  const breaks = Math.round(duration / act) - 1;
+  if (breaks < 1) return [];
+
+  const earliest = EDGE_GUARD_SECONDS;
+  const latest = duration - EDGE_GUARD_SECONDS;
+  if (earliest >= latest) return [];
+
+  // Acts of equal length, so the joins sit at 1/(n+1), 2/(n+1) ... of the run.
+  const span = duration / (breaks + 1);
+  const points = [];
+  for (let i = 1; i <= breaks; i += 1) {
+    const jitter = span * (Math.random() * 0.3 - 0.15);
+    const at = Math.round(span * i + jitter);
+    points.push(Math.min(latest, Math.max(earliest, at)));
+  }
+  return points.sort((a, b) => a - b);
+}
+
+/**
+ * The next act join after the current position, or null if the programme has
+ * none left.
+ *
+ * Called again after each break, which re-rolls the jitter on the joins still
+ * to come. That is harmless -- they are drawn off the same act grid either way
+ * -- and the guard below stops a re-roll landing a second break on top of the
+ * one just finished.
  */
 export function scheduleNextBreak(fromSeconds, duration, everyMinutes) {
-  if (!duration || duration < MIN_PROGRAMME_SECONDS) return null;
-
-  const latest = duration - EDGE_GUARD_SECONDS;
-  const earliest = Math.max(fromSeconds, EDGE_GUARD_SECONDS);
-  if (earliest >= latest) return null;
-
-  const base = Math.max(60, (Number(everyMinutes) || 12) * 60);
-  const jitter = base * (Math.random() * 0.4 - 0.2); // +/- 20%
-  const target = earliest + base + jitter;
-
-  if (target >= latest) return null;
-  return target;
+  const from = Math.max(0, Number(fromSeconds) || 0);
+  const next = planBreakPoints(duration, everyMinutes).find((t) => t > from + 45);
+  return next == null ? null : next;
 }
 
 export function formatSpotLength(seconds) {
@@ -275,10 +321,6 @@ export function formatSpotLength(seconds) {
 // Anything longer than this is a recorded block of adverts rather than one
 // advert, and is played by dropping into it rather than from the top.
 export const COMPILATION_SECONDS = 240;
-// How long to stay in a compilation before moving on. Roughly the length of two
-// or three adverts, jittered so every break is not identically long.
-const CLIP_MIN = 32;
-const CLIP_MAX = 52;
 
 export function isCompilationSpot(spot) {
   return !!spot && (spot.compilation === true || (spot.duration || 0) > COMPILATION_SECONDS);
@@ -294,18 +336,28 @@ export function isCompilationSpot(spot) {
  * or two. The edges land mid-advert sometimes, which is roughly what happens
  * when a channel joins a break late anyway.
  */
-export function planCompilationClip(spot) {
+export function planCompilationClip(spot, targetSeconds) {
   const total = spot?.duration || 0;
-  const clip = CLIP_MIN + Math.random() * (CLIP_MAX - CLIP_MIN);
+  const target = Math.min(
+    CLIP_SECONDS_MAX,
+    Math.max(CLIP_SECONDS_MIN, Math.round(Number(targetSeconds) || DEFAULT_CLIP_SECONDS))
+  );
+  // Jittered a quarter either way around the length asked for, so successive
+  // breaks are not all identically long, and never more than most of the
+  // recording in case someone asks for three minutes of a four minute block.
+  const clip = Math.min(
+    Math.max(5, total * 0.8),
+    target * 0.75 + Math.random() * target * 0.5
+  );
   // Stay clear of the very start and end, where these recordings tend to carry
   // the tail of a programme or a blank run-out.
   const earliest = Math.min(30, total * 0.05);
   const latest = Math.max(earliest, total - clip - 20);
   const startAt = earliest + Math.random() * Math.max(0, latest - earliest);
-  return { startAt: Math.round(startAt), clipSeconds: Math.round(clip) };
+  return { startAt: Math.round(startAt), clipSeconds: Math.max(5, Math.round(clip)) };
 }
 
-export function pickSpots(set, count, lastPlayedName = null) {
+export function pickSpots(set, count, lastPlayedName = null, clipSeconds = undefined) {
   const spots = (set?.spots || []).filter(Boolean);
   if (spots.length === 0) return [];
 
@@ -316,6 +368,6 @@ export function pickSpots(set, count, lastPlayedName = null) {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled.slice(0, Math.max(1, Math.min(count || 2, shuffled.length))).map((spot) =>
-    isCompilationSpot(spot) ? { ...spot, ...planCompilationClip(spot) } : spot
+    isCompilationSpot(spot) ? { ...spot, ...planCompilationClip(spot, clipSeconds) } : spot
   );
 }

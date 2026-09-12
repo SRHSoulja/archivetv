@@ -26,23 +26,29 @@ user or verified against the running app; nothing here is speculation.
 
 ### Outstanding, in the order the user raised them
 
-1. **Break timing is still interval-based.** The user pointed out that the
-   original intent was breaks that do not feel clockwork, and "roughly every N
-   minutes ±20% jitter" is still a timer. The agreed-plausible fix is
-   **proportional placement**: put breaks at act-like fractions of the
-   programme (around a third and two-thirds through a 22-minute show) rather
-   than every N minutes regardless of length, still jittered. Lives in
-   `scheduleNextBreak` in `src/services/commercials.js`.
-   *Scene/silence detection is impossible — see the CORS note below.*
+1. ~~**Break timing is still interval-based.**~~ **Done.** Breaks are now placed
+   in proportion to the programme. `planBreakPoints` in
+   `src/services/commercials.js` cuts a programme into acts of roughly
+   `everyMinutes` and puts a break at each join, jittered +/-15% of an act.
+   `everyMinutes` now sets the *density*, not the clock. Verified live: with
+   acts of 131s the first natural break fired at 121s, 142s and 147s across
+   three runs. Nothing under about one and a half acts is interrupted at all,
+   which is what keeps short cartoons clean.
 
-2. **Compilation clip length should be adjustable.** Currently hardcoded
-   `CLIP_MIN = 32` / `CLIP_MAX = 52` in `src/services/commercials.js`. Wants a
-   control in the BREAKS panel.
+2. ~~**Compilation clip length should be adjustable.**~~ **Done.**
+   `config.clipSeconds` (default 42, range 10-180), control in the BREAKS
+   panel reading PLAY THIS MUCH OF A BLOCK. `planCompilationClip` jitters a
+   quarter either way around it. Verified: asked for 20s, the block played for
+   24s / 17s / 24s.
 
-3. **Mix short spots and long blocks in one reel.** Already half-true —
-   `isCompilationSpot` decides per spot, so a reel can hold both. Needs
-   checking end to end and probably surfacing in the UI, because the user does
-   not currently believe it works.
+3. ~~**Mix short spots and long blocks in one reel.**~~ **Done and verified.** A
+   reel holding one `ctvc` advert and one 49-minute block played both, in
+   shuffled order, and returned to the programme. The reel line now reads its
+   own composition ("1 advert - 1 long block - 2 tapes") so it is visible
+   without opening it. Drop-in points across three runs: 2608s, 188s, 2745s --
+   random, as intended. Note for future testing: `video.currentTime` reads 0
+   for a second or two after a compilation starts, before the seek lands, so
+   sampling once early reports a false "always drops in at 0".
 
 4. **Categorise bookmarked tapes** into genres/series rather than one flat
    MY BOOKMARKS shelf. Tape metadata lives in `archivetv_bookmarks_v1`; custom

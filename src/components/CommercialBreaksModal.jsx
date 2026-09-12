@@ -17,9 +17,31 @@ import {
   getAdConfig,
   setAdConfig,
   MIN_PROGRAMME_SECONDS,
+  DEFAULT_CLIP_SECONDS,
+  CLIP_SECONDS_MIN,
+  CLIP_SECONDS_MAX,
   formatSpotLength,
   isCompilationSpot,
 } from '../services/commercials';
+
+/**
+ * What a reel is made of, in one line.
+ *
+ * A reel can mix both kinds of material: separate adverts play top to tail,
+ * while a long block is joined partway in and left after a clip. Worth saying
+ * out loud on the reel itself, because the two behave nothing alike.
+ */
+function describeReel(set) {
+  const spots = set?.spots || [];
+  if (spots.length === 0) return 'empty';
+  const blocks = spots.filter(isCompilationSpot).length;
+  const singles = spots.length - blocks;
+  const parts = [];
+  if (singles) parts.push(`${singles} advert${singles === 1 ? '' : 's'}`);
+  if (blocks) parts.push(`${blocks} long block${blocks === 1 ? '' : 's'}`);
+  parts.push(`${new Set(spots.map((x) => x.identifier)).size} tapes`);
+  return parts.join(' \u00b7 ');
+}
 
 export default function CommercialBreaksModal({
   isOpen,
@@ -315,6 +337,30 @@ export default function CommercialBreaksModal({
               className="mt-1 w-16 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1 text-xs text-zinc-100 outline-none block"
             />
           </label>
+          <label className="block col-span-2">
+            <span className="font-pixel text-[10px] text-zinc-400 tracking-wider">
+              PLAY THIS MUCH OF A BLOCK
+            </span>
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                type="number"
+                min={CLIP_SECONDS_MIN}
+                max={CLIP_SECONDS_MAX}
+                step={5}
+                value={config.clipSeconds ?? DEFAULT_CLIP_SECONDS}
+                onChange={(e) =>
+                  push({ ...config, clipSeconds: Number(e.target.value) || DEFAULT_CLIP_SECONDS })
+                }
+                className="w-16 bg-black/60 border-2 border-zinc-700 focus:border-amber-500/70 rounded px-2 py-1 text-xs text-zinc-100 outline-none"
+              />
+              <span className="text-[10px] text-zinc-400">
+                sec &mdash; about{' '}
+                {Math.max(1, Math.round((config.clipSeconds ?? DEFAULT_CLIP_SECONDS) / 30))} advert
+                {Math.round((config.clipSeconds ?? DEFAULT_CLIP_SECONDS) / 30) === 1 ? '' : 's'} out
+                of a long recording
+              </span>
+            </div>
+          </label>
         </div>
 
         <button
@@ -329,16 +375,20 @@ export default function CommercialBreaksModal({
           PLAY A BREAK NOW
         </button>
         <p className="mt-1.5 text-[10px] leading-relaxed text-zinc-400">
-          Waiting for a real one takes a while: the first break lands roughly{' '}
-          {config.everyMinutes} minutes past the 90 second mark, so on a default setting that is
-          about {Math.round((config.everyMinutes * 60 + 90) / 60)} minutes into a programme.
+          Waiting for a real one takes a while: a 22 minute programme breaks around the 11 minute
+          mark, a feature rather later.
         </p>
 
         <p className="mt-2 text-[10px] leading-relaxed text-zinc-400">
-          Timing is jittered by up to 20% so breaks do not land like clockwork, and never within 90
-          seconds of either end. Programmes under {Math.round(MIN_PROGRAMME_SECONDS / 60)} minutes
-          are left alone, and breaks are skipped entirely on the Tube embed, whose position cannot
-          be read well enough to resume.
+          Breaks are placed in proportion to the programme rather than on a timer. Each programme is
+          cut into acts of roughly {config.everyMinutes} minutes and a break goes at every join, so
+          a half hour show breaks once in the middle and a feature breaks into five or six parts
+          &mdash; jittered, so the same programme never breaks in quite the same place twice.
+          Anything under{' '}
+          {Math.max(Math.round(MIN_PROGRAMME_SECONDS / 60), Math.round(config.everyMinutes * 1.5))}{' '}
+          minutes is left alone entirely, nothing is interrupted within 90 seconds of either end,
+          and breaks are skipped on the Tube embed, whose position cannot be read well enough to
+          resume.
         </p>
 
         {/* reels */}
@@ -407,10 +457,11 @@ export default function CommercialBreaksModal({
                       <span className="block font-pixel text-[11px] text-zinc-200 truncate">
                         {s.name}
                       </span>
+                      {/* Says what is actually in the reel, because single
+                          adverts and long blocks behave differently and a reel
+                          is allowed to hold both. */}
                       <span className="block text-[10px] text-zinc-400">
-                        {s.spots.length} spots
-                        {s.spots.length > 0 &&
-                          ` \u00b7 ${new Set(s.spots.map((x) => x.identifier)).size} tapes`}
+                        {describeReel(s)}
                       </span>
                     </button>
                   )}

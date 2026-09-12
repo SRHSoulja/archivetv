@@ -612,7 +612,7 @@ export default function App() {
       if (time > duration - EDGE_GUARD_SECONDS) return;
 
       const set = getAdSets().find((s) => s.id === setId);
-      const spots = pickSpots(set, adConfig.spotsPerBreak, lastSpotRef.current);
+      const spots = pickSpots(set, adConfig.spotsPerBreak, lastSpotRef.current, adConfig.clipSeconds);
       if (!spots.length) {
         nextBreakRef.current = null;
         return;
@@ -626,7 +626,7 @@ export default function App() {
   const handleTestBreak = useCallback(() => {
     const { setId } = resolveChannelAds(adConfig, currentChannel?.id);
     const set = getAdSets().find((s) => s.id === setId) || getAdSets()[0];
-    const spots = pickSpots(set, adConfig.spotsPerBreak, lastSpotRef.current);
+    const spots = pickSpots(set, adConfig.spotsPerBreak, lastSpotRef.current, adConfig.clipSeconds);
     if (!spots.length) return false;
     startBreak(spots, currentProgramRef.current, playheadRef.current.time || 0);
     return true;
